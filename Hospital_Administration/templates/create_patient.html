@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Create Patient Account</h1>
+
+  <label>Full Name</label>
+  <input type="text" id="name" />
+
+  <label>Email</label>
+  <input type="email" id="email" />
+
+  <label>Password</label>
+  <input type="password" id="password" />
+
+  <label>Phone</label>
+  <input type="tel" id="phone" />
+
+  <label>Gender</label>
+  <select id="gender">
+    <option value="">-- Select --</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="other">Other</option>
+    <option value="prefer_not">Prefer not to say</option>
+  </select>
+
+  <label>Date of Birth</label>
+  <input type="date" id="dob" />
+
+  <label>Employment Status</label>
+  <select id="employeeStatus">
+    <option value="">-- Select --</option>
+    <option value="employed">Employed</option>
+    <option value="unemployed">Unemployed</option>
+    <option value="student">Student</option>
+    <option value="retired">Retired</option>
+    <option value="self_employed">Self Employed</option>
+  </select>
+
+  <label>Assigned Doctor</label>
+  <select id="assignedDoctor">
+    <option value="">-- Select Doctor --</option>
+    {% for doc in doctors %}
+    <option value="{{ doc.uid }}">{{ doc.name }} ({{ doc.email }})</option>
+    {% endfor %}
+  </select>
+
+  <!-- Guardian toggle -->
+  <div style="margin-top:20px; padding:14px; background:#f0f8ff;
+              border:1px solid #cce; border-radius:6px;">
+    <label style="display:flex; align-items:center; gap:10px;
+                  cursor:pointer; margin:0;">
+      <input type="checkbox" id="hasGuardian"
+             onchange="toggleGuardian(this)" style="width:auto;" />
+      This patient has a guardian
+    </label>
+  </div>
+
+  <div id="guardianBox" class="guardian-box">
+    <h2>Guardian Details</h2>
+
+    <label>Guardian Name</label>
+    <input type="text" id="guardianName" />
+
+    <label>Guardian Email</label>
+    <input type="email" id="guardianEmail" />
+
+    <label>Guardian Password</label>
+    <input type="password" id="guardianPassword" />
+
+    <label>Guardian Phone</label>
+    <input type="tel" id="guardianPhone" />
+  </div>
+
+  <button class="btn btn-success btn-full" onclick="submit()">
+    Create Patient Account
+  </button>
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+function toggleGuardian(cb) {
+  document.getElementById("guardianBox").style.display =
+    cb.checked ? "block" : "none";
+}
+
+async function submit() {
+  const hasGuardian = document.getElementById("hasGuardian").checked;
+  const payload = {
+    name:            document.getElementById("name").value.trim(),
+    email:           document.getElementById("email").value.trim(),
+    password:        document.getElementById("password").value,
+    phone:           document.getElementById("phone").value.trim(),
+    gender:          document.getElementById("gender").value,
+    dob:             document.getElementById("dob").value,
+    employeeStatus:  document.getElementById("employeeStatus").value,
+    assignedDoctor:  document.getElementById("assignedDoctor").value,
+    hasGuardian:     hasGuardian,
+    guardianName:     hasGuardian ? document.getElementById("guardianName").value.trim()    : "",
+    guardianEmail:    hasGuardian ? document.getElementById("guardianEmail").value.trim()   : "",
+    guardianPassword: hasGuardian ? document.getElementById("guardianPassword").value       : "",
+    guardianPhone:    hasGuardian ? document.getElementById("guardianPhone").value.trim()   : "",
+  };
+
+  const msg = document.getElementById("msg");
+  const res = await fetch("/create-patient", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  msg.style.display = "block";
+  if (res.ok) {
+    msg.className = "msg success";
+    msg.textContent = "✅ Patient created" +
+      (data.guardianUid ? " with guardian" : "") + "!";
+  } else {
+    msg.className = "msg error";
+    msg.textContent = "❌ " + data.error;
+  }
+}
+</script>
+{% endblock %}

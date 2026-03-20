@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Create Counselor Account</h1>
+
+  <label>Full Name</label>
+  <input type="text" id="name" placeholder="Ms. Sarah" />
+
+  <label>Email</label>
+  <input type="email" id="email" placeholder="counselor@hospital.com" />
+
+  <label>Password</label>
+  <input type="password" id="password" placeholder="Min 6 characters" />
+
+  <label>Phone</label>
+  <input type="tel" id="phone" placeholder="+94 77 123 4567" />
+
+  <label>Specialization</label>
+  <input type="text" id="specialization" placeholder="e.g. CBT" />
+
+  <label>Employee ID</label>
+  <input type="text" id="employeeId" placeholder="e.g. COU-001" />
+
+  <button class="btn btn-primary btn-full" onclick="submit()">Create Counselor</button>
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+async function submit() {
+  const payload = {
+    name:           document.getElementById("name").value.trim(),
+    email:          document.getElementById("email").value.trim(),
+    password:       document.getElementById("password").value,
+    phone:          document.getElementById("phone").value.trim(),
+    specialization: document.getElementById("specialization").value.trim(),
+    employeeId:     document.getElementById("employeeId").value.trim(),
+  };
+  const msg = document.getElementById("msg");
+  const res = await fetch("/create-counselor", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  msg.style.display = "block";
+  if (res.ok) {
+    msg.className = "msg success";
+    msg.textContent = "✅ Counselor created successfully";
+    ["name","email","password","phone","specialization","employeeId"]
+      .forEach(id => document.getElementById(id).value = "");
+  } else {
+    msg.className = "msg error";
+    msg.textContent = "❌ " + data.error;
+  }
+}
+</script>
+{% endblock %}

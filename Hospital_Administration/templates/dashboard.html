@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="stat-row">
+  <div class="stat-card">
+    <div class="num">{{ doctors|length }}</div>
+    <div class="lbl">Doctors</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">{{ counselors|length }}</div>
+    <div class="lbl">Counselors</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">{{ patients|length }}</div>
+    <div class="lbl">Patients</div>
+  </div>
+</div>
+
+<div class="card">
+  <h1>Quick Actions</h1>
+  <div style="display:flex; gap:12px; flex-wrap:wrap;">
+    <a href="/create-doctor"    class="btn btn-primary">+ Add Doctor</a>
+    <a href="/create-counselor" class="btn btn-primary">+ Add Counselor</a>
+    <a href="/create-patient"   class="btn btn-success">+ Add Patient</a>
+    <a href="/assign-doctor"    class="btn btn-primary">Assign Doctor</a>
+  </div>
+</div>
+
+{% endblock %}

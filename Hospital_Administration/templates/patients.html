@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <h1 style="margin:0">Patients</h1>
+    <a href="/create-patient" class="btn btn-success">+ Add Patient</a>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Patient</th><th>Email</th><th>Phone</th>
+        <th>Gender</th><th>Assigned Doctor</th>
+        <th>Guardian</th><th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in patients %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.email }}</td>
+        <td>{{ p.phone }}</td>
+        <td>{{ p.gender }}</td>
+        <td>{{ p.doctorName }}</td>
+        <td>
+          {% if p.guardian %}
+            {{ p.guardian.name }}<br>
+            <small style="color:#888;">{{ p.guardian.phone }}</small>
+          {% else %}
+            <span style="color:#aaa;">None</span>
+          {% endif %}
+        </td>
+        <td>{{ p.createdAt[:10] if p.createdAt else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center;color:#888;">No patients yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
