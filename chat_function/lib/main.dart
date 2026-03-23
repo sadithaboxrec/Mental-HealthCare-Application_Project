@@ -10,16 +10,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-  theme: ThemeData(
-    primaryColor: const Color.fromARGB(255, 109, 167, 214),
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      secondary: Colors.blueAccent,
-    ),
+theme: ThemeData(
+  useMaterial3: true,
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color.fromARGB(255, 176, 215, 247),
+  ).copyWith(
+    secondary: const Color.fromARGB(255, 152, 181, 231),
   ),
+),
   home: HomeScreen(),
 
-    ); //meterialApp
+    ); 
   }
 }
        

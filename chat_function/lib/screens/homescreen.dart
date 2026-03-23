@@ -21,7 +21,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
 
       appBar: AppBar(
-        title: Text('We are here for you'),  
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text('We Are Here For You'),  
         actions: [
           IconButton(
             icon: Icon(Icons.search),
@@ -35,6 +36,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
         bottom:TabBar(
           controller: _controller,
+           labelColor: Colors.white,      
+  unselectedLabelColor: Colors.white70, 
+  indicatorColor: Colors.white, 
           tabs: [
             Tab(text: 'CHAT',),
             Tab(text: 'CALLS',),
