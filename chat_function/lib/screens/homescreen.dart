@@ -28,9 +28,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             icon: Icon(Icons.search),
             onPressed: () {},
           ),
-          IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: () {},
+          PopupMenuButton<String>(
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem<String>(
+                  value: 'Starred Messages',
+                  child: Text('Starred Messages'),
+                ),
+                PopupMenuItem<String>(
+                  value: 'Settings',
+                  child: Text('Settings'),
+                  
+                ),
+
+                PopupMenuItem<String>(
+                  value: 'Logout',
+                  child: Text('Logout'),
+                ),
+              ];
+            },
           ),
         ],
 
@@ -45,7 +61,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ],
         )
       ),
-      
+      body: TabBarView(
+        controller: _controller,
+        children: [
+          Center(child: Text('Chat')),
+          Center(child: Text('Calls')),
+        ],
+      ),
     );
   }
 }
