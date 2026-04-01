@@ -22,8 +22,8 @@ class CustomCard extends StatelessWidget {
       subtitle:
       Row(children: [
         Icon(Icons.done_all, size: 16, color: Colors.blue),
-        SizedBox(width: 3),
-        Text('Hello, how are you feeling today?',style: TextStyle(fontSize: 14),),
+        SizedBox(width: 2),
+        Text('Hello',style: TextStyle(fontSize: 14),),
       ],),
       trailing: Text('10:30 AM' ),
       

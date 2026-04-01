@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_function/page/doctor_chatpage.dart';
+import 'package:chat_function/CustomUI/CustomCard.dart';
 
 
 class HomeScreen extends StatefulWidget{
