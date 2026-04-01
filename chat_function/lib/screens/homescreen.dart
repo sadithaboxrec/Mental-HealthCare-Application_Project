@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:chat_function/page/doctor_chatpage.dart';
+
 
 class HomeScreen extends StatefulWidget{
   HomeScreen({Key? key}) : super(key: key);
@@ -28,7 +31,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             icon: Icon(Icons.search),
             onPressed: () {},
           ),
+           //pop menu button with starred massagees, setting and logout options
           PopupMenuButton<String>(
+            onSelected: (value) => print(value),
+
             itemBuilder: (BuildContext context) {
               return [
                 PopupMenuItem<String>(
@@ -45,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   value: 'Logout',
                   child: Text('Logout'),
                 ),
+
               ];
             },
           ),
@@ -52,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
         bottom:TabBar(
           controller: _controller,
+          
            labelColor: Colors.white,      
   unselectedLabelColor: Colors.white70, 
   indicatorColor: Colors.white, 
@@ -64,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: TabBarView(
         controller: _controller,
         children: [
-          Center(child: Text('Chat')),
+          DoctorChatPage(),
           Center(child: Text('Calls')),
         ],
       ),
