@@ -1,5 +1,5 @@
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chat_function/model/doctorchatmodel.dart';
 
 class IndividualPage extends StatefulWidget {
@@ -15,6 +15,23 @@ class IndividualPage extends StatefulWidget {
 }
 
 class _IndividualPageState extends State<IndividualPage> {
+  TextEditingController _controller = TextEditingController();
+  bool showEmoji = false;
+  FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        setState(() {
+          showEmoji = false;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +40,6 @@ class _IndividualPageState extends State<IndividualPage> {
       // 🔷 APP BAR
       appBar: AppBar(
         backgroundColor: Colors.lightBlue[100],
-
         leadingWidth: 80,
         leading: InkWell(
           onTap: () => Navigator.pop(context),
@@ -40,7 +56,6 @@ class _IndividualPageState extends State<IndividualPage> {
             ],
           ),
         ),
-
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -54,7 +69,6 @@ class _IndividualPageState extends State<IndividualPage> {
             const Text("online", style: TextStyle(fontSize: 12)),
           ],
         ),
-
         actions: [
           IconButton(
             icon: const Icon(Icons.call),
@@ -64,97 +78,107 @@ class _IndividualPageState extends State<IndividualPage> {
             icon: const Icon(Icons.search),
             onPressed: () {},
           ),
-          PopupMenuButton<String>(
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: "media",
-                child: Text("Media, links, docs"),
-              ),
-              PopupMenuItem(
-                value: "theme",
-                child: Text("Chat theme"),
-              ),
-            ],
-          ),
         ],
       ),
 
       // 🔷 BODY
-      body: Stack(
+      body: Column(
         children: [
-          // Chat messages
-          ListView(),
+          Expanded(
+            child: ListView(),
+          ),
 
-          // 🔻 MESSAGE INPUT BAR
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  // 🔥 TEXT FIELD AREA
-                  Expanded(
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
+          // fix input area issue
+          Row(
+            children: [
+              Expanded(
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  margin: const EdgeInsets.all(8),
+                  child: TextFormField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    textAlignVertical: TextAlignVertical.center,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: 5,
+                    minLines: 1,
+                    decoration: InputDecoration(
+                      hintText: "Type a message",
+
+                      // 😊 EMOJI BUTTON
+                      prefixIcon: IconButton(
+                        icon: const Icon(Icons.emoji_emotions),
+                        onPressed: () {
+                          _focusNode.unfocus();
+                          setState(() {
+                            showEmoji = !showEmoji;
+                          });
+                        },
                       ),
-                      child: TextFormField(
-                        textAlignVertical: TextAlignVertical.center,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: 5,
-                        minLines: 1,
 
-                        decoration: InputDecoration(
-                          hintText: "Type a message",
-
-                          // 😊 Emoji icon
-                          prefixIcon: IconButton(
-                            icon: const Icon(Icons.emoji_emotions),
+                      // 📎 + 🎤
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.attach_file),
                             onPressed: () {},
                           ),
-
-                          // 📎 Attach + 🎤 mic
-                          suffixIcon: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.attach_file),
-                                onPressed: () {},
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.mic),
-                                onPressed: () {},
-                              ),
-                            ],
+                          IconButton(
+                            icon: const Icon(Icons.mic),
+                            onPressed: () {},
                           ),
+                        ],
+                      ),
 
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 10,
-                          ),
-                        ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
                       ),
                     ),
                   ),
-
-                  const SizedBox(width: 5),
-
-                  // 🚀 SEND BUTTON
-                  CircleAvatar(
-                    radius: 25,
-                    backgroundColor: Colors.lightBlue,
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white),
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+
+              //send botton
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.lightBlue,
+                  child: IconButton(
+                    icon: const Icon(Icons.send, color: Colors.white),
+                    onPressed: () {
+                      print(_controller.text);
+                      _controller.clear();
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
+
+          //emoji picker
+          showEmoji ? emojiSelect() : Container(),
         ],
       ),
     );
   }
+
+  Widget emojiSelect() {
+    return SizedBox(
+      height: 250,
+      child: EmojiPicker(
+        onEmojiSelected: (category, emoji) {
+          _controller.text += emoji.emoji;
+        },
+        
+        ),
+      
+    );
+  
+}
 }
