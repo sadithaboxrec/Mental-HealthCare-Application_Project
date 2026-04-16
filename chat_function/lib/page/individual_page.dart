@@ -32,12 +32,59 @@ class _IndividualPageState extends State<IndividualPage> {
     });
   }
 
+  Widget iconcreation(IconData icon, Color color, String text) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 30,
+          backgroundColor: color,
+          child: Icon(icon, color: Colors.white, size: 29),
+        ),
+        const SizedBox(height: 5),
+        Text(text)
+      ],
+    );
+  }
+
+  Widget bottomsheet() {
+    return Container(
+      height: 278,
+      width: MediaQuery.of(context).size.width,
+      child: Card(
+        margin: const EdgeInsets.all(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  iconcreation(Icons.insert_drive_file, Colors.indigo, "Document"),
+                  iconcreation(Icons.camera_alt, Colors.pink, "Camera"),
+                  iconcreation(Icons.insert_photo, Colors.purple, "Gallery"),
+                ],
+              ),
+              const SizedBox(height: 25),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  iconcreation(Icons.headset, Colors.orange, "Audio"),
+                  iconcreation(Icons.location_on, Colors.teal, "Location"),
+                  iconcreation(Icons.person, Colors.blue, "Contact"),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 180, 235, 232),
 
-      // 🔷 APP BAR
       appBar: AppBar(
         backgroundColor: Colors.lightBlue[100],
         leadingWidth: 80,
@@ -81,14 +128,12 @@ class _IndividualPageState extends State<IndividualPage> {
         ],
       ),
 
-      // 🔷 BODY
       body: Column(
         children: [
           Expanded(
             child: ListView(),
           ),
 
-          // fix input area issue
           Row(
             children: [
               Expanded(
@@ -107,7 +152,6 @@ class _IndividualPageState extends State<IndividualPage> {
                     decoration: InputDecoration(
                       hintText: "Type a message",
 
-                      // 😊 EMOJI BUTTON
                       prefixIcon: IconButton(
                         icon: const Icon(Icons.emoji_emotions),
                         onPressed: () {
@@ -118,13 +162,18 @@ class _IndividualPageState extends State<IndividualPage> {
                         },
                       ),
 
-                      // 📎 + 🎤
                       suffixIcon: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.attach_file),
-                            onPressed: () {},
+                            onPressed: () {
+                              showModalBottomSheet(
+                                backgroundColor: Colors.transparent,
+                                context: context,
+                                builder: (builder) => bottomsheet(),
+                              );
+                            },
                           ),
                           IconButton(
                             icon: const Icon(Icons.mic),
@@ -143,7 +192,6 @@ class _IndividualPageState extends State<IndividualPage> {
                 ),
               ),
 
-              //send botton
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: CircleAvatar(
@@ -161,7 +209,6 @@ class _IndividualPageState extends State<IndividualPage> {
             ],
           ),
 
-          //emoji picker
           showEmoji ? emojiSelect() : Container(),
         ],
       ),
@@ -175,10 +222,7 @@ class _IndividualPageState extends State<IndividualPage> {
         onEmojiSelected: (category, emoji) {
           _controller.text += emoji.emoji;
         },
-        
-        ),
-      
+      ),
     );
-  
-}
+  }
 }
