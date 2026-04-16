@@ -1,4 +1,5 @@
 
+import 'package:chat_function/screens/SelectContact.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_function/screens/homescreen.dart';//need to imort s this
 import 'package:chat_function/CustomUI/CustomCard.dart';
@@ -54,7 +55,12 @@ List<Doctorchatmodel> chats = [
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (builder) => SelectContact()), // Navigate to selectcontact page, so we type this line while automatically import selectcontact.dart
+          );
+        },
         child: Icon(Icons.chat),
       ),
       body:ListView.builder(
