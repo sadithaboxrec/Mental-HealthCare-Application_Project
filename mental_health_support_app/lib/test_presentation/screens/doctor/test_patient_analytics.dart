@@ -386,6 +386,37 @@ class _GuardianCharts extends StatelessWidget {
           color: Colors.blue,
         )).toList()),
 
+
+        /// for medication input by guardian about the patient
+        const SizedBox(height: 20),
+        const TestSectionTitle(title: 'Medication Adherence (Guardian)'),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: logs.where((l) =>
+              l.containsKey('medicationTaken')).map((l) {
+            final taken = l['medicationTaken'] as bool? ?? false;
+            return Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                color: taken
+                    ? Colors.green.shade50 : Colors.red.shade50,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                    color: taken ? Colors.green : Colors.red),
+              ),
+              child: Column(children: [
+                Text((l['date'] as String).substring(5),
+                    style: const TextStyle(fontSize: 9)),
+                Icon(taken ? Icons.check : Icons.close,
+                    size: 14,
+                    color: taken ? Colors.green : Colors.red),
+              ]),
+            );
+          }).toList(),
+        ),
+
         const SizedBox(height: 20),
         const TestSectionTitle(title: 'Observations'),
         ...logs.where((l) =>

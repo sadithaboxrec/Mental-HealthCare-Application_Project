@@ -249,6 +249,7 @@ class _TestGuardianHomeState extends State<TestGuardianHome> {
   Prescription?        _prescription;
   Appointment?         _nextAppointment;
   bool   _loading       = true;
+  bool _savingMed = false;
   int    _selectedMood  = 1;
   final  _obsCtrl       = TextEditingController();
 
@@ -303,6 +304,16 @@ class _TestGuardianHomeState extends State<TestGuardianHome> {
         widget.user.uid, _patientUid!, glasses);
     await _load();
     _showWaterFeedback((_todayLog?['waterIntake'] as int? ?? 0));
+  }
+
+  // to mark whether the patient tooks meds or not
+  Future<void> _toggleMedication(bool taken) async {
+    setState(() => _savingMed = true);
+    await GuardianController.updateMedication(
+        widget.user.uid, _patientUid!, taken);
+    await _load();
+    if (mounted) setState(() => _savingMed = false);
+    _snack(taken ? '✅ Medication marked as taken' : '❌ Marked as not taken');
   }
 
   Future<void> _saveObservations() async {
@@ -494,6 +505,68 @@ class _TestGuardianHomeState extends State<TestGuardianHome> {
 
               const SizedBox(height: 20),
 
+
+
+              const SizedBox(height: 20),
+
+// ── Medication section to check whether the patient taking them ────────────────────────────────
+              const TestSectionTitle(
+                title: '💊 Patient Medication Today',
+                subtitle: 'Mark whether patient took their medicine',
+              ),
+              Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _savingMed ? null : () => _toggleMedication(true),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _todayLog?['medicationTaken'] == true
+                            ? Colors.green : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green),
+                      ),
+                      child: Text('✅ Taken',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _todayLog?['medicationTaken'] == true
+                                ? Colors.white : Colors.green,
+                            fontWeight: FontWeight.bold,
+                          )),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _savingMed ? null : () => _toggleMedication(false),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _todayLog?['medicationTaken'] == false &&
+                            _todayLog?['medicationTaken'] != null
+                            ? Colors.red : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.red),
+                      ),
+                      child: Text('❌ Not Taken',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _todayLog?['medicationTaken'] == false &&
+                                _todayLog?['medicationTaken'] != null
+                                ? Colors.white : Colors.red,
+                            fontWeight: FontWeight.bold,
+                          )),
+                    ),
+                  ),
+                ),
+              ]),
+
+
+              // end of update medicine section
+
               // ── Observations ──────────────────────
               const TestSectionTitle(title: 'Observations'),
               TextField(
@@ -540,3 +613,5 @@ class _TestGuardianHomeState extends State<TestGuardianHome> {
     }
   }
 }
+
+

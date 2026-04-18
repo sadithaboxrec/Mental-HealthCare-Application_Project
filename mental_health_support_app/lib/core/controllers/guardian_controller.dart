@@ -35,4 +35,9 @@ class GuardianController {
   static Future<Appointment?> getPatientNextAppointment(
       String patientUid) async =>
       await GuardianService.getPatientNextAppointment(patientUid);
+
+
+  static Future<void> updateMedication(
+      String guardianUid, String patientUid, bool taken) async =>
+      await GuardianService.updateMedication(guardianUid, patientUid, taken);
 }

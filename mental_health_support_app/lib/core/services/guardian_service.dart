@@ -191,5 +191,32 @@ class GuardianService {
   }
 
 
+  // to update medications whether the patient it took or not
+
+  static Future<void> updateMedication(
+      String guardianUid, String patientUid, bool taken) async {
+    final now      = DateTime.now().toIso8601String();
+    final existing = await _getTodayLog(guardianUid);
+
+    if (existing != null) {
+      await _db.collection('guardian_logs')
+          .doc(existing['id'])
+          .update({'medicationTaken': taken, 'updatedAt': now});
+    } else {
+      await _db.collection('guardian_logs').add({
+        'guardianUid':    guardianUid,
+        'patientUid':     patientUid,
+        'date':           _today(),
+        'mood':           0,
+        'waterIntake':    0,
+        'observations':   '',
+        'medicationTaken': taken,
+        'createdAt':      now,
+        'updatedAt':      now,
+      });
+    }
+  }
+
+
 
 }
