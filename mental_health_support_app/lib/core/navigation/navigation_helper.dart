@@ -15,8 +15,9 @@ import '../../test_presentation/screens/doctor/test_doctor_root.dart';
 import '../../test_presentation/screens/patient/test_patient_root.dart';
 
 // presentation
-import '../../presentation/screens/counselor/counselor_home.dart';
+// import '../../presentation/screens/counselor/counselor_home.dart';
 import '../../presentation/screens/guardian/guardian_home.dart';
+import '../../presentation/screens/counselor/counselor_screen.dart';
 
 
 
@@ -74,7 +75,7 @@ class NavigationHelper {
         return GuardianHome(user: user);
       case 'counselor':
       //  return TestCounselorScreen(user: user);
-      return CounselorHome(user: user);
+        return CounselorScreen(user: user);
       default:
         return const TestLoginScreen();
     }
