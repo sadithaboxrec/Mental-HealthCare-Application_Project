@@ -30,23 +30,30 @@ class _GuardianHomeState extends State<GuardianHome> {
 
   Map<String, dynamic>? _todayLog;
   Prescription? _prescription;
-  Appointment?  _nextAppointment;
+  Appointment? _nextAppointment;
 
-  bool _loading    = true;
-  bool _savingMed  = false;
-  bool _savingObs  = false;
-  bool _savedObs   = false;
+  bool _loading = true;
+  bool _savingMed = false;
+  bool _savingObs = false;
+  bool _savedObs = false;
 
   double _moodValue = 3;
 
-  final TextEditingController _obsCtrl  = TextEditingController();
-  final FocusNode             _obsFocus = FocusNode();
+  final TextEditingController _obsCtrl = TextEditingController();
+  final FocusNode _obsFocus = FocusNode();
 
   @override
-  void initState() { super.initState(); _load(); }
+  void initState() {
+    super.initState();
+    _load();
+  }
 
   @override
-  void dispose() { _obsCtrl.dispose(); _obsFocus.dispose(); super.dispose(); }
+  void dispose() {
+    _obsCtrl.dispose();
+    _obsFocus.dispose();
+    super.dispose();
+  }
 
   // ── LOAD ────────────────────────────────────────────────────────────────
   Future<void> _load() async {
@@ -61,21 +68,25 @@ class _GuardianHomeState extends State<GuardianHome> {
         GuardianController.getPatientNextAppointment(_patientUid!),
       ]);
 
-      _todayLog        = results[0] as Map<String, dynamic>?;
-      _prescription    = results[1] as Prescription?;
+      _todayLog = results[0] as Map<String, dynamic>?;
+      _prescription = results[1] as Prescription?;
       _nextAppointment = results[2] as Appointment?;
 
-      _moodValue    = ((_todayLog?['mood'] ?? 3) as int).toDouble();
-      _obsCtrl.text =  _todayLog?['observations'] ?? '';
+      _moodValue = ((_todayLog?['mood'] as int? ?? 3).clamp(1, 5)).toDouble();
+      _obsCtrl.text = _todayLog?['observations'] ?? '';
     }
 
     setState(() => _loading = false);
   }
 
-  // ── MEDICATION 
+  // ── MEDICATION
   Future<void> _toggleMedication(bool taken) async {
     setState(() => _savingMed = true);
-    await GuardianController.updateMedication(widget.user.uid, _patientUid!, taken);
+    await GuardianController.updateMedication(
+      widget.user.uid,
+      _patientUid!,
+      taken,
+    );
     setState(() {
       _todayLog ??= {};
       _todayLog!['medicationTaken'] = taken;
@@ -83,7 +94,7 @@ class _GuardianHomeState extends State<GuardianHome> {
     });
   }
 
-  // ── WATER 
+  // ── WATER
   Future<void> _addWater(int g) async {
     await GuardianController.addWater(widget.user.uid, _patientUid!, g);
     setState(() {
@@ -92,35 +103,50 @@ class _GuardianHomeState extends State<GuardianHome> {
     });
   }
 
-  // ── MOOD 
+  // ── MOOD
   Future<void> _saveMood(double v) async {
-    _moodValue = v;
-    await GuardianController.updateMood(widget.user.uid, _patientUid!, v.round());
+    _moodValue = v.clamp(1, 5);
+    await GuardianController.updateMood(
+      widget.user.uid,
+      _patientUid!,
+      v.round(),
+    );
     setState(() {});
   }
 
-  // ── OBSERVATIONS 
+  // ── OBSERVATIONS
   Future<void> _saveObservations() async {
     if (_patientUid == null) return;
-    setState(() { _savingObs = true; _savedObs = false; });
+    setState(() {
+      _savingObs = true;
+      _savedObs = false;
+    });
     await GuardianController.updateObservations(
-        widget.user.uid, _patientUid!, _obsCtrl.text.trim());
-    setState(() { _savingObs = false; _savedObs = true; });
+      widget.user.uid,
+      _patientUid!,
+      _obsCtrl.text.trim(),
+    );
+    setState(() {
+      _savingObs = false;
+      _savedObs = true;
+    });
   }
 
-  // ── LOGOUT 
+  // ── LOGOUT
   Future<void> _logout() async {
     await AuthController.logout();
     if (context.mounted) NavigationHelper.goToLogin(context);
   }
 
-  // ── BUILD 
+  // ── BUILD
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F6FF),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF4A90D9)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF4A90D9)),
+            )
           : RefreshIndicator(
               onRefresh: _load,
               color: const Color(0xFF4A90D9),
