@@ -26,14 +26,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text('We Are Here For You'),  
+        title: Text('We Are Here For You',
+        style: TextStyle(
+          color:Colors.white,//change color to white
+          fontWeight: FontWeight.bold,//bold text
+        )),  
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: Icon(
+              Icons.search,
+              color: Colors.white,
+              ),
             onPressed: () {},
           ),
            //pop menu button with starred massagees, setting and logout options
           PopupMenuButton<String>(
+            icon: Icon(
+              Icons.more_vert,
+              color: Colors.white,
+            ),
             onSelected: (value) => print(value),
 
             itemBuilder: (BuildContext context) {

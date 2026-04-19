@@ -4,14 +4,21 @@ import '../models/app_user.dart';
 import '../../test_presentation/screens/test_login_screen.dart';
 import '../../test_presentation/screens/test_doctor_screen.dart';
 // import '../../test_presentation/screens/test_patient_screen.dart';
- import '../../test_presentation/screens/test_counselor_screen.dart';
+//  import '../../test_presentation/screens/test_counselor_screen.dart';
+//import '../../test_presentation/screens/counselor/test_counselor_screen.dart';
 // import '../../test_presentation/screens/test_guardian_screen.dart';
 // import '../../presentation/screens/login_screen.dart';
 // import '../../test_presentation/screens/doctor/test_doctor_home.dart';
 // import '../../test_presentation/screens/patient/test_patient_home.dart';
-import '../../test_presentation/screens/guardian/test_guardian_home.dart';
+// import '../../test_presentation/screens/guardian/test_guardian_home.dart';
 import '../../test_presentation/screens/doctor/test_doctor_root.dart';
 import '../../test_presentation/screens/patient/test_patient_root.dart';
+
+// presentation
+// import '../../presentation/screens/counselor/counselor_home.dart';
+import '../../presentation/screens/guardian/guardian_home.dart';
+import '../../presentation/screens/counselor/counselor_screen.dart';
+
 
 
 
@@ -64,9 +71,11 @@ class NavigationHelper {
         // return TestPatientHome(user: user);
         return TestPatientRoot(user: user);
       case 'guardian':
-        return TestGuardianHome(user: user);
+        // return TestGuardianHome(user: user);
+        return GuardianHome(user: user);
       case 'counselor':
-        return TestCounselorScreen(user: user);
+      //  return TestCounselorScreen(user: user);
+        return CounselorScreen(user: user);
       default:
         return const TestLoginScreen();
     }
