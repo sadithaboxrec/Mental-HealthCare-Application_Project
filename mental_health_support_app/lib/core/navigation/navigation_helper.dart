@@ -11,7 +11,7 @@ import '../../test_presentation/screens/test_doctor_screen.dart';
 // import '../../test_presentation/screens/doctor/test_doctor_home.dart';
 // import '../../test_presentation/screens/patient/test_patient_home.dart';
 // import '../../test_presentation/screens/guardian/test_guardian_home.dart';
-import '../../test_presentation/screens/doctor/test_doctor_root.dart';
+//import '../../test_presentation/screens/doctor/test_doctor_root.dart';
 //import '../../test_presentation/screens/patient/test_patient_root.dart';
 
 // presentation
@@ -19,6 +19,7 @@ import '../../test_presentation/screens/doctor/test_doctor_root.dart';
 import '../../presentation/screens/guardian/guardian_home.dart';
 import '../../presentation/screens/counselor/counselor_screen.dart';
 import '../../presentation/screens/patient/patient_root.dart';
+import '../../presentation/screens/doctor/doctor_root.dart';
 
 
 
@@ -66,7 +67,8 @@ class NavigationHelper {
     switch (user.role) {
       case 'doctor':
         // return TestDoctorHome(user: user);
-        return TestDoctorRoot(user: user);
+        //return TestDoctorRoot(user: user);
+        return DoctorRoot(user: user);
       case 'patient':
         // return TestPatientHome(user: user);
     //    return TestPatientRoot(user: user);
