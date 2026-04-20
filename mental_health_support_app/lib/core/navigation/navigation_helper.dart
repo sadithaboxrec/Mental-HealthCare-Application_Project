@@ -11,29 +11,38 @@ import '../../test_presentation/screens/test_doctor_screen.dart';
 // import '../../test_presentation/screens/doctor/test_doctor_home.dart';
 // import '../../test_presentation/screens/patient/test_patient_home.dart';
 // import '../../test_presentation/screens/guardian/test_guardian_home.dart';
+<<<<<<< Updated upstream
 import '../../test_presentation/screens/doctor/test_doctor_root.dart';
 import '../../test_presentation/screens/patient/test_patient_root.dart';
+=======
+// import '../../test_presentation/screens/doctor/test_doctor_root.dart';
+//import '../../test_presentation/screens/patient/test_patient_root.dart';
+>>>>>>> Stashed changes
 
 // presentation
 // import '../../presentation/screens/counselor/counselor_home.dart';
 import '../../presentation/screens/guardian/guardian_home.dart';
 import '../../presentation/screens/counselor/counselor_screen.dart';
+<<<<<<< Updated upstream
 
 
 
 
+=======
+import '../../presentation/screens/patient/patient_root.dart';
+import '../../presentation/screens/doctor/doctor_root.dart';
+>>>>>>> Stashed changes
 
 // Decides where to go after login
 // Maps roles  screens
 class NavigationHelper {
-
   //  Navigate based on role
   static void goToRoleScreen(BuildContext context, AppUser user) {
     final screen = _screenForRole(user);
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => screen),
-          (_) => false,
+      (_) => false,
     );
   }
 
@@ -42,7 +51,7 @@ class NavigationHelper {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const TestLoginScreen()),
-          (_) => false,
+      (_) => false,
     );
   }
 
@@ -66,20 +75,24 @@ class NavigationHelper {
     switch (user.role) {
       case 'doctor':
         // return TestDoctorHome(user: user);
-        return TestDoctorRoot(user: user);
+        // return TestDoctorRoot(user: user);
+        return DoctorRoot(user: user);
       case 'patient':
         // return TestPatientHome(user: user);
+<<<<<<< Updated upstream
         return TestPatientRoot(user: user);
+=======
+        //    return TestPatientRoot(user: user);
+        return PatientRoot(user: user);
+>>>>>>> Stashed changes
       case 'guardian':
         // return TestGuardianHome(user: user);
         return GuardianHome(user: user);
       case 'counselor':
-      //  return TestCounselorScreen(user: user);
+        //  return TestCounselorScreen(user: user);
         return CounselorScreen(user: user);
       default:
         return const TestLoginScreen();
     }
-
-
   }
 }
