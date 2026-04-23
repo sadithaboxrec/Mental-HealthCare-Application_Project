@@ -1,6 +1,7 @@
 import '../services/auth_service.dart';
 import '../state/auth_state.dart';
 import '../models/app_user.dart';
+import 'notification_controller.dart';
 
 // connect user with services
 
@@ -12,6 +13,13 @@ class AuthController {
         // Calls service , Stores user in state
     if (result.isSuccess && result.user != null) {
       AuthState.setUser(result.user!);
+
+
+      if (result.user!.role == 'patient' ||
+          result.user!.role == 'guardian') {
+        await NotificationController.saveToken(result.user!.uid);
+      }
+
     }
 
     return result;

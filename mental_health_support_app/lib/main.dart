@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'core/controllers/notification_controller.dart';
 import 'firebase_options.dart';
 import 'core/controllers/auth_controller.dart';
 import 'core/navigation/navigation_helper.dart';
@@ -8,6 +9,10 @@ import 'test_presentation/screens/test_login_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // for notifiations
+  await NotificationController.init();
+
   runApp(const MyApp());
 }
 

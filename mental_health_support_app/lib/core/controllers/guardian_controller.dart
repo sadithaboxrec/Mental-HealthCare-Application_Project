@@ -40,4 +40,15 @@ class GuardianController {
   static Future<void> updateMedication(
       String guardianUid, String patientUid, bool taken) async =>
       await GuardianService.updateMedication(guardianUid, patientUid, taken);
+
+
+
+  // for notifications
+
+  static Future<String?> fetchNameByUid(String uid) async {
+    return await GuardianService.getPatientName(uid);
+  }
+
+
+
 }

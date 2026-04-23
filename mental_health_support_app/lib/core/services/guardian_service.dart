@@ -219,4 +219,14 @@ class GuardianService {
 
 
 
+  // for notifications
+  static Future<String?> getPatientName(String patientUid) async {
+    final doc = await _db.collection('patients').doc(patientUid).get();
+    if (!doc.exists) return null;
+    return doc.data()?['name'] as String?;
+  }
+
+
+
+
 }

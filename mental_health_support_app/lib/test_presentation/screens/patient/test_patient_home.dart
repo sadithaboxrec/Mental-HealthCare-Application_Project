@@ -450,6 +450,12 @@ import '../../components/test_section_title.dart';
 import 'test_mood_response.dart';
 import 'test_diary_screen.dart';
 
+
+
+import '../../../core/models/appointment.dart';
+import '../../../core/controllers/notification_controller.dart';
+import '../../components/test_notification_trigger.dart';
+
 class TestPatientHome extends StatefulWidget {
   final AppUser user;
   const TestPatientHome({super.key, required this.user});
@@ -465,6 +471,9 @@ class _TestPatientHomeState extends State<TestPatientHome> {
   int          _moodSlider  = 3;
   String       _selectedSleep = '';
 
+  // for appointments
+  Appointment? _nextAppointment;
+
   @override
   void initState() {
     super.initState();
@@ -477,6 +486,13 @@ class _TestPatientHomeState extends State<TestPatientHome> {
       final results = await Future.wait([
         PatientController.getTodayLog(widget.user.uid),
         PatientController.getActivePrescription(widget.user.uid),
+
+
+    // for appointments
+       PatientController.getNextAppointment(widget.user.uid),
+
+
+
       ]);
       if (mounted) setState(() {
         _todayLog     = results[0] as DailyLog?;
@@ -674,6 +690,62 @@ class _TestPatientHomeState extends State<TestPatientHome> {
             ),
 
             const SizedBox(height: 24),
+
+
+
+            //    for notifications
+
+            const SizedBox(height: 16),
+            TestNotificationTrigger(
+              patientName:     widget.user.name,
+              prescription:    _prescription,
+              nextAppointment: _nextAppointment,
+              isGuardian:      false,
+            ),
+
+
+            const SizedBox(height: 8),
+
+
+            const SizedBox(height: 16),
+            Row(children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => NotificationController.testAlarm(),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text('Test Alarm',
+                      style: TextStyle(color: Colors.white, fontSize: 11)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => NotificationController.testGeneral(),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                  child: const Text('Test General',
+                      style: TextStyle(color: Colors.white, fontSize: 11)),
+                ),
+              ),
+            ]),
+
+
+
+
+
+
+
+            //  test ends
+
+
+
+
+
+
+
+
+
+
+
 
             // ── Water Intake ──────────────────────
             Row(children: [
