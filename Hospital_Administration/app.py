@@ -1,9 +1,9 @@
 from flask import Flask, render_template
-import requests
 from config import db
 from routes.doctor_routes   import doctor_routes
 from routes.counselor_routes import counselor_routes
 from routes.patient_routes  import patient_routes
+from routes.analytics_routes import analytics_routes
 from routes.notification_routes import notification_routes
 
 #notifications
@@ -19,6 +19,7 @@ app = Flask(__name__)
 
 # notifications
 app.register_blueprint(notification_routes)
+app.register_blueprint(analytics_routes)
 
 app.register_blueprint(doctor_routes)
 app.register_blueprint(counselor_routes)
@@ -52,53 +53,8 @@ scheduler.add_job(run_medication_reminders, 'cron', hour=21, minute=0)
 # Appointments — every night at 9pm
 scheduler.add_job(run_appointment_reminders, 'cron', hour=21, minute=0)
 
-
-
-# Water reminders — 3 times a day
-scheduler.add_job(
-    lambda: requests.post('http://localhost:5000/trigger/water'),
-    'cron', hour=9,  minute=0
-)
-scheduler.add_job(
-    lambda: requests.post('http://localhost:5000/trigger/water'),
-    'cron', hour=14, minute=0
-)
-scheduler.add_job(
-    lambda: requests.post('http://localhost:5000/trigger/water'),
-    'cron', hour=19, minute=0
-)
-
-# Diary reminder — once a day at 8pm
-scheduler.add_job(
-    lambda: requests.post('http://localhost:5000/trigger/diary'),
-    'cron', hour=20, minute=0
-)
-
-
-
 scheduler.start()
 print('Scheduler started ✅')
 
-
-# for testing purposes, we can add a job that runs in 2 minutes to verify the reminders are working correctly. In production, you would remove this test job.
-
-
-from datetime import datetime, timedelta
-
-test_time = datetime.now() + timedelta(minutes=0.2)
-scheduler.add_job(
-    run_medication_reminders,
-    'date',
-    run_date=test_time,
-    id='test_immediate'
-)
-print(f'Test job fires at: {test_time}')
-
-
-
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-

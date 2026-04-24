@@ -255,18 +255,13 @@
 //   }
 // }
 
-
-
-
-
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../../core/models/app_user.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/controllers/patient_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../components2/test_section_title.dart';
+import '../../../presentation/components2/section_title.dart';
 
 class TestPatientAppointments extends StatefulWidget {
   final AppUser user;
@@ -310,8 +305,10 @@ class _TestPatientAppointmentsState extends State<TestPatientAppointments> {
           _next = results[0] as Appointment?;
           final snap = results[1] as QuerySnapshot;
           _past = snap.docs
-              .map((d) =>
-              Appointment.fromMap(d.id, d.data() as Map<String, dynamic>))
+              .map(
+                (d) =>
+                    Appointment.fromMap(d.id, d.data() as Map<String, dynamic>),
+              )
               .toList();
           _loading = false;
         });
@@ -336,7 +333,7 @@ class _TestPatientAppointmentsState extends State<TestPatientAppointments> {
     );
     if (picked == null) return;
     newDate =
-    '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+        '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
 
     if (!mounted) return;
     await showDialog(
@@ -400,197 +397,221 @@ class _TestPatientAppointmentsState extends State<TestPatientAppointments> {
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _sectionContainer(
-              highlighted: true,
-              child: Column(
+                padding: const EdgeInsets.all(16),
                 children: [
-                  _sectionCard(
-                    child: const Row(
+                  _sectionContainer(
+                    highlighted: true,
+                    child: Column(
                       children: [
-                        Icon(Icons.calendar_month_outlined,
-                            color: Color(0xFF5DADE3), size: 18),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: TestSectionTitle(title: 'Next Appointment'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  if (_next != null) ...[
-                    _glassCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.calendar_today,
-                                    color: Color(0xFF5DADE3), size: 18),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _next!.date,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const Spacer(),
-                                _statusBadge(_next!.status),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.access_time,
-                                    size: 15, color: Colors.black54),
-                                const SizedBox(width: 6),
-                                Text('Time: ${_next!.time}'),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.72),
-                                borderRadius: BorderRadius.circular(10),
+                        _sectionCard(
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_month_outlined,
+                                color: Color(0xFF5DADE3),
+                                size: 18,
                               ),
-                              child: const Row(
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: SectionTitle(title: 'Next Appointment'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        if (_next != null) ...[
+                          _glassCard(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.local_hospital,
-                                      color: Colors.black54, size: 16),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Colombo National Hospital',
-                                    style: TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 12.5,
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.calendar_today,
+                                        color: Color(0xFF5DADE3),
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        _next!.date,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      _statusBadge(_next!.status),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 15,
+                                        color: Colors.black54,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text('Time: ${_next!.time}'),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.72),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.local_hospital,
+                                          color: Colors.black54,
+                                          size: 16,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Colombo National Hospital',
+                                          style: TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 12.5,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.schedule),
-                        label: const Text('Request Reschedule'),
-                        onPressed: _requestReschedule,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF5DADE3),
-                          side: const BorderSide(color: Color(0xFF5DADE3)),
-                          padding:
-                          const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-                      ),
-                    ),
-                  ] else
-                    _glassCard(
-                      child: const Padding(
-                        padding: EdgeInsets.all(18),
-                        child: Row(
-                          children: [
-                            Icon(Icons.event_busy_outlined,
-                                color: Colors.black54),
-                            SizedBox(width: 8),
-                            Text(
-                              'No upcoming appointment',
-                              style: TextStyle(color: Colors.black54),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              icon: const Icon(Icons.schedule),
+                              label: const Text('Request Reschedule'),
+                              onPressed: _requestReschedule,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF5DADE3),
+                                side: const BorderSide(
+                                  color: Color(0xFF5DADE3),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-            _sectionContainer(
-              highlighted: false,
-              child: Column(
-                children: [
-                  _sectionCard(
-                    child: const Row(
-                      children: [
-                        Icon(Icons.history,
-                            color: Color(0xFF5DADE3), size: 18),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child:
-                          TestSectionTitle(title: 'Past Appointments'),
-                        ),
+                          ),
+                        ] else
+                          _glassCard(
+                            child: const Padding(
+                              padding: EdgeInsets.all(18),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.event_busy_outlined,
+                                    color: Colors.black54,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'No upcoming appointment',
+                                    style: TextStyle(color: Colors.black54),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  if (_past.isEmpty)
-                    _glassCard(
-                      child: const Padding(
-                        padding: EdgeInsets.all(18),
-                        child: Row(
-                          children: [
-                            Icon(Icons.folder_open, color: Colors.black54),
-                            SizedBox(width: 8),
-                            Text(
-                              'No past appointments',
-                              style: TextStyle(color: Colors.black54),
-                            ),
-                          ],
+                  const SizedBox(height: 18),
+                  _sectionContainer(
+                    highlighted: false,
+                    child: Column(
+                      children: [
+                        _sectionCard(
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.history,
+                                color: Color(0xFF5DADE3),
+                                size: 18,
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: SectionTitle(title: 'Past Appointments'),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    )
-                  else
-                    ..._past.map(
-                          (apt) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _glassCard(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                        const SizedBox(height: 10),
+                        if (_past.isEmpty)
+                          _glassCard(
+                            child: const Padding(
+                              padding: EdgeInsets.all(18),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.folder_open,
+                                    color: Colors.black54,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'No past appointments',
+                                    style: TextStyle(color: Colors.black54),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          ..._past.map(
+                            (apt) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _glassCard(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
                                     children: [
-                                      Text(
-                                        apt.date,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              apt.date,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Time: ${apt.time}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Time: ${apt.time}',
-                                        style:
-                                        const TextStyle(fontSize: 12),
-                                      ),
+                                      _statusBadge(apt.status),
                                     ],
                                   ),
                                 ),
-                                _statusBadge(apt.status),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                      ],
                     ),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
       ),
     );
   }
@@ -604,10 +625,7 @@ class _TestPatientAppointmentsState extends State<TestPatientAppointments> {
     );
   }
 
-  Widget _sectionContainer({
-    required Widget child,
-    required bool highlighted,
-  }) {
+  Widget _sectionContainer({required Widget child, required bool highlighted}) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/appointment.dart';
+import '../models/diary_entry.dart';
 import '../models/prescription.dart';
 import '../models/reschedule_request.dart';
 import '../models/daily_log.dart';
@@ -104,17 +105,20 @@ class DoctorService {
   //  Get active prescription for patient
   static Future<Prescription?> getActivePrescription(
       String patientUid) async {
-
     final snap = await _db
         .collection('prescriptions')
         .where('patientUid', isEqualTo: patientUid)
-        .where('isActive', isEqualTo: true)
-        .orderBy('createdAt', descending: true)
-        .limit(1)
         .get();
 
-    if (snap.docs.isEmpty) return null;
-    return Prescription.fromMap(snap.docs.first.id, snap.docs.first.data());
+    final prescriptions = snap.docs
+        .map((d) => Prescription.fromMap(d.id, d.data()))
+        .where((p) => p.isActive)
+        .toList();
+
+    if (prescriptions.isEmpty) return null;
+
+    prescriptions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return prescriptions.first;
 
   }
 
@@ -137,13 +141,66 @@ class DoctorService {
     final snap = await _db
         .collection('daily_logs')
         .where('patientUid', isEqualTo: patientUid)
-        .where('date', isGreaterThanOrEqualTo: from)
-        .where('date', isLessThanOrEqualTo: to)
-        .orderBy('date')
         .get();
-    return snap.docs
+    final logs = snap.docs
         .map((d) => DailyLog.fromMap(d.id, d.data()))
+        .where((log) => log.date.compareTo(from) >= 0 && log.date.compareTo(to) <= 0)
         .toList();
+
+    logs.sort((a, b) => a.date.compareTo(b.date));
+    return logs;
+  }
+
+  static Future<List<DiaryEntry>> getDiaryEntries(
+      String patientUid, String from, String to) async {
+    final snap = await _db
+        .collection('diary_entries')
+        .where('patientUid', isEqualTo: patientUid)
+        .get();
+
+    final allEntries = snap.docs
+        .map((d) => DiaryEntry.fromMap(d.id, d.data()))
+        .where((entry) => entry.content.trim().isNotEmpty)
+        .toList();
+
+    allEntries.sort((a, b) => b.sortKey.compareTo(a.sortKey));
+
+    final rangedEntries = allEntries.where((entry) {
+      final entryDate = entry.createdDateKey;
+      if (entryDate.isEmpty) return true;
+      return entryDate.compareTo(from) >= 0 && entryDate.compareTo(to) <= 0;
+    }).toList();
+
+    if (rangedEntries.isNotEmpty) {
+      return rangedEntries;
+    }
+
+    return allEntries;
+  }
+
+  static Future<Map<String, dynamic>?> getDiaryAnalysisSnapshot(
+      String patientUid) async {
+    final directDoc = await _db
+        .collection('analytics_snapshots')
+        .doc(patientUid)
+        .get();
+
+    if (directDoc.exists) {
+      final data = directDoc.data();
+      if (data != null && data['type'] == 'diary_analysis') {
+        return data;
+      }
+    }
+
+    final snap = await _db
+        .collection('analytics_snapshots')
+        .where('patientUid', isEqualTo: patientUid)
+        .where('type', isEqualTo: 'diary_analysis')
+        .limit(1)
+        .get();
+
+    if (snap.docs.isEmpty) return null;
+    return snap.docs.first.data();
   }
 
   //  Get guardian logs between dates
@@ -152,12 +209,23 @@ class DoctorService {
     final snap = await _db
         .collection('guardian_logs')
         .where('patientUid', isEqualTo: patientUid)
-        .where('date', isGreaterThanOrEqualTo: from)
-        .where('date', isLessThanOrEqualTo: to)
-        .orderBy('date')
         .get();
 
-    return snap.docs.map((d) => d.data()).toList();
+    final logs = snap.docs
+        .map((d) => d.data())
+        .where((log) {
+          final date = (log['date'] as String?) ?? '';
+          return date.compareTo(from) >= 0 && date.compareTo(to) <= 0;
+        })
+        .toList();
+
+    logs.sort((a, b) {
+      final aDate = (a['date'] as String?) ?? '';
+      final bDate = (b['date'] as String?) ?? '';
+      return aDate.compareTo(bDate);
+    });
+
+    return logs;
   }
 
   //  Get medicines list

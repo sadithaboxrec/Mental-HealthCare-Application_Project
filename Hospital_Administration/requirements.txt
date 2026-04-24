@@ -1,4 +1,4 @@
-flask
-flask-admin
-
-apscheduler
+Flask>=3.0,<4.0
+Flask-Admin>=1.6,<2.0
+APScheduler>=3.10,<4.0
+firebase-admin>=6.5,<7.0
