@@ -3,6 +3,7 @@ from config import db
 from routes.doctor_routes   import doctor_routes
 from routes.counselor_routes import counselor_routes
 from routes.patient_routes  import patient_routes
+from routes.analytics_routes import analytics_routes
 from routes.notification_routes import notification_routes
 
 #notifications
@@ -18,6 +19,7 @@ app = Flask(__name__)
 
 # notifications
 app.register_blueprint(notification_routes)
+app.register_blueprint(analytics_routes)
 
 app.register_blueprint(doctor_routes)
 app.register_blueprint(counselor_routes)

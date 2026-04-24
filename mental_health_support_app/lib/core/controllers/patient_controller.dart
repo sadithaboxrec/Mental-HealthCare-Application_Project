@@ -1,5 +1,6 @@
 import '../services/patient_service.dart';
 import '../models/daily_log.dart';
+import '../models/diary_entry.dart';
 import '../models/prescription.dart';
 import '../models/appointment.dart';
 
@@ -25,6 +26,17 @@ class PatientController {
   static Future<void> saveDiaryEntry(
       String patientUid, String content) async =>
       await PatientService.saveDiaryEntry(patientUid, content);
+
+  static Future<List<DiaryEntry>> getDiaryEntries(
+      String patientUid) async =>
+      await PatientService.getDiaryEntries(patientUid);
+
+  static Future<void> updateDiaryEntry(
+      String entryId, String content) async =>
+      await PatientService.updateDiaryEntry(entryId, content);
+
+  static Future<void> deleteDiaryEntry(String entryId) async =>
+      await PatientService.deleteDiaryEntry(entryId);
 
   static Future<Prescription?> getActivePrescription(
       String patientUid) async =>

@@ -1,0 +1,26 @@
+# Python / Flask backend
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Local environment and secrets
+.env
+.env.*
+serviceAccountKey.json
+*.pem
+*.key
+
+# Logs and local artifacts
+*.log
+*.sqlite3
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

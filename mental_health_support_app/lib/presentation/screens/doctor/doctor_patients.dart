@@ -4,8 +4,7 @@ import '../../../core/models/app_user.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/controllers/doctor_controller.dart';
 import 'patient_detail.dart';
-// import 'patient_analytics.dart';
-import 'doctor_analytics.dart';
+import 'patient_analytics.dart';
 
 const _kBlue = Color(0xFF5BB8F5);
 const _kBorder = Color(0xFFDAEEFB);
