@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/models/app_user.dart';
 import '../../../core/models/daily_log.dart';
+import '../../../core/models/diary_entry.dart';
 import '../../../core/models/prescription.dart';
 import '../../../core/controllers/doctor_controller.dart';
 
@@ -26,9 +28,74 @@ class PatientAnalytics extends StatefulWidget {
 }
 
 class _PatientAnalyticsState extends State<PatientAnalytics> {
+  static const Map<String, List<String>> _themePhrases = {
+    'hopelessness': [
+      'hopeless',
+      'no hope',
+      'nothing will get better',
+      'it will never get better',
+      'no point',
+      'what is the point',
+    ],
+    'burden': [
+      'burden',
+      'better off without me',
+      'people would be better without me',
+      'i am worthless',
+      'worthless',
+      'useless',
+    ],
+    'withdrawal': [
+      'alone',
+      'isolated',
+      'nobody understands',
+      'no one cares',
+      'want to disappear',
+      'stay away from everyone',
+    ],
+    'distress': [
+      'overwhelmed',
+      "can't cope",
+      'falling apart',
+      'anxious',
+      'panic',
+      'scared',
+      'tired of this',
+    ],
+    'worsening': [
+      'getting worse',
+      'worse every day',
+      'again and again',
+      'still the same',
+      'nothing changed',
+      'worse than before',
+    ],
+    'self_harm': [
+      'hurt myself',
+      'self harm',
+      'cut myself',
+      'want to die',
+      'kill myself',
+      'end my life',
+      'suicide',
+    ],
+    'plan_preparation': [
+      'i have a plan',
+      'planned it',
+      'prepared for it',
+      'goodbye',
+      'farewell',
+      'final note',
+      'last message',
+    ],
+  };
+
   List<DailyLog> _patientLogs = [];
   List<Map<String, dynamic>> _guardianLogs = [];
+  List<DiaryEntry> _diaryEntries = [];
   Prescription? _prescription;
+  _DiaryAnalysisSummary? _diarySnapshotSummary;
+  String? _diaryDataNotice;
   bool _loading = true;
   bool _showPatient = true;
 
@@ -54,23 +121,88 @@ class _PatientAnalyticsState extends State<PatientAnalytics> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
+    final patientLogs = await _safeLoad(
+      () => DoctorController.getDailyLogs(widget.patientUid, _fromDate, _toDate),
+      <DailyLog>[],
+      label: 'daily logs',
+    );
+    final guardianLogs = await _safeLoad(
+      () => DoctorController.getGuardianLogs(widget.patientUid, _fromDate, _toDate),
+      <Map<String, dynamic>>[],
+      label: 'guardian logs',
+    );
+    final prescription = await _safeLoad(
+      () => DoctorController.getActivePrescription(widget.patientUid),
+      null,
+      label: 'prescription',
+    );
+
+    List<DiaryEntry> diaryEntries = [];
+    _DiaryAnalysisSummary? diarySnapshotSummary;
+    String? diaryDataNotice;
+
     try {
-      final results = await Future.wait([
-        DoctorController.getDailyLogs(widget.patientUid, _fromDate, _toDate),
-        DoctorController.getGuardianLogs(widget.patientUid, _fromDate, _toDate),
-        DoctorController.getActivePrescription(widget.patientUid),
-      ]);
-      if (mounted) {
-        setState(() {
-          _patientLogs = results[0] as List<DailyLog>;
-          _guardianLogs = results[1] as List<Map<String, dynamic>>;
-          _prescription = results[2] as Prescription?;
-          _loading = false;
-        });
+      diaryEntries = await DoctorController.getDiaryEntries(
+        widget.patientUid,
+        _fromDate,
+        _toDate,
+      );
+    } on FirebaseException catch (e) {
+      debugPrint('Diary entry load error: $e');
+      if (e.code == 'permission-denied') {
+        diaryDataNotice =
+            'Raw diary entries are blocked by Firestore rules for this doctor account.';
+      } else {
+        diaryDataNotice = 'Could not load raw diary entries.';
       }
     } catch (e) {
-      debugPrint('Analytics load error: $e');
-      if (mounted) setState(() => _loading = false);
+      debugPrint('Diary entry load error: $e');
+      diaryDataNotice = 'Could not load raw diary entries.';
+    }
+
+    if (diaryEntries.isEmpty) {
+      try {
+        final snapshot =
+            await DoctorController.getDiaryAnalysisSnapshot(widget.patientUid);
+        if (snapshot != null) {
+          diarySnapshotSummary = _DiaryAnalysisSummary.fromSnapshot(snapshot);
+          diaryDataNotice = diaryDataNotice == null
+              ? 'Showing the stored diary analysis snapshot for this patient.'
+              : 'Showing the stored diary analysis snapshot because raw diary entries are blocked.';
+        }
+      } on FirebaseException catch (e) {
+        debugPrint('Diary snapshot load error: $e');
+        if (diaryDataNotice == null && e.code == 'permission-denied') {
+          diaryDataNotice =
+              'Diary analysis is also blocked by Firestore rules for this doctor account.';
+        }
+      } catch (e) {
+        debugPrint('Diary snapshot load error: $e');
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _patientLogs = patientLogs;
+      _guardianLogs = guardianLogs;
+      _diaryEntries = diaryEntries;
+      _prescription = prescription;
+      _diarySnapshotSummary = diarySnapshotSummary;
+      _diaryDataNotice = diaryDataNotice;
+      _loading = false;
+    });
+  }
+
+  Future<T> _safeLoad<T>(
+    Future<T> Function() loader,
+    T fallback, {
+    required String label,
+  }) async {
+    try {
+      return await loader();
+    } catch (e) {
+      debugPrint('Analytics $label load error: $e');
+      return fallback;
     }
   }
 
@@ -139,11 +271,15 @@ class _PatientAnalyticsState extends State<PatientAnalytics> {
             // ── Summary cards ─────────────────────
             Row(
               children: [
-                _summaryCard("Sessions", "24", "This month"),
+                _summaryCard(
+                  "Diary Status",
+                  _diaryAnalysis.severityLabel,
+                  _diaryEntries.isEmpty ? "No entries" : "${_diaryEntries.length} entries",
+                ),
                 const SizedBox(width: 12),
-                _summaryCard("Avg Mood", "3.8", "😊"),
+                _summaryCard("Avg Mood", _averageMoodLabel(), _moodSummaryEmoji()),
                 const SizedBox(width: 12),
-                _summaryCard("Adherence", "85%", "✅"),
+                _summaryCard("Adherence", _adherenceLabel(), _adherenceStatus()),
               ],
             ),
             const SizedBox(height: 24),
@@ -215,6 +351,16 @@ class _PatientAnalyticsState extends State<PatientAnalytics> {
             _sectionTitle("Medication Adherence"),
             _medicationAdherenceCard(),
 
+            const SizedBox(height: 24),
+            _sectionTitle("Diary Analysis"),
+            const SizedBox(height: 8),
+            _diaryAnalysisCard(),
+
+            const SizedBox(height: 20),
+            _sectionTitle("Diary Evidence"),
+            const SizedBox(height: 8),
+            _diaryEvidenceCard(),
+
             const SizedBox(height: 28),
 
             // ── Current prescription ──────────────
@@ -277,6 +423,544 @@ class _PatientAnalyticsState extends State<PatientAnalytics> {
       color: Colors.black87,
     ),
   );
+
+  _DiaryAnalysisSummary get _diaryAnalysis =>
+      _diarySnapshotSummary ?? _buildDiaryAnalysis(_diaryEntries);
+
+  String _averageMoodLabel() {
+    if (_patientLogs.isEmpty) return "--";
+    final total = _patientLogs.fold<int>(0, (sum, log) => sum + log.mood);
+    final average = total / _patientLogs.length;
+    return average.toStringAsFixed(1);
+  }
+
+  String _moodSummaryEmoji() {
+    if (_patientLogs.isEmpty) return "No logs";
+    final total = _patientLogs.fold<int>(0, (sum, log) => sum + log.mood);
+    final average = (total / _patientLogs.length).round();
+    return _moodEmoji(average);
+  }
+
+  String _adherenceLabel() {
+    if (_patientLogs.isEmpty) return "--";
+    final takenCount = _patientLogs.where((log) => log.medicationTaken).length;
+    final percentage = ((takenCount / _patientLogs.length) * 100).round();
+    return '$percentage%';
+  }
+
+  String _adherenceStatus() {
+    if (_patientLogs.isEmpty) return "No logs";
+    final takenCount = _patientLogs.where((log) => log.medicationTaken).length;
+    final ratio = takenCount / _patientLogs.length;
+    if (ratio >= 0.8) return "On track";
+    if (ratio >= 0.5) return "Monitor";
+    return "Low";
+  }
+
+  String _displayDate(String raw) {
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return raw;
+
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    final hour = parsed.hour % 12 == 0 ? 12 : parsed.hour % 12;
+    final minute = parsed.minute.toString().padLeft(2, '0');
+    final suffix = parsed.hour >= 12 ? 'PM' : 'AM';
+    return '${months[parsed.month - 1]} ${parsed.day}, ${parsed.year} - $hour:$minute $suffix';
+  }
+
+  int _wordCount(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return 0;
+    return trimmed.split(RegExp(r'\s+')).length;
+  }
+
+  String _diaryPreview(String content) {
+    final clean = content.trim();
+    if (clean.length <= 140) return clean;
+    return '${clean.substring(0, 140).trim()}...';
+  }
+
+  Widget _diaryAnalysisCard() {
+    final summary = _diaryAnalysis;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _kCard,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.shield_outlined, color: summary.color),
+              const SizedBox(width: 10),
+              const Text(
+                "Diary Analysis Outcome",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const Spacer(),
+              _severityBadge(summary.severity, summary.color),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            summary.action,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+              height: 1.45,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            summary.screeningNote,
+            style: const TextStyle(
+              fontSize: 12.5,
+              color: Colors.grey,
+              height: 1.45,
+            ),
+          ),
+          if (_diaryDataNotice != null) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _kLightBlue.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _kBlue.withOpacity(0.12)),
+              ),
+              child: Text(
+                _diaryDataNotice!,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  color: Colors.black87,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _metricChip(
+                label: 'Entries',
+                value: '${summary.entryCount}',
+                color: _kBlue,
+              ),
+              _metricChip(
+                label: 'Latest',
+                value: summary.lastEntryAt == null
+                    ? 'No entry'
+                    : _displayDate(summary.lastEntryAt!),
+                color: Colors.indigo,
+              ),
+              if (summary.themeCounts.isNotEmpty)
+                _metricChip(
+                  label: 'Top themes',
+                  value: summary.themeCounts.keys.take(2).join(', '),
+                  color: Colors.orange,
+                ),
+              _metricChip(
+                label: 'Evidence',
+                value: '${summary.evidence.length}',
+                color: summary.color,
+              ),
+            ],
+          ),
+          if (summary.themeCounts.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: summary.themeCounts.entries.map((entry) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: summary.color.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: summary.color.withOpacity(0.16)),
+                  ),
+                  child: Text(
+                    '${entry.key}: ${entry.value}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: summary.color,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _metricChip({
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.5,
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _diaryEvidenceCard() {
+    final summary = _diaryAnalysis;
+    if (summary.evidence.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: const Text(
+          "No diary analysis evidence available in the selected range.",
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _kCard,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: summary.evidence.take(4).map((item) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: _kLightBlue.withOpacity(0.45),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.insights_rounded,
+                      size: 18,
+                      color: _kBlue,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _displayDate(item.timestamp),
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (item.explicit)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: const Text(
+                          'Explicit',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.orange,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  item.excerpt,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      item.theme,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _kBlue,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      item.whyItMatters,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _severityBadge(String severity, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Text(
+        severity.toUpperCase(),
+        style: TextStyle(
+          fontSize: 11.5,
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  int _countOccurrences(String text, String phrase) {
+    var index = 0;
+    var count = 0;
+
+    while (true) {
+      index = text.indexOf(phrase, index);
+      if (index == -1) break;
+      count++;
+      index += phrase.length;
+    }
+
+    return count;
+  }
+
+  String _themeRationale(String theme) {
+    const rationales = {
+      'hopelessness': 'Hopeless language can indicate worsening depressive risk and needs follow-up.',
+      'burden': 'Burden or worthlessness language can increase concern and requires review.',
+      'withdrawal': 'Withdrawal and isolation language can indicate deteriorating engagement and support needs.',
+      'distress': 'High distress language suggests current emotional strain and should be tracked.',
+      'worsening': 'Repeated worsening language suggests decline over time rather than a one-off bad day.',
+      'self_harm': 'Direct self-harm or suicide language requires immediate clinical review.',
+      'plan_preparation': 'Planning or preparation language requires immediate escalation and human review.',
+    };
+
+    return rationales[theme] ?? 'Relevant text concern detected.';
+  }
+
+  _DiaryEntryAnalysis _analyzeDiaryEntry(DiaryEntry entry) {
+    final rawText = entry.content;
+    final text = rawText.toLowerCase();
+
+    final themes = <String>[];
+    final counts = <String, int>{};
+    var score = 0;
+
+    for (final theme in _themePhrases.entries) {
+      var matchCount = 0;
+      for (final phrase in theme.value) {
+        if (text.contains(phrase)) {
+          matchCount += _countOccurrences(text, phrase);
+        }
+      }
+      if (matchCount > 0) {
+        counts[theme.key] = matchCount;
+        themes.add(theme.key);
+      }
+    }
+
+    score += counts['distress'] ?? 0;
+    score += counts['worsening'] ?? 0;
+    score += counts['withdrawal'] ?? 0;
+    score += (counts['hopelessness'] ?? 0) * 2;
+    score += (counts['burden'] ?? 0) * 2;
+    score += (counts['self_harm'] ?? 0) * 5;
+    score += (counts['plan_preparation'] ?? 0) * 6;
+
+    final explicitSelfHarm = (counts['self_harm'] ?? 0) > 0;
+    final explicitPlan = (counts['plan_preparation'] ?? 0) > 0;
+
+    final severity = explicitPlan || score >= 8
+        ? 'critical'
+        : explicitSelfHarm || score >= 5
+            ? 'warning'
+            : score >= 2
+                ? 'watch'
+                : 'stable';
+
+    final evidence = themes.map((theme) {
+      return _DiaryEvidenceItem(
+        timestamp: entry.createdAt,
+        theme: theme,
+        excerpt: _diaryPreview(rawText),
+        explicit: theme == 'self_harm' || theme == 'plan_preparation',
+        whyItMatters: _themeRationale(theme),
+      );
+    }).toList();
+
+    return _DiaryEntryAnalysis(
+      entry: entry,
+      severity: severity,
+      themes: themes,
+      evidence: evidence,
+    );
+  }
+
+  _DiaryAnalysisSummary _buildDiaryAnalysis(List<DiaryEntry> entries) {
+    if (entries.isEmpty) {
+      return const _DiaryAnalysisSummary(
+        entryCount: 0,
+        severity: 'stable',
+        action: 'Routine monitoring only.',
+        screeningNote:
+            'Diary analysis is supportive evidence only and does not replace validated screening such as PHQ-9, PHQ-A, GAD-7, ASQ, or C-SSRS workflows.',
+        themeCounts: {},
+        evidence: [],
+        lastEntryAt: null,
+      );
+    }
+
+    const severityRank = {
+      'stable': 0,
+      'watch': 1,
+      'warning': 2,
+      'critical': 3,
+    };
+
+    final analyzed = entries.map(_analyzeDiaryEntry).toList();
+    final themeCounts = <String, int>{};
+    final evidence = <_DiaryEvidenceItem>[];
+    var recentWarningCount = 0;
+    final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+
+    for (final item in analyzed) {
+      for (final theme in item.themes) {
+        themeCounts[theme] = (themeCounts[theme] ?? 0) + 1;
+      }
+      evidence.addAll(item.evidence);
+
+      final created = DateTime.tryParse(item.entry.createdAt)?.toLocal();
+      if (created != null &&
+          created.isAfter(sevenDaysAgo) &&
+          (severityRank[item.severity] ?? 0) >= 2) {
+        recentWarningCount++;
+      }
+    }
+
+    var overall = analyzed
+        .map((item) => item.severity)
+        .reduce((a, b) => (severityRank[a] ?? 0) >= (severityRank[b] ?? 0) ? a : b);
+
+    if (overall != 'critical' && recentWarningCount >= 2) {
+      overall = 'warning';
+    }
+
+    if (overall == 'stable' && themeCounts.values.fold<int>(0, (sum, v) => sum + v) >= 2) {
+      overall = 'watch';
+    }
+
+    final sortedThemeEntries = themeCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return _DiaryAnalysisSummary(
+      entryCount: entries.length,
+      severity: overall,
+      action: _actionForSeverity(overall),
+      screeningNote:
+          'Diary analysis is supportive evidence only and does not replace validated screening such as PHQ-9, PHQ-A, GAD-7, ASQ, or C-SSRS workflows.',
+      themeCounts: {
+        for (final entry in sortedThemeEntries) entry.key: entry.value,
+      },
+      evidence: evidence.take(20).toList(),
+      lastEntryAt: entries.first.createdAt,
+    );
+  }
+
+  String _actionForSeverity(String severity) {
+    switch (severity) {
+      case 'watch':
+        return 'Show in dashboard and include in doctor digest.';
+      case 'warning':
+        return 'Same-day clinician review and acknowledgement required.';
+      case 'critical':
+        return 'Immediate human review and urgent clinician alert required.';
+      case 'stable':
+      default:
+        return 'Routine monitoring only.';
+    }
+  }
 
   Widget _moodTrendCard() {
     final logs = _showPatient ? _patientLogs : _guardianLogs;
@@ -651,6 +1335,133 @@ class _PatientAnalyticsState extends State<PatientAnalytics> {
 }
 
 // ── Mood Line Chart Painter ───────────────────────────────────────────────────
+
+class _DiaryAnalysisSummary {
+  final int entryCount;
+  final String severity;
+  final String action;
+  final String screeningNote;
+  final Map<String, int> themeCounts;
+  final List<_DiaryEvidenceItem> evidence;
+  final String? lastEntryAt;
+
+  const _DiaryAnalysisSummary({
+    required this.entryCount,
+    required this.severity,
+    required this.action,
+    required this.screeningNote,
+    required this.themeCounts,
+    required this.evidence,
+    required this.lastEntryAt,
+  });
+
+  factory _DiaryAnalysisSummary.fromSnapshot(Map<String, dynamic> map) {
+    final rawThemeCounts = map['themeCounts'];
+    final themeCounts = <String, int>{};
+    if (rawThemeCounts is Map) {
+      rawThemeCounts.forEach((key, value) {
+        final parsedValue = value is int ? value : int.tryParse('$value') ?? 0;
+        themeCounts['$key'] = parsedValue;
+      });
+    }
+
+    final rawEvidence = map['evidence'];
+    final evidence = <_DiaryEvidenceItem>[];
+    if (rawEvidence is List) {
+      for (final item in rawEvidence) {
+        if (item is Map<String, dynamic>) {
+          evidence.add(_DiaryEvidenceItem.fromMap(item));
+        } else if (item is Map) {
+          evidence.add(_DiaryEvidenceItem.fromMap(item.cast<String, dynamic>()));
+        }
+      }
+    }
+
+    return _DiaryAnalysisSummary(
+      entryCount: _toInt(map['entryCount']),
+      severity: (map['severity'] ?? 'stable').toString(),
+      action: (map['action'] ?? 'Routine monitoring only.').toString(),
+      screeningNote: (map['screeningNote'] ??
+              'Diary analysis is supportive evidence only and does not replace validated screening such as PHQ-9, PHQ-A, GAD-7, ASQ, or C-SSRS workflows.')
+          .toString(),
+      themeCounts: themeCounts,
+      evidence: evidence,
+      lastEntryAt: map['lastEntryAt']?.toString(),
+    );
+  }
+
+  String get severityLabel {
+    switch (severity) {
+      case 'critical':
+        return 'Critical';
+      case 'warning':
+        return 'Warning';
+      case 'watch':
+        return 'Watch';
+      default:
+        return 'Stable';
+    }
+  }
+
+  Color get color {
+    switch (severity) {
+      case 'critical':
+        return const Color(0xFFB42318);
+      case 'warning':
+        return const Color(0xFFB54708);
+      case 'watch':
+        return const Color(0xFF1D4ED8);
+      default:
+        return const Color(0xFF1F7A4D);
+    }
+  }
+}
+
+class _DiaryEvidenceItem {
+  final String timestamp;
+  final String theme;
+  final String excerpt;
+  final bool explicit;
+  final String whyItMatters;
+
+  const _DiaryEvidenceItem({
+    required this.timestamp,
+    required this.theme,
+    required this.excerpt,
+    required this.explicit,
+    required this.whyItMatters,
+  });
+
+  factory _DiaryEvidenceItem.fromMap(Map<String, dynamic> map) {
+    return _DiaryEvidenceItem(
+      timestamp: (map['timestamp'] ?? map['createdAt'] ?? '').toString(),
+      theme: (map['theme'] ?? 'text concern').toString(),
+      excerpt: (map['excerpt'] ?? '').toString(),
+      explicit: map['explicit'] == true,
+      whyItMatters: (map['whyItMatters'] ?? 'Relevant text concern detected.')
+          .toString(),
+    );
+  }
+}
+
+int _toInt(dynamic value) {
+  if (value is int) return value;
+  return int.tryParse('$value') ?? 0;
+}
+
+class _DiaryEntryAnalysis {
+  final DiaryEntry entry;
+  final String severity;
+  final List<String> themes;
+  final List<_DiaryEvidenceItem> evidence;
+
+  const _DiaryEntryAnalysis({
+    required this.entry,
+    required this.severity,
+    required this.themes,
+    required this.evidence,
+  });
+}
 
 class _MoodLinePainter extends CustomPainter {
   final List<double> moods;

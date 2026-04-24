@@ -1,5 +1,6 @@
 import '../services/doctor_service.dart';
 import '../models/appointment.dart';
+import '../models/diary_entry.dart';
 import '../models/prescription.dart';
 import '../models/daily_log.dart';
 import '../models/reschedule_request.dart';
@@ -42,6 +43,14 @@ class DoctorController {
   static Future<List<DailyLog>> getDailyLogs(
       String patientUid, String from, String to) async =>
       await DoctorService.getDailyLogs(patientUid, from, to);
+
+  static Future<List<DiaryEntry>> getDiaryEntries(
+      String patientUid, String from, String to) async =>
+      await DoctorService.getDiaryEntries(patientUid, from, to);
+
+  static Future<Map<String, dynamic>?> getDiaryAnalysisSnapshot(
+      String patientUid) async =>
+      await DoctorService.getDiaryAnalysisSnapshot(patientUid);
 
   static Future<List<Map<String, dynamic>>> getGuardianLogs(
       String patientUid, String from, String to) async =>
