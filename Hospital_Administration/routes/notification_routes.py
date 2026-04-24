@@ -8,8 +8,43 @@ notification_routes = Blueprint('notification_routes', __name__)
 
 #  Helpers for notfications
 
+# def _send_fcm(token, title, body, notif_type='general'):
+#     try:
+#         message = messaging.Message(
+#             notification=messaging.Notification(
+#                 title=title,
+#                 body=body,
+#             ),
+#             android=messaging.AndroidConfig(
+#                 priority='high',
+#                 notification=messaging.AndroidNotification(
+#                     sound='alarm_sound',
+#                     channel_id='health_alerts',
+#                     notification_priority=
+#                         messaging.AndroidNotificationPriority.PRIORITY_MAX,
+#                 ),
+#             ),
+#             data={'type': notif_type},
+#             token=token,
+#         )
+#         response = messaging.send(message)
+#         print(f'FCM sent: {response}')
+#         return response
+#     except Exception as e:
+#         print(f'FCM error: {e}')
+#         return None
+
+
+
 def _send_fcm(token, title, body, notif_type='general'):
     try:
+        print(f'\n--- FCM Notification ---')
+        print(f'Type:  {notif_type}')
+        print(f'Title: {title}')
+        print(f'Body:  {body}')
+        print(f'Token: {token[:30]}...')
+        print(f'------------------------')
+
         message = messaging.Message(
             notification=messaging.Notification(
                 title=title,
@@ -20,19 +55,42 @@ def _send_fcm(token, title, body, notif_type='general'):
                 notification=messaging.AndroidNotification(
                     sound='alarm_sound',
                     channel_id='health_alerts',
-                    notification_priority=
-                        messaging.AndroidNotificationPriority.PRIORITY_MAX,
                 ),
             ),
             data={'type': notif_type},
             token=token,
         )
         response = messaging.send(message)
-        print(f'FCM sent: {response}')
+        print(f'FCM sent successfully: {response}')
         return response
     except Exception as e:
         print(f'FCM error: {e}')
         return None
+
+
+# def _send_fcm(token, title, body, notif_type='general'):
+#     try:
+#         message = messaging.Message(
+#             notification=messaging.Notification(
+#                 title=title,
+#                 body=body,
+#             ),
+#             android=messaging.AndroidConfig(
+#                 priority='high',
+#                 notification=messaging.AndroidNotification(
+#                     sound='alarm_sound',
+#                     channel_id='health_alerts',
+#                 ),
+#             ),
+#             data={'type': notif_type},
+#             token=token,
+#         )
+#         response = messaging.send(message)
+#         print(f'FCM sent: {response}')
+#         return response
+#     except Exception as e:
+#         print(f'FCM error: {e}')
+#         return None
 
 
 def _current_slot():
@@ -196,6 +254,73 @@ def trigger_appointments():
         'tomorrow': _tomorrow_str(),
         'sent':     sent,
     }), 200
+
+
+
+
+
+@notification_routes.route('/trigger/water', methods=['POST'])
+def trigger_water():
+    """Send water reminder to all patients"""
+    sent   = 0
+    errors = 0
+
+    patients = db.collection('users')\
+        .where('role', '==', 'patient').stream()
+
+    for p in patients:
+        data  = p.to_dict()
+        token = data.get('fcmToken')
+        name  = data.get('name', 'Patient')
+
+        if not token:
+            continue
+
+        print(f'\n--- Water Reminder ---')
+        print(f'Patient: {name}')
+
+        result = _send_fcm(
+            token=token,
+            title='💧 Stay Hydrated',
+            body='Don\'t forget to drink water and log your intake today.',
+            notif_type='general',
+        )
+        if result: sent += 1
+        else: errors += 1
+
+    return jsonify({'status': 'done', 'sent': sent, 'errors': errors}), 200
+
+
+@notification_routes.route('/trigger/diary', methods=['POST'])
+def trigger_diary():
+    """Send diary reminder to all patients"""
+    sent   = 0
+    errors = 0
+
+    patients = db.collection('users')\
+        .where('role', '==', 'patient').stream()
+
+    for p in patients:
+        data  = p.to_dict()
+        token = data.get('fcmToken')
+        name  = data.get('name', 'Patient')
+
+        if not token:
+            continue
+
+        print(f'\n--- Diary Reminder ---')
+        print(f'Patient: {name}')
+
+        result = _send_fcm(
+            token=token,
+            title='📓 Write in your diary',
+            body='Take a moment to record your thoughts and feelings today.',
+            notif_type='general',
+        )
+        if result: sent += 1
+        else: errors += 1
+
+    return jsonify({'status': 'done', 'sent': sent, 'errors': errors}), 200
 
 
 #  Single device test endpoint
