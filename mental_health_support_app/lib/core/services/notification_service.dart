@@ -107,24 +107,66 @@ class NotificationService {
     );
   }
 
+
+
+  //
+  // static Future<void> saveToken(String uid) async {
+  //   try {
+  //     final String? token = await _fcm.getToken();
+  //     if (token == null) return;
+  //     await FirebaseFirestore.instance
+  //         .collection('users')
+  //         .doc(uid)
+  //         .update({'fcmToken': token});
+  //     _fcm.onTokenRefresh.listen((String t) {
+  //       FirebaseFirestore.instance
+  //           .collection('users')
+  //           .doc(uid)
+  //           .update({'fcmToken': t});
+  //     });
+  //     debugPrint('FCM token saved ✅');
+  //   } catch (e) {
+  //     debugPrint('Token error: $e');
+  //   }
+  // }
+
+
+
+
+
   static Future<void> saveToken(String uid) async {
     try {
+      debugPrint('=== saveToken called for uid: $uid ===');
       final String? token = await _fcm.getToken();
-      if (token == null) return;
+      debugPrint('=== FCM token received: ${token?.substring(0, 20)} ===');
+
+      if (token == null) {
+        debugPrint('=== TOKEN IS NULL — FCM not working ===');
+        return;
+      }
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
           .update({'fcmToken': token});
+
+      debugPrint('=== FCM token saved to Firestore  ===');
+
       _fcm.onTokenRefresh.listen((String t) {
         FirebaseFirestore.instance
             .collection('users')
             .doc(uid)
             .update({'fcmToken': t});
       });
-      debugPrint('FCM token saved ✅');
     } catch (e) {
-      debugPrint('Token error: $e');
+      debugPrint('=== Token error: $e ===');
     }
   }
+
+
+
+
+
+
 }
 
