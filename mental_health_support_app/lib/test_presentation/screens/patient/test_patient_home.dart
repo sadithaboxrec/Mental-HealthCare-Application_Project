@@ -706,6 +706,16 @@ class _TestPatientHomeState extends State<TestPatientHome> {
 
             const SizedBox(height: 8),
 
+//  to force save fcm token
+            ElevatedButton(
+              onPressed: () async {
+                await NotificationController.saveToken(widget.user.uid);
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Token save attempted')));
+              },
+              child: const Text('Save FCM Token'),
+            ),
+
 
             const SizedBox(height: 16),
             Row(children: [
