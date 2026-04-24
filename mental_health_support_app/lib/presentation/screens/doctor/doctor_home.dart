@@ -255,6 +255,36 @@ class _DoctorHomeState extends State<DoctorHome> {
                       ),
                     ),
                   ),
+
+
+
+
+// adding to get the new patients who are assigned by the administration
+
+
+                  // ── New Patients
+                  if (_newPatients.isNotEmpty) ...[
+                    const Text(
+                      "New Patients",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+
+                    ..._newPatients.map((p) => _PatientCard(
+                      patientUid:  p['uid'] ?? '',
+                      patientName: p['name'] ?? 'Unknown',
+                      subtitle:    p['email'] ?? 'No email',
+                      doctorUser:  widget.user,
+                      onRefresh:   _load,
+
+                      // against the defined isNew false in constructor
+                      isNew:       true,
+                    )),
+
+                    const SizedBox(height: 20),
+                  ],
+
+
  
                   const SizedBox(height: 16),
  
@@ -394,6 +424,10 @@ class _PatientCard extends StatelessWidget {
   final AppUser   doctorUser;
   final VoidCallback onRefresh;
   final String?   appointmentId;
+
+// for get newly assigned patients
+  final bool isNew;
+
  
   const _PatientCard({
     required this.patientUid,
@@ -402,6 +436,10 @@ class _PatientCard extends StatelessWidget {
     required this.doctorUser,
     required this.onRefresh,
     this.appointmentId,
+
+
+    // for get newly assigned patients
+    this.isNew = false,
   });
  
   @override
@@ -415,10 +453,39 @@ class _PatientCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
  
+            // Row(
+            //   children: [
+            //     const CircleAvatar(radius: 20, child: Icon(Icons.person, size: 20)),
+            //     const SizedBox(width: 12),
+            //     Expanded(
+            //       child: Column(
+            //         crossAxisAlignment: CrossAxisAlignment.start,
+            //         children: [
+            //           Text(patientName,
+            //               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            //           Text(subtitle,
+            //               style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            // ),
+
+
+    // adding for newly assigned patients
             Row(
               children: [
-                const CircleAvatar(radius: 20, child: Icon(Icons.person, size: 20)),
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: isNew ? Colors.green.shade100 : null,
+                  child: Icon(
+                    Icons.person,
+                    size: 20,
+                    color: isNew ? Colors.green : null,
+                  ),
+                ),
                 const SizedBox(width: 12),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -430,9 +497,19 @@ class _PatientCard extends StatelessWidget {
                     ],
                   ),
                 ),
+
+                if (isNew)
+                  const Chip(
+                    label: Text("NEW",
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                    backgroundColor: Color(0xFFE8F5E9),
+                    padding: EdgeInsets.zero,
+                  ),
               ],
             ),
- 
+
+
+
             const SizedBox(height: 12),
  
             Row(
