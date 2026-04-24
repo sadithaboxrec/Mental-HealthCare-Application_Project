@@ -11,8 +11,7 @@ class PatientMedications extends StatefulWidget {
   const PatientMedications({super.key, required this.user});
 
   @override
-  State<PatientMedications> createState() =>
-      _PatientMedicationsState();
+  State<PatientMedications> createState() => _PatientMedicationsState();
 }
 
 class _PatientMedicationsState extends State<PatientMedications> {
@@ -30,7 +29,7 @@ class _PatientMedicationsState extends State<PatientMedications> {
     setState(() => _loading = true);
     try {
       _prescription =
-      await PatientController.getActivePrescription(widget.user.uid);
+          await PatientController.getActivePrescription(widget.user.uid);
     } catch (e) {
       debugPrint('Medications load error: $e');
     } finally {
@@ -57,328 +56,327 @@ class _PatientMedicationsState extends State<PatientMedications> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF8FBFF),
-              Color(0xFFEAF3FC),
-            ],
+            colors: [Color(0xFFF8FBFF), Color(0xFFEAF3FC)],
           ),
         ),
         child: _loading
             ? const Center(
-          child: CircularProgressIndicator(color: _primaryBlue),
-        )
+                child: CircularProgressIndicator(color: _primaryBlue),
+              )
             : _prescription == null || _prescription!.medicines.isEmpty
-            ? Center(
-          child: _glassCard(
-            child: const Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 28,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.medication_liquid_outlined,
-                    size: 42,
-                    color: _primaryBlue,
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    'No active prescription',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        )
-            : ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-          children: [
-            _sectionContainer(
-              highlighted: true,
-              child: _glassCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(
-                            Icons.description_outlined,
-                            color: _primaryBlue,
-                            size: 20,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Prescription Summary',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today_outlined,
-                            size: 14,
-                            color: Colors.black54,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Prescribed on ${_prescription!.createdAt.substring(0, 10)}',
-                            style: const TextStyle(
-                              color: Colors.black54,
-                              fontSize: 12.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_prescription!.diagnosis.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Row(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                ? Center(
+                    child: _glassCard(
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 28),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 2),
-                              child: Icon(
-                                Icons.health_and_safety_outlined,
-                                size: 15,
-                                color: Colors.black54,
-                              ),
+                            Icon(
+                              Icons.medication_liquid_outlined,
+                              size: 42,
+                              color: _primaryBlue,
                             ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                _prescription!.diagnosis,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.black87,
-                                ),
+                            SizedBox(height: 12),
+                            Text(
+                              'No active prescription',
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            _sectionContainer(
-              highlighted: false,
-              child: Column(
-                children: [
-                  _glassCard(
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.medication_outlined,
-                              color: _primaryBlue, size: 18),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: SectionTitle(title: 'Medicines'),
-                          ),
-                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  ..._prescription!.medicines.map(
-                        (med) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _glassCard(
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding:
-                                    const EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: _primaryBlue
-                                          .withOpacity(0.16),
-                                      borderRadius:
-                                      BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(
-                                      Icons.medication_outlined,
-                                      color: _primaryBlue,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      med.name,
-                                      style: const TextStyle(
+                  )
+                : ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                    children: [
+                      // ── Prescription summary ──────────────
+                      _sectionContainer(
+                        highlighted: true,
+                        child: _glassCard(
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Row(
+                                  children: [
+                                    Icon(Icons.description_outlined,
+                                        color: _primaryBlue, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Prescription Summary',
+                                      style: TextStyle(
+                                        fontSize: 15,
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 15.5,
                                         color: Colors.black87,
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    padding:
-                                    const EdgeInsets.symmetric(
-                                      horizontal: 11,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _primaryBlue
-                                          .withOpacity(0.14),
-                                      borderRadius:
-                                      BorderRadius.circular(100),
-                                      border: Border.all(
-                                        color: _primaryBlue
-                                            .withOpacity(0.35),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      med.dose,
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                        Icons.calendar_today_outlined,
+                                        size: 14,
+                                        color: Colors.black54),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Prescribed on ${_prescription!.createdAt.substring(0, 10)}',
                                       style: const TextStyle(
-                                        color: _primaryBlue,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 12,
+                                          color: Colors.black54,
+                                          fontSize: 12.5),
+                                    ),
+                                  ],
+                                ),
+                                if (_prescription!.diagnosis.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.only(top: 2),
+                                        child: Icon(
+                                            Icons.health_and_safety_outlined,
+                                            size: 15,
+                                            color: Colors.black54),
                                       ),
-                                    ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          _prescription!.diagnosis,
+                                          style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.black87),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // ── Medicines list ────────────────────
+                      _sectionContainer(
+                        highlighted: false,
+                        child: Column(
+                          children: [
+                            _glassCard(
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.medication_outlined,
+                                        color: _primaryBlue, size: 18),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: SectionTitle(title: 'Medicines'),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 12),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  if (med.morning)
-                                    _scheduleChip(
-                                      icon: Icons.wb_sunny_outlined,
-                                      label: 'Morning',
-                                      color: Colors.orange,
-                                    ),
-                                  if (med.afternoon)
-                                    _scheduleChip(
-                                      icon:
-                                      Icons.light_mode_outlined,
-                                      label: 'Afternoon',
-                                      color: Colors.amber,
-                                    ),
-                                  if (med.night)
-                                    _scheduleChip(
-                                      icon: Icons.nightlight_round,
-                                      label: 'Night',
-                                      color: Colors.indigo,
-                                    ),
-                                  _scheduleChip(
-                                    icon: Icons.restaurant_outlined,
-                                    label: med.beforeMeal
-                                        ? 'Before meal'
-                                        : 'After meal',
-                                    color: Colors.teal,
+                            ),
+                            const SizedBox(height: 10),
+                            ..._prescription!.medicines.map(
+                              (med) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _medicineCard(med),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // ── Doctor suggestions ────────────────
+                      if (_prescription!.suggestions.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        _sectionContainer(
+                          highlighted: true,
+                          child: Column(
+                            children: [
+                              _glassCard(
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 10),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.tips_and_updates_outlined,
+                                          color: Colors.amber, size: 18),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        child: SectionTitle(
+                                            title: "Doctor's Suggestions"),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              _glassCard(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(14),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(7),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.withOpacity(0.14),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: const Icon(
+                                            Icons.tips_and_updates_outlined,
+                                            color: Colors.amber,
+                                            size: 18),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          _prescription!.suggestions,
+                                          style: const TextStyle(
+                                              fontSize: 13.2,
+                                              color: Colors.black87,
+                                              height: 1.35),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ),
+                      ],
+
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+      ),
+    );
+  }
+
+  // ── Medicine card ─────────────────────────────────────
+  Widget _medicineCard(dynamic med) {
+    // ✅ FIX: read tabletCount (int) not dose (string)
+    final int tabletCount = (med.tabletCount as int?) ?? 1;
+
+    return _glassCard(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Name row + tablet count badge ─────
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: _primaryBlue.withOpacity(0.16),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.medication_outlined,
+                      color: _primaryBlue, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    med.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15.5,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+
+                // ✅ Always show tablet count badge (even 1 tablet)
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: _primaryBlue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$tabletCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            if (_prescription!.suggestions.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              _sectionContainer(
-                highlighted: true,
-                child: Column(
-                  children: [
-                    _glassCard(
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.tips_and_updates_outlined,
-                                color: Colors.amber, size: 18),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: SectionTitle(
-                                  title: "Doctor's Suggestions"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _glassCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Row(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color:
-                                Colors.amber.withOpacity(0.14),
-                                borderRadius:
-                                BorderRadius.circular(10),
-                              ),
-                              child: const Icon(
-                                Icons.tips_and_updates_outlined,
-                                color: Colors.amber,
-                                size: 18,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                _prescription!.suggestions,
-                                style: const TextStyle(
-                                  fontSize: 13.2,
-                                  color: Colors.black87,
-                                  height: 1.35,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
-            ],
-            const SizedBox(height: 20),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── Schedule chips ────────────────────
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // time of day
+                if (med.morning)
+                  _scheduleChip(
+                    icon: Icons.wb_sunny_outlined,
+                    label: 'Morning',
+                    color: Colors.orange,
+                  ),
+                if (med.afternoon)
+                  _scheduleChip(
+                    icon: Icons.light_mode_outlined,
+                    label: 'Afternoon',
+                    color: Colors.amber,
+                  ),
+                if (med.night)
+                  _scheduleChip(
+                    icon: Icons.nightlight_round,
+                    label: 'Night',
+                    color: Colors.indigo,
+                  ),
+
+                // meal timing
+                _scheduleChip(
+                  icon: Icons.restaurant_outlined,
+                  label: med.beforeMeal ? 'Before meal' : 'After meal',
+                  color: Colors.teal,
+                ),
+
+                // tablet count chip (always visible)
+                _scheduleChip(
+                  icon: Icons.medication_liquid_outlined,
+                  label: tabletCount == 1
+                      ? '1 tablet'
+                      : '$tabletCount tablets',
+                  color: _primaryBlue,
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
+
+  // ── Helpers ───────────────────────────────────────────
 
   Widget _glassCard({required Widget child}) {
     return ClipRRect(
@@ -437,7 +435,8 @@ class _PatientMedicationsState extends State<PatientMedications> {
     required Color color,
   }) =>
       Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: color.withOpacity(0.13),
           borderRadius: BorderRadius.circular(100),
