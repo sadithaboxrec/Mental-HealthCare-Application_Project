@@ -59,10 +59,13 @@ class TestNotificationTrigger extends StatelessWidget {
             );
           } else {
             await NotificationController.patientMedicationReminder(
+
               medicineName: med.name,
               dose:         med.dose,
               mealTiming:   meal,
               timeSlot:     _slot,
+
+              uid: '',    // for local save of notifications
             );
           }
           count++;
@@ -81,6 +84,11 @@ class TestNotificationTrigger extends StatelessWidget {
         );
       } else {
         await NotificationController.patientAppointmentReminder(
+
+
+          uid: '',    // for local save of notifications
+
+
           date: nextAppointment!.date,
           time: nextAppointment!.time,
         );

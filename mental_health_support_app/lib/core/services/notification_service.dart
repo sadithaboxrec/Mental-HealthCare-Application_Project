@@ -71,42 +71,46 @@ class NotificationService {
     FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
 
     _initialized = true;
-    debugPrint('NotificationService initialized ✅');
+    debugPrint('NotificationService initialized and running ..======== ');
   }
 
-  static Future<void> show({
-    required String title,
-    required String body,
-    String type = 'general',
-  }) async {
-    final bool isAlarm =
-        type == 'medication' || type == 'appointment';
+  // static Future<void> show({
+  //   required String title,
+  //   required String body,
+  //   String type = 'general',
+  // }) async {
+  //   final bool isAlarm =
+  //       type == 'medication' || type == 'appointment';
+  //
+  //   final AndroidNotificationDetails androidDetails =
+  //   AndroidNotificationDetails(
+  //     _channelId,
+  //     _channelName,
+  //     importance:       Importance.max,
+  //     priority:         Priority.high,
+  //     playSound:        true,
+  //     sound:            isAlarm
+  //         ? const RawResourceAndroidNotificationSound('alarm_sound')
+  //         : null,
+  //     enableVibration:  isAlarm,
+  //     fullScreenIntent: isAlarm,
+  //     autoCancel:       true,
+  //     timeoutAfter:     10000,
+  //     styleInformation: BigTextStyleInformation(body),
+  //   );
+  //
+  //   await _plugin.show(
+  //     DateTime.now().millisecondsSinceEpoch ~/ 1000 % 100000,
+  //     title,
+  //     body,
+  //     NotificationDetails(android: androidDetails),
+  //   );
+  // }
 
-    final AndroidNotificationDetails androidDetails =
-    AndroidNotificationDetails(
-      _channelId,
-      _channelName,
-      importance:       Importance.max,
-      priority:         Priority.high,
-      playSound:        true,
-      sound:            isAlarm
-          ? const RawResourceAndroidNotificationSound('alarm_sound')
-          : null,
-      enableVibration:  isAlarm,
-      fullScreenIntent: isAlarm,
-      autoCancel:       true,
-      timeoutAfter:     10000,
-      styleInformation: BigTextStyleInformation(body),
-    );
 
-    await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000 % 100000,
-      title,
-      body,
-      NotificationDetails(android: androidDetails),
-    );
-  }
-
+                ///////////////////////
+              //  updated below      //
+              //////////////////////////
 
 
   //
@@ -164,6 +168,68 @@ class NotificationService {
   }
 
 
+
+
+
+
+
+
+ // When a notification is shown locally, also save it to Firestore.
+
+
+
+
+  static Future<void> show({
+    required String title,
+    required String body,
+    String type  = 'general',
+    String? uid,               // ← add this optional param
+  }) async {
+    final bool isAlarm =
+        type == 'medication' || type == 'appointment';
+
+    final AndroidNotificationDetails androidDetails =
+    AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      importance:       Importance.max,
+      priority:         Priority.high,
+      playSound:        true,
+      sound:            isAlarm
+          ? const RawResourceAndroidNotificationSound('alarm_sound')
+          : null,
+      enableVibration:  isAlarm,
+      fullScreenIntent: isAlarm,
+      autoCancel:       true,
+      timeoutAfter:     10000,
+      styleInformation: BigTextStyleInformation(body),
+    );
+
+    await _plugin.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000 % 100000,
+      title,
+      body,
+      NotificationDetails(android: androidDetails),
+    );
+
+    // Save to Firestore inbox if uid provided
+    if (uid != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('notifications')
+            .add({
+          'uid':       uid,
+          'title':     title,
+          'body':      body,
+          'type':      type,
+          'isRead':    false,
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+      } catch (e) {
+        debugPrint('Inbox save error: $e');
+      }
+    }
+  }
 
 
 

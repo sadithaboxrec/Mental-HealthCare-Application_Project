@@ -11,37 +11,64 @@ class NotificationController {
   // ── Patient ───────────────────────────────────────────
 
   static Future<void> patientMedicationReminder({
+
+
+    required String uid,           //  uid for local save
+
     required String medicineName,
     required String dose,
     required String mealTiming,
     required String timeSlot,
   }) =>
       NotificationService.show(
+
+        uid:   uid,                //  pass uid
+
         title: '💊 Time for your medicine',
         body:  'Take $medicineName ($dose) $mealTiming. '
             'Slot: $timeSlot.',
         type:  'medication',
+
+
+
       );
 
   static Future<void> patientAppointmentReminder({
+
+
+    required String uid,           //  uid for local save
+
     required String date,
     required String time,
   }) =>
       NotificationService.show(
+
+        uid:   uid,                //  pass uid
+
         title: '📅 Clinic Visit Tomorrow',
         body:  'You have an appointment tomorrow at $time on $date.',
         type:  'appointment',
       );
 
-  static Future<void> patientWaterReminder() =>
+  static Future<void> patientWaterReminder({String? uid}) =>
       NotificationService.show(
+
+
+        uid:   uid,                //  pass uid
+
+
         title: '💧 Stay Hydrated',
         body:  'Don\'t forget to drink water and log your intake.',
         type:  'general',
       );
 
-  static Future<void> patientDiaryReminder() =>
+  static Future<void> patientDiaryReminder({String? uid}) =>
       NotificationService.show(
+
+
+        uid:   uid,                //  pass uid
+
+
         title: '📓 Write in your diary',
         body:  'Take a moment to record your thoughts today.',
         type:  'general',

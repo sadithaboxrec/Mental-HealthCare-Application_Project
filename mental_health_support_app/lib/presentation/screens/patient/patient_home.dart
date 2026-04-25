@@ -100,9 +100,11 @@ class _PatientHomeState extends State<PatientHome> {
                   padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 10),
                   children: [
                     HomeHeader(
-  userName: widget.user.name,  
-  primaryBlue: _primaryBlue,
-  primaryBlueDeep: _primaryBlueDeep,
+
+                      uid: widget.user.uid,     // for local notication page save
+                      userName: widget.user.name,
+                      primaryBlue: _primaryBlue,
+                      primaryBlueDeep: _primaryBlueDeep,
 ),
                     const SizedBox(height: 8),
 

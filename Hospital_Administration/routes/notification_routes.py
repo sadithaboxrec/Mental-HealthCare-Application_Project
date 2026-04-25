@@ -6,35 +6,7 @@ from datetime import datetime, timedelta
 notification_routes = Blueprint('notification_routes', __name__)
 
 
-#  Helpers for notfications
-
-# def _send_fcm(token, title, body, notif_type='general'):
-#     try:
-#         message = messaging.Message(
-#             notification=messaging.Notification(
-#                 title=title,
-#                 body=body,
-#             ),
-#             android=messaging.AndroidConfig(
-#                 priority='high',
-#                 notification=messaging.AndroidNotification(
-#                     sound='alarm_sound',
-#                     channel_id='health_alerts',
-#                     notification_priority=
-#                         messaging.AndroidNotificationPriority.PRIORITY_MAX,
-#                 ),
-#             ),
-#             data={'type': notif_type},
-#             token=token,
-#         )
-#         response = messaging.send(message)
-#         print(f'FCM sent: {response}')
-#         return response
-#     except Exception as e:
-#         print(f'FCM error: {e}')
-#         return None
-
-
+# ── Helpers ───────────────────────────────────────────────
 
 def _send_fcm(token, title, body, notif_type='general'):
     try:
@@ -68,29 +40,25 @@ def _send_fcm(token, title, body, notif_type='general'):
         return None
 
 
-# def _send_fcm(token, title, body, notif_type='general'):
-#     try:
-#         message = messaging.Message(
-#             notification=messaging.Notification(
-#                 title=title,
-#                 body=body,
-#             ),
-#             android=messaging.AndroidConfig(
-#                 priority='high',
-#                 notification=messaging.AndroidNotification(
-#                     sound='alarm_sound',
-#                     channel_id='health_alerts',
-#                 ),
-#             ),
-#             data={'type': notif_type},
-#             token=token,
-#         )
-#         response = messaging.send(message)
-#         print(f'FCM sent: {response}')
-#         return response
-#     except Exception as e:
-#         print(f'FCM error: {e}')
-#         return None
+def _save_to_inbox(uid, title, body, notif_type):
+    """Save notification to Firestore inbox"""
+    try:
+        db.collection('notifications').add({
+            'uid':       uid,
+            'title':     title,
+            'body':      body,
+            'type':      notif_type,
+            'isRead':    False,
+            'createdAt': datetime.now().isoformat(),
+        })
+    except Exception as e:
+        print(f'Inbox save error: {e}')
+
+
+def _format_dose(med):
+    """Returns dose string only if it exists and is not empty"""
+    dose = med.get('dose', '').strip()
+    return f' — {dose}' if dose else ''
 
 
 def _current_slot():
@@ -111,15 +79,12 @@ def _get_token(uid):
     return None
 
 
-# Medication Reminders
+# ── Medication Reminders ──────────────────────────────────
 
 def run_medication_reminders():
-
-#    Checks  prescriptions and sends medication reminders to patients and their guardians based on time
-
-    slot  = _current_slot()
-    sent  = 0
-    skip  = 0
+    slot = _current_slot()
+    sent = 0
+    skip = 0
 
     print(f'\n=== Medication reminders — slot: {slot} ===')
 
@@ -132,45 +97,47 @@ def run_medication_reminders():
         patient_name = data.get('patientName', 'Patient')
         medicines    = data.get('medicines', [])
 
-        # Filter medicines for current slot
         slot_meds = [m for m in medicines if m.get(slot, False)]
 
         if not slot_meds:
             skip += 1
             continue
 
-        # Send to patient
         p_token = _get_token(patient_uid)
-        if p_token:
-            for med in slot_meds:
-                meal = 'before meal' if med.get('beforeMeal') \
-                    else 'after meal'
+
+        for med in slot_meds:
+            meal  = 'before meal' if med.get('beforeMeal') else 'after meal'
+            dose  = _format_dose(med)
+            title = '💊 Time for your medicine'
+            body  = f'Take {med["name"]}{dose} {meal}.'
+
+            # Send to patient
+            if p_token:
                 result = _send_fcm(
                     token=p_token,
-                    title='💊 Time for your medicine',
-                    body=f'Take {med["name"]} ({med.get("dose", "")}) '
-                         f'{meal}.',
+                    title=title,
+                    body=body,
                     notif_type='medication',
                 )
-                if result: sent += 1
+                if result:
+                    sent += 1
+                    _save_to_inbox(patient_uid, title, body, 'medication')
 
-        # Send to guardian
-        patient_doc = db.collection('patients') \
-            .document(patient_uid).get()
-        if patient_doc.exists:
-            guardian_uid = patient_doc.to_dict().get('guardianUid')
-            if guardian_uid:
-                g_token = _get_token(guardian_uid)
-                if g_token:
-                    for med in slot_meds:
-                        meal = 'before meal' if med.get('beforeMeal') \
-                            else 'after meal'
+            # Send to guardian
+            patient_doc = db.collection('patients') \
+                .document(patient_uid).get()
+            if patient_doc.exists:
+                guardian_uid = patient_doc.to_dict().get('guardianUid')
+                if guardian_uid:
+                    g_token = _get_token(guardian_uid)
+                    if g_token:
+                        g_title = f'💊 Medication — {patient_name}'
+                        g_body  = f'{patient_name} needs to take ' \
+                                  f'{med["name"]}{dose} {meal}.'
                         result = _send_fcm(
                             token=g_token,
-                            title=f'💊 Medication — {patient_name}',
-                            body=f'{patient_name} needs to take '
-                                 f'{med["name"]} '
-                                 f'({med.get("dose", "")}) {meal}.',
+                            title=g_title,
+                            body=g_body,
                             notif_type='medication',
                         )
                         if result: sent += 1
@@ -179,12 +146,9 @@ def run_medication_reminders():
     return sent
 
 
-#  Appointment Reminders
+# ── Appointment Reminders ─────────────────────────────────
 
 def run_appointment_reminders():
-
-  #  Checks appointments for tomorrow and sends reminders to patients and their guardians.
-
     tomorrow = _tomorrow_str()
     sent     = 0
 
@@ -201,17 +165,22 @@ def run_appointment_reminders():
         patient_name = data.get('patientName', 'Patient')
         time         = data.get('time', '')
 
-        # Send to patient
         p_token = _get_token(patient_uid)
+
+        # Send to patient
         if p_token:
+            title = '📅 Clinic Visit Tomorrow'
+            body  = f'You have an appointment tomorrow ' \
+                    f'at {time} on {tomorrow}. Please prepare.'
             result = _send_fcm(
                 token=p_token,
-                title='📅 Clinic Visit Tomorrow',
-                body=f'You have an appointment tomorrow '
-                     f'at {time} on {tomorrow}. Please prepare.',
+                title=title,
+                body=body,
                 notif_type='appointment',
             )
-            if result: sent += 1
+            if result:
+                sent += 1
+                _save_to_inbox(patient_uid, title, body, 'appointment')
 
         # Send to guardian
         patient_doc = db.collection('patients') \
@@ -234,15 +203,83 @@ def run_appointment_reminders():
     return sent
 
 
-# Testing end points
+# ── Water Reminders ───────────────────────────────────────
+
+def run_water_reminders():
+    sent   = 0
+    errors = 0
+    title  = '💧 Stay Hydrated'
+    body   = 'Don\'t forget to drink water and log your intake today.'
+
+    patients = db.collection('users') \
+        .where('role', '==', 'patient').stream()
+
+    for p in patients:
+        data  = p.to_dict()
+        token = data.get('fcmToken')
+        uid   = data.get('uid', '')
+
+        if not token:
+            continue
+
+        result = _send_fcm(
+            token=token,
+            title=title,
+            body=body,
+            notif_type='general',
+        )
+        if result:
+            sent += 1
+            _save_to_inbox(uid, title, body, 'general')
+        else:
+            errors += 1
+
+    return sent, errors
+
+
+# ── Diary Reminders ───────────────────────────────────────
+
+def run_diary_reminders():
+    sent   = 0
+    errors = 0
+    title  = '📓 Write in your diary'
+    body   = 'Take a moment to record your thoughts and feelings today.'
+
+    patients = db.collection('users') \
+        .where('role', '==', 'patient').stream()
+
+    for p in patients:
+        data  = p.to_dict()
+        token = data.get('fcmToken')
+        uid   = data.get('uid', '')
+
+        if not token:
+            continue
+
+        result = _send_fcm(
+            token=token,
+            title=title,
+            body=body,
+            notif_type='general',
+        )
+        if result:
+            sent += 1
+            _save_to_inbox(uid, title, body, 'general')
+        else:
+            errors += 1
+
+    return sent, errors
+
+
+# ── Endpoints ─────────────────────────────────────────────
 
 @notification_routes.route('/trigger/medications', methods=['POST'])
 def trigger_medications():
     sent = run_medication_reminders()
     return jsonify({
-        'status':  'done',
-        'slot':    _current_slot(),
-        'sent':    sent,
+        'status': 'done',
+        'slot':   _current_slot(),
+        'sent':   sent,
     }), 200
 
 
@@ -256,81 +293,28 @@ def trigger_appointments():
     }), 200
 
 
-
-
-
 @notification_routes.route('/trigger/water', methods=['POST'])
 def trigger_water():
-    """Send water reminder to all patients"""
-    sent   = 0
-    errors = 0
-
-    patients = db.collection('users')\
-        .where('role', '==', 'patient').stream()
-
-    for p in patients:
-        data  = p.to_dict()
-        token = data.get('fcmToken')
-        name  = data.get('name', 'Patient')
-
-        if not token:
-            continue
-
-        print(f'\n--- Water Reminder ---')
-        print(f'Patient: {name}')
-
-        result = _send_fcm(
-            token=token,
-            title='💧 Stay Hydrated',
-            body='Don\'t forget to drink water and log your intake today.',
-            notif_type='general',
-        )
-        if result: sent += 1
-        else: errors += 1
-
-    return jsonify({'status': 'done', 'sent': sent, 'errors': errors}), 200
+    sent, errors = run_water_reminders()
+    return jsonify({
+        'status': 'done',
+        'sent':   sent,
+        'errors': errors,
+    }), 200
 
 
 @notification_routes.route('/trigger/diary', methods=['POST'])
 def trigger_diary():
-    """Send diary reminder to all patients"""
-    sent   = 0
-    errors = 0
+    sent, errors = run_diary_reminders()
+    return jsonify({
+        'status': 'done',
+        'sent':   sent,
+        'errors': errors,
+    }), 200
 
-    patients = db.collection('users')\
-        .where('role', '==', 'patient').stream()
-
-    for p in patients:
-        data  = p.to_dict()
-        token = data.get('fcmToken')
-        name  = data.get('name', 'Patient')
-
-        if not token:
-            continue
-
-        print(f'\n--- Diary Reminder ---')
-        print(f'Patient: {name}')
-
-        result = _send_fcm(
-            token=token,
-            title='📓 Write in your diary',
-            body='Take a moment to record your thoughts and feelings today.',
-            notif_type='general',
-        )
-        if result: sent += 1
-        else: errors += 1
-
-    return jsonify({'status': 'done', 'sent': sent, 'errors': errors}), 200
-
-
-#  Single device test endpoint
 
 @notification_routes.route('/trigger/test', methods=['POST'])
 def trigger_test():
-    """
-    POST body: { "uid": "user_uid_here", "type": "medication" }
-    Sends a test notification to a specific user.
-    """
     data  = request.json
     uid   = data.get('uid', '')
     ntype = data.get('type', 'general')
@@ -344,14 +328,17 @@ def trigger_test():
         'appointment': '📅 Test Appointment Reminder',
         'general':     '🔔 Test General Notification',
     }
+    title = titles.get(ntype, '🔔 Test')
+    body  = f'This is a test {ntype} notification from Flask.'
 
     result = _send_fcm(
         token=token,
-        title=titles.get(ntype, '🔔 Test'),
-        body=f'This is a test {ntype} notification from Flask.',
+        title=title,
+        body=body,
         notif_type=ntype,
     )
 
     if result:
+        _save_to_inbox(uid, title, body, ntype)
         return jsonify({'status': 'sent', 'messageId': result}), 200
     return jsonify({'error': 'Failed to send'}), 500

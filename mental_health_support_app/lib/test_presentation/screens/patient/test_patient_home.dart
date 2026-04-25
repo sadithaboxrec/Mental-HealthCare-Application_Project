@@ -456,6 +456,11 @@ import '../../../core/models/appointment.dart';
 import '../../../core/controllers/notification_controller.dart';
 import '../../components/test_notification_trigger.dart';
 
+
+
+import '../../../core/controllers/notification_inbox_controller.dart';
+import 'test_notification_screen.dart';
+
 class TestPatientHome extends StatefulWidget {
   final AppUser user;
   const TestPatientHome({super.key, required this.user});
@@ -581,11 +586,92 @@ class _TestPatientHomeState extends State<TestPatientHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
+
+
+
+      ////////////////////////////////////////
+      // adding for local notifications save//
+      ///////////////////////////////////////
+
+
+      // appBar: AppBar(
+      //   title: Text('Hi, ${widget.user.name} 👋'),
+      //   backgroundColor: Colors.green,
+      //   foregroundColor: Colors.white,
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.book_outlined),
+      //       tooltip: 'Diary',
+      //       onPressed: () => Navigator.push(context, MaterialPageRoute(
+      //         builder: (_) => TestDiaryScreen(user: widget.user),
+      //       )),
+      //     ),
+      //     IconButton(
+      //       icon: const Icon(Icons.logout),
+      //       onPressed: () async {
+      //         await AuthController.logout();
+      //         if (context.mounted) NavigationHelper.goToLogin(context);
+      //       },
+      //     ),
+      //   ],
+      // ),
+
+
+
       appBar: AppBar(
         title: Text('Hi, ${widget.user.name} 👋'),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         actions: [
+          // Notification bell with badge
+          StreamBuilder<int>(
+            stream: NotificationInboxController
+                .unreadCountStream(widget.user.uid),
+            builder: (context, snap) {
+              final count = snap.data ?? 0;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TestNotificationScreen(
+                          uid: widget.user.uid,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 6,
+                      top:   6,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color:  Colors.red,
+                          shape:  BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth:  18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          count > 99 ? '99+' : '$count',
+                          style: const TextStyle(
+                            color:    Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+
           IconButton(
             icon: const Icon(Icons.book_outlined),
             tooltip: 'Diary',
@@ -602,6 +688,13 @@ class _TestPatientHomeState extends State<TestPatientHome> {
           ),
         ],
       ),
+
+
+
+
+
+
+
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

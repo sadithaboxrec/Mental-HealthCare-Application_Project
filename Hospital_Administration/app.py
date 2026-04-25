@@ -1,10 +1,14 @@
 from flask import Flask, render_template
+import requests
 from config import db
 from routes.doctor_routes   import doctor_routes
 from routes.counselor_routes import counselor_routes
 from routes.patient_routes  import patient_routes
 from routes.analytics_routes import analytics_routes
 from routes.notification_routes import notification_routes
+
+# from testing of notifications
+from datetime import datetime, timedelta
 
 #notifications
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -50,11 +54,51 @@ scheduler.add_job(run_medication_reminders, 'cron', hour=8,  minute=0)
 scheduler.add_job(run_medication_reminders, 'cron', hour=13, minute=0)
 scheduler.add_job(run_medication_reminders, 'cron', hour=21, minute=0)
 
-# Appointments — every night at 9pm
+# Appointments —  night at 9pm
 scheduler.add_job(run_appointment_reminders, 'cron', hour=21, minute=0)
 
+
+
+# Water  — 3 times a day
+scheduler.add_job(
+    lambda: requests.post('http://localhost:5000/trigger/water'),
+    'cron', hour=9,  minute=0
+)
+scheduler.add_job(
+    lambda: requests.post('http://localhost:5000/trigger/water'),
+    'cron', hour=14, minute=0
+)
+scheduler.add_job(
+    lambda: requests.post('http://localhost:5000/trigger/water'),
+    'cron', hour=19, minute=0
+)
+
+# Diary  — once a day at 8pm
+scheduler.add_job(
+    lambda: requests.post('http://localhost:5000/trigger/diary'),
+    'cron', hour=20, minute=0
+)
+
+
+
+
+
 scheduler.start()
-print('Scheduler started ✅')
+print('Notification Scheduler started ')
+
+
+
+
+
+
+test_time = datetime.now() + timedelta(minutes=0.3)
+scheduler.add_job(
+    run_medication_reminders,
+    'date',
+    run_date=test_time,
+    id='test_immediate'
+)
+print(f'Test job fires at: {test_time}')
 
 if __name__ == "__main__":
     app.run(debug=True)
