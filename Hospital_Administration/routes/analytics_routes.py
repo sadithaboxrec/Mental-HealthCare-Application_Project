@@ -4,6 +4,10 @@ from services.diary_analysis_service import (
     analyze_all_patient_diaries,
     analyze_patient_diary,
 )
+from services.xai_analysis_service import (
+    analyze_all_patient_xai,
+    analyze_patient_xai,
+)
 
 
 analytics_routes = Blueprint("analytics_routes", __name__)
@@ -53,6 +57,38 @@ def recompute_diary_analysis(patient_uid):
     notify = bool(data.get("notify", False))
 
     summary = analyze_patient_diary(
+        patient_uid,
+        persist=True,
+        notify=notify,
+    )
+    return jsonify(summary), 200
+
+
+@analytics_routes.route("/analytics/xai", methods=["GET"])
+def all_xai_analysis_summaries():
+    summaries = analyze_all_patient_xai(
+        persist=False,
+        notify=False,
+    )
+    return jsonify(summaries), 200
+
+
+@analytics_routes.route("/analytics/xai/<patient_uid>", methods=["GET"])
+def xai_analysis_summary(patient_uid):
+    summary = analyze_patient_xai(
+        patient_uid,
+        persist=False,
+        notify=False,
+    )
+    return jsonify(summary), 200
+
+
+@analytics_routes.route("/analytics/xai/<patient_uid>/recompute", methods=["POST"])
+def recompute_xai_analysis(patient_uid):
+    data = request.json or {}
+    notify = bool(data.get("notify", False))
+
+    summary = analyze_patient_xai(
         patient_uid,
         persist=True,
         notify=notify,

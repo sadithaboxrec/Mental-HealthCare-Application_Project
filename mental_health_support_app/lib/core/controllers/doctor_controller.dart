@@ -48,9 +48,9 @@ class DoctorController {
       String patientUid, String from, String to) async =>
       await DoctorService.getDiaryEntries(patientUid, from, to);
 
-  static Future<Map<String, dynamic>?> getDiaryAnalysisSnapshot(
+  static Future<Map<String, dynamic>?> getXaiAnalysisSnapshot(
       String patientUid) async =>
-      await DoctorService.getDiaryAnalysisSnapshot(patientUid);
+      await DoctorService.getXaiAnalysisSnapshot(patientUid);
 
   static Future<List<Map<String, dynamic>>> getGuardianLogs(
       String patientUid, String from, String to) async =>

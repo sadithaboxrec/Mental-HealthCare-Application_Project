@@ -114,6 +114,7 @@ class PatientService {
         'updatedAt':       now,
       });
     }
+
   }
 
   //  Mark medication taken
@@ -141,6 +142,18 @@ class PatientService {
         'updatedAt':       now,
       });
     }
+
+    await _db.collection('medication_adherence_events').add({
+      'patientUid': patientUid,
+      'prescriptionId': null,
+      'medicineId': null,
+      'slot': 'daily',
+      'scheduledAt': now,
+      'status': taken ? 'taken' : 'missed',
+      'reportedBy': 'patient',
+      'reportedAt': now,
+      'guardianVerification': null,
+    });
   }
 
   // Save diary entry

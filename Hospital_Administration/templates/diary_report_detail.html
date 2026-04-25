@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <h1 style="margin:0;">XAI Detail</h1>
+    <a href="/diary-reports" class="btn btn-primary">All Reports</a>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="num">{{ summary.severity|upper }}</div>
+      <div class="lbl">Severity</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ summary.score }}</div>
+      <div class="lbl">Score</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ summary.confidence }}</div>
+      <div class="lbl">Confidence</div>
+    </div>
+  </div>
+
+  <h2>Primary Drivers</h2>
+  <table style="margin-bottom:20px;">
+    <thead><tr><th>Driver</th><th>Source</th><th>Evidence</th></tr></thead>
+    <tbody>
+      {% for driver in summary.primaryDrivers %}
+      <tr>
+        <td>{{ driver.displayName or driver.theme }}</td>
+        <td>{{ driver.vector }}</td>
+        <td>{{ driver.evidenceSnippet }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" style="text-align:center;color:#888;">No primary drivers</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Privacy-Gated Evidence</h2>
+  <table>
+    <thead><tr><th>Theme</th><th>Source</th><th>Evidence</th><th>Why It Matters</th></tr></thead>
+    <tbody>
+      {% for item in summary.evidence %}
+      <tr>
+        <td>{{ item.displayName or item.theme }}</td>
+        <td>{{ item.source }}</td>
+        <td>{{ item.excerpt }}</td>
+        <td>{{ item.whyItMatters }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" style="text-align:center;color:#888;">No evidence</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

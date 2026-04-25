@@ -178,7 +178,7 @@ class DoctorService {
     return allEntries;
   }
 
-  static Future<Map<String, dynamic>?> getDiaryAnalysisSnapshot(
+  static Future<Map<String, dynamic>?> getXaiAnalysisSnapshot(
       String patientUid) async {
     final directDoc = await _db
         .collection('analytics_snapshots')
@@ -187,7 +187,10 @@ class DoctorService {
 
     if (directDoc.exists) {
       final data = directDoc.data();
-      if (data != null && data['type'] == 'diary_analysis') {
+      if (data != null &&
+          (data['type'] == 'xai_analysis' ||
+              data['analysisType'] == 'xai_analysis_v1' ||
+              data['type'] == 'diary_analysis')) {
         return data;
       }
     }
@@ -195,12 +198,21 @@ class DoctorService {
     final snap = await _db
         .collection('analytics_snapshots')
         .where('patientUid', isEqualTo: patientUid)
+        .where('type', isEqualTo: 'xai_analysis')
+        .limit(1)
+        .get();
+
+    if (snap.docs.isNotEmpty) return snap.docs.first.data();
+
+    final legacySnap = await _db
+        .collection('analytics_snapshots')
+        .where('patientUid', isEqualTo: patientUid)
         .where('type', isEqualTo: 'diary_analysis')
         .limit(1)
         .get();
 
-    if (snap.docs.isEmpty) return null;
-    return snap.docs.first.data();
+    if (legacySnap.docs.isEmpty) return null;
+    return legacySnap.docs.first.data();
   }
 
   //  Get guardian logs between dates

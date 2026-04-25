@@ -56,7 +56,7 @@ class _PatientHomeState extends State<PatientHome> {
           _todayLog = results[0] as DailyLog?;
           _prescription = results[1] as Prescription?;
           if (_todayLog != null) {
-            _moodSlider = _todayLog!.mood > 0 ? _todayLog!.mood : 3;
+            _moodSlider = _todayLog!.mood > 0 ? _todayLog!.mood.clamp(1, 5) : 3;
             _selectedSleep = _todayLog!.sleepHours;
             _localWaterCount = _todayLog!.waterIntake;
             _localMedTaken = _todayLog!.medicationTaken;

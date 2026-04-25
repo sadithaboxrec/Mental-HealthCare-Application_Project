@@ -84,6 +84,7 @@ scheduler.add_job(
 
 
 scheduler.start()
+<<<<<<< Updated upstream
 print('Notification Scheduler started ')
 
 
@@ -99,6 +100,9 @@ scheduler.add_job(
     id='test_immediate'
 )
 print(f'Test job fires at: {test_time}')
+=======
+print("Scheduler started")
+>>>>>>> Stashed changes
 
 if __name__ == "__main__":
     app.run(debug=True)

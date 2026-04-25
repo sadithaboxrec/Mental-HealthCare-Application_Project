@@ -4,6 +4,7 @@ import 'core/controllers/notification_controller.dart';
 import 'firebase_options.dart';
 import 'core/controllers/auth_controller.dart';
 import 'core/navigation/navigation_helper.dart';
+import 'core/services/phenotyping_service.dart';
 import 'test_presentation/screens/test_login_screen.dart';
 
 void main() async {
@@ -16,8 +17,38 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _collectResumeSignals();
+    }
+  }
+
+  Future<void> _collectResumeSignals() async {
+    final user = await AuthController.restoreSession();
+    if (user == null) return;
+    await PhenotypingService.collectStartupSignals(user);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +79,7 @@ class _AppStartupState extends State<AppStartup> {
     if (!mounted) return;
 
     if (user != null) {
+      Future<void>.microtask(() => PhenotypingService.collectStartupSignals(user));
       NavigationHelper.goToRoleScreen(context, user);
     } else {
       NavigationHelper.goToLogin(context);
