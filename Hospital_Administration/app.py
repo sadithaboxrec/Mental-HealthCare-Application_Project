@@ -79,30 +79,8 @@ scheduler.add_job(
     'cron', hour=20, minute=0
 )
 
-
-
-
-
 scheduler.start()
-<<<<<<< Updated upstream
-print('Notification Scheduler started ')
-
-
-
-
-
-
-test_time = datetime.now() + timedelta(minutes=0.3)
-scheduler.add_job(
-    run_medication_reminders,
-    'date',
-    run_date=test_time,
-    id='test_immediate'
-)
-print(f'Test job fires at: {test_time}')
-=======
 print("Scheduler started")
->>>>>>> Stashed changes
 
 if __name__ == "__main__":
     app.run(debug=True)
