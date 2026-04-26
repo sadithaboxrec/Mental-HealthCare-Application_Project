@@ -187,21 +187,89 @@ class _DoctorHomeState extends State<DoctorHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.transparent,
+      //   elevation: 0,
+      //   automaticallyImplyLeading: false,
+      //   title: const Text(""),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.logout, color: Colors.black),
+      //       onPressed: () async {
+      //         await AuthController.logout();
+      //         if (context.mounted) NavigationHelper.goToLogin(context);
+      //       },
+      //     )
+      //   ],
+      // ),
+
+
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
-        title: const Text(""),
+        title: Row(
+          children: [
+            // Actual Image Logo
+            Container(
+              height: 36,
+              width: 36,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/logo.png'), // Path to your logo
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              "MindCare",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.8,
+              ),
+            ),
+          ],
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.black),
-            onPressed: () async {
-              await AuthController.logout();
-              if (context.mounted) NavigationHelper.goToLogin(context);
-            },
-          )
+          // Modernized Logout Button
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100, // Subtle background
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.logout_rounded, color: Colors.black87, size: 22),
+              onPressed: () async {
+                // Add a simple confirmation dialog for a better UX
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Logout'),
+                    content: const Text('Are you sure you want to exit?'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                      TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Logout')),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true) {
+                  await AuthController.logout();
+                  if (context.mounted) NavigationHelper.goToLogin(context);
+                }
+              },
+            ),
+          ),
         ],
       ),
+
+
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -211,16 +279,100 @@ class _DoctorHomeState extends State<DoctorHome> {
                 children: [
  
                   // ── Header ───────────────────────────
-                  Text("hey ! Dr.",
-                      style: TextStyle(fontSize: 20, color: const Color.fromARGB(255, 17, 17, 17))),
-                  Text(widget.user.name,
-                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
-                  const Text(
-                    "Your sanctuary for patient care and data insights.",
-                    style: TextStyle(color: Colors.grey),
+                  // Text("hello !",
+                  //     style: TextStyle(fontSize: 20, color: const Color.fromARGB(255, 17, 17, 17))),
+                  // Text(widget.user.name,
+                  //     style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  // const SizedBox(height: 6),
+                  // const Text(
+                  //   "MindCare , Helping those who in need .",
+                  //   style: TextStyle(color: Colors.grey),
+                  // ),
+                  // const SizedBox(height: 20),
+
+
+                  // ── Header ───────────────────────────
+// ── Updated Header Row ───────────────────────────
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                style: const TextStyle(fontSize: 26, color: Colors.black, letterSpacing: -0.5),
+                                children: [
+                                  const TextSpan(
+                                    text: "Hello, ",
+                                    style: TextStyle(fontWeight: FontWeight.w300, color: Colors.black54),
+                                  ),
+                                  TextSpan(
+                                    text: widget.user.name,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              "MindCare, helping those in need.",
+                              style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w400),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Modern Profile Avatar with Doctor Badge
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(2), // White border effect
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF5BB8F5).withOpacity(0.2),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                )
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              radius: 28,
+                              backgroundColor: const Color(0xFF5BB8F5).withOpacity(0.1),
+                              child: Text(
+                                widget.user.name[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: Color(0xFF5BB8F5),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Small Doctor Badge
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF5BB8F5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.medical_services_rounded,
+                              size: 12,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
+
  
                   // ── Emergency card (TAPPABLE) ─────────
                   GestureDetector(

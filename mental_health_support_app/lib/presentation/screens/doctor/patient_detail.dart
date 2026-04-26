@@ -864,8 +864,33 @@ class _PatientDetailState extends State<PatientDetail> {
     }
   }
 
-  void _snack(String msg) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  // void _snack(String msg) =>
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
+
+  //////////////////////////////////////////
+  // // update 26 april by saditha/////////
+  /////////////////////////////////////////
+
+  void _snack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(msg, style: const TextStyle(fontWeight: FontWeight.w500)),
+          ],
+        ),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: _kBlue,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -977,55 +1002,94 @@ class _PatientDetailState extends State<PatientDetail> {
             const SizedBox(height: 24),
             _sectionHeader('Next Appointment'),
             const SizedBox(height: 12),
+            // _card(
+            //   child: Row(
+            //     children: [
+            //       Expanded(
+            //         child: GestureDetector(
+            //           onTap: _pickDate,
+            //           child: Container(
+            //             padding: const EdgeInsets.all(14),
+            //             decoration: BoxDecoration(
+            //               border: Border.all(color: _kBorder),
+            //               borderRadius: BorderRadius.circular(12),
+            //             ),
+            //             child: Text(
+            //               _nextApptDate.isEmpty
+            //                   ? 'Select Date'
+            //                   : _nextApptDate,
+            //               style: TextStyle(
+            //                 color: _nextApptDate.isEmpty
+            //                     ? Colors.grey
+            //                     : Colors.black87,
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //       ),
+            //       const SizedBox(width: 12),
+            //       GestureDetector(
+            //         onTap: () async {
+            //           final time = await showTimePicker(
+            //             context: context,
+            //             initialTime: TimeOfDay.now(),
+            //           );
+            //           if (time != null && mounted) {
+            //             setState(() => _nextApptTime =
+            //             '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}');
+            //           }
+            //         },
+            //         child: Container(
+            //           padding: const EdgeInsets.all(14),
+            //           decoration: BoxDecoration(
+            //             border: Border.all(color: _kBorder),
+            //             borderRadius: BorderRadius.circular(12),
+            //           ),
+            //           child: Text(_nextApptTime),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+
+
             _card(
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _pickDate,
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: _kBorder),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          _nextApptDate.isEmpty
-                              ? 'Select Date'
-                              : _nextApptDate,
-                          style: TextStyle(
-                            color: _nextApptDate.isEmpty
-                                ? Colors.grey
-                                : Colors.black87,
-                          ),
-                        ),
-                      ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: _kLightBlue, borderRadius: BorderRadius.circular(12)),
+                      child: const Icon(Icons.calendar_today_rounded, color: _kBlue),
                     ),
+                    title: const Text('Appointment Date', style: TextStyle(fontSize: 14, color: Colors.black54)),
+                    subtitle: Text(_nextApptDate.isEmpty ? 'Tap to set date' : _nextApptDate,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    onTap: _pickDate,
+                    trailing: const Icon(Icons.chevron_right),
                   ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () async {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (time != null && mounted) {
-                        setState(() => _nextApptTime =
-                        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}');
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: _kBorder),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(_nextApptTime),
+                  const Divider(height: 24),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: _kLightBlue, borderRadius: BorderRadius.circular(12)),
+                      child: const Icon(Icons.access_time_rounded, color: _kBlue),
                     ),
+                    title: const Text('Preferred Time', style: TextStyle(fontSize: 14, color: Colors.black54)),
+                    subtitle: Text(_nextApptTime,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    onTap: () async {
+                      final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+                      if (time != null) setState(() => _nextApptTime = time.format(context));
+                    },
+                    trailing: const Icon(Icons.chevron_right),
                   ),
                 ],
               ),
             ),
+
 
             const SizedBox(height: 32),
 
@@ -1130,168 +1194,341 @@ class _PatientDetailState extends State<PatientDetail> {
   );
 
   // ── Medicine card ─────────────────────────────────────
+  // Widget _medCard(int index, _MedEntry entry) {
+  //   return Container(
+  //     margin: const EdgeInsets.only(bottom: 12),
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: _kCard,
+  //       borderRadius: BorderRadius.circular(16),
+  //       border: Border.all(color: _kBorder),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //
+  //         // ── Dropdown + delete ───────────────────
+  //         Row(
+  //           children: [
+  //             const Icon(Icons.medication, color: _kBlue, size: 26),
+  //             const SizedBox(width: 12),
+  //             Expanded(
+  //               child: DropdownButtonFormField<String>(
+  //                 value: entry.selected,
+  //                 hint: const Text('Select Medicine'),
+  //                 items: _medOptions
+  //                     .map((name) => DropdownMenuItem(
+  //                     value: name, child: Text(name)))
+  //                     .toList(),
+  //                 onChanged: (val) =>
+  //                     setState(() => entry.selected = val),
+  //                 decoration:
+  //                 const InputDecoration(border: InputBorder.none),
+  //               ),
+  //             ),
+  //             IconButton(
+  //               icon: const Icon(Icons.delete_outline,
+  //                   color: Colors.red, size: 24),
+  //               onPressed: () {
+  //                 if (_medicines.length > 1) {
+  //                   setState(() => _medicines.removeAt(index));
+  //                 } else {
+  //                   _snack('At least one medicine is required');
+  //                 }
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //
+  //         const Divider(height: 20),
+  //
+  //         // ── Tablet count ────────────────────────
+  //         Row(
+  //           children: [
+  //             const Icon(Icons.medication_liquid_outlined,
+  //                 size: 18, color: Colors.grey),
+  //             const SizedBox(width: 8),
+  //             const Text('No. of Tablets',
+  //                 style: TextStyle(fontSize: 13)),
+  //             const Spacer(),
+  //             _countBtn(
+  //               icon: Icons.remove,
+  //               onTap: () => setState(() {
+  //                 final v =
+  //                     int.tryParse(entry.tabletCtrl.text) ?? 1;
+  //                 if (v > 1) entry.tabletCtrl.text = '${v - 1}';
+  //               }),
+  //             ),
+  //             const SizedBox(width: 10),
+  //             SizedBox(
+  //               width: 44,
+  //               child: TextField(
+  //                 controller: entry.tabletCtrl,
+  //                 keyboardType: TextInputType.number,
+  //                 textAlign: TextAlign.center,
+  //                 style: const TextStyle(
+  //                     fontSize: 15, fontWeight: FontWeight.bold),
+  //                 decoration: InputDecoration(
+  //                   isDense: true,
+  //                   contentPadding:
+  //                   const EdgeInsets.symmetric(vertical: 8),
+  //                   border: OutlineInputBorder(
+  //                     borderRadius: BorderRadius.circular(8),
+  //                     borderSide:
+  //                     const BorderSide(color: _kBorder),
+  //                   ),
+  //                   focusedBorder: OutlineInputBorder(
+  //                     borderRadius: BorderRadius.circular(8),
+  //                     borderSide:
+  //                     const BorderSide(color: _kBlue),
+  //                   ),
+  //                 ),
+  //                 onChanged: (_) => setState(() {}),
+  //               ),
+  //             ),
+  //             const SizedBox(width: 10),
+  //             _countBtn(
+  //               icon: Icons.add,
+  //               onTap: () => setState(() {
+  //                 final v =
+  //                     int.tryParse(entry.tabletCtrl.text) ?? 1;
+  //                 entry.tabletCtrl.text = '${v + 1}';
+  //               }),
+  //             ),
+  //           ],
+  //         ),
+  //
+  //         const SizedBox(height: 14),
+  //
+  //         // ── Meal timing ─────────────────────────
+  //         Row(
+  //           children: [
+  //             const Icon(Icons.restaurant_outlined,
+  //                 size: 18, color: Colors.grey),
+  //             const SizedBox(width: 8),
+  //             const Text('Meal Timing',
+  //                 style: TextStyle(fontSize: 13)),
+  //             const Spacer(),
+  //             _mealChip(
+  //               label: 'Before Meal',
+  //               selected: entry.beforeMeal,
+  //               onTap: () => setState(() {
+  //                 entry.beforeMeal = true;
+  //                 entry.afterMeal  = false;
+  //               }),
+  //             ),
+  //             const SizedBox(width: 8),
+  //             _mealChip(
+  //               label: 'After Meal',
+  //               selected: entry.afterMeal,
+  //               onTap: () => setState(() {
+  //                 entry.afterMeal  = true;
+  //                 entry.beforeMeal = false;
+  //               }),
+  //             ),
+  //           ],
+  //         ),
+  //
+  //         const SizedBox(height: 14),
+  //
+  //         // ── Time of day ─────────────────────────
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //           children: [
+  //             _timeChip(
+  //                 emoji: '🌅',
+  //                 label: 'Morning',
+  //                 selected: entry.morning,
+  //                 onTap: () => setState(
+  //                         () => entry.morning = !entry.morning)),
+  //             _timeChip(
+  //                 emoji: '☀️',
+  //                 label: 'Afternoon',
+  //                 selected: entry.afternoon,
+  //                 onTap: () => setState(
+  //                         () => entry.afternoon = !entry.afternoon)),
+  //             _timeChip(
+  //                 emoji: '🌙',
+  //                 label: 'Night',
+  //                 selected: entry.night,
+  //                 onTap: () =>
+  //                     setState(() => entry.night = !entry.night)),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+
+
+
+  // ── Modernized Medicine card ─────────────────────────────────────
   Widget _medCard(int index, _MedEntry entry) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: _kCard,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          // ── Dropdown + delete ───────────────────
-          Row(
-            children: [
-              const Icon(Icons.medication, color: _kBlue, size: 26),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: entry.selected,
-                  hint: const Text('Select Medicine'),
-                  items: _medOptions
-                      .map((name) => DropdownMenuItem(
-                      value: name, child: Text(name)))
-                      .toList(),
-                  onChanged: (val) =>
-                      setState(() => entry.selected = val),
-                  decoration:
-                  const InputDecoration(border: InputBorder.none),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline,
-                    color: Colors.red, size: 24),
-                onPressed: () {
-                  if (_medicines.length > 1) {
-                    setState(() => _medicines.removeAt(index));
-                  } else {
-                    _snack('At least one medicine is required');
-                  }
-                },
-              ),
-            ],
-          ),
-
-          const Divider(height: 20),
-
-          // ── Tablet count ────────────────────────
-          Row(
-            children: [
-              const Icon(Icons.medication_liquid_outlined,
-                  size: 18, color: Colors.grey),
-              const SizedBox(width: 8),
-              const Text('No. of Tablets',
-                  style: TextStyle(fontSize: 13)),
-              const Spacer(),
-              _countBtn(
-                icon: Icons.remove,
-                onTap: () => setState(() {
-                  final v =
-                      int.tryParse(entry.tabletCtrl.text) ?? 1;
-                  if (v > 1) entry.tabletCtrl.text = '${v - 1}';
-                }),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 44,
-                child: TextField(
-                  controller: entry.tabletCtrl,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    contentPadding:
-                    const EdgeInsets.symmetric(vertical: 8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide:
-                      const BorderSide(color: _kBorder),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide:
-                      const BorderSide(color: _kBlue),
-                    ),
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
-              ),
-              const SizedBox(width: 10),
-              _countBtn(
-                icon: Icons.add,
-                onTap: () => setState(() {
-                  final v =
-                      int.tryParse(entry.tabletCtrl.text) ?? 1;
-                  entry.tabletCtrl.text = '${v + 1}';
-                }),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          // ── Meal timing ─────────────────────────
-          Row(
-            children: [
-              const Icon(Icons.restaurant_outlined,
-                  size: 18, color: Colors.grey),
-              const SizedBox(width: 8),
-              const Text('Meal Timing',
-                  style: TextStyle(fontSize: 13)),
-              const Spacer(),
-              _mealChip(
-                label: 'Before Meal',
-                selected: entry.beforeMeal,
-                onTap: () => setState(() {
-                  entry.beforeMeal = true;
-                  entry.afterMeal  = false;
-                }),
-              ),
-              const SizedBox(width: 8),
-              _mealChip(
-                label: 'After Meal',
-                selected: entry.afterMeal,
-                onTap: () => setState(() {
-                  entry.afterMeal  = true;
-                  entry.beforeMeal = false;
-                }),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          // ── Time of day ─────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _timeChip(
-                  emoji: '🌅',
-                  label: 'Morning',
-                  selected: entry.morning,
-                  onTap: () => setState(
-                          () => entry.morning = !entry.morning)),
-              _timeChip(
-                  emoji: '☀️',
-                  label: 'Afternoon',
-                  selected: entry.afternoon,
-                  onTap: () => setState(
-                          () => entry.afternoon = !entry.afternoon)),
-              _timeChip(
-                  emoji: '🌙',
-                  label: 'Night',
-                  selected: entry.night,
-                  onTap: () =>
-                      setState(() => entry.night = !entry.night)),
-            ],
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Column(
+          children: [
+            // Header Section
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              color: _kBlue.withOpacity(0.08),
+              child: Row(
+                children: [
+                  const Icon(Icons.medication_rounded, color: _kBlue, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButtonFormField<String>(
+                        value: entry.selected,
+                        isExpanded: true,
+                        hint: const Text('Select Medicine',
+                            style: TextStyle(fontSize: 14, color: Colors.black54)),
+                        items: _medOptions
+                            .map((name) => DropdownMenuItem(
+                            value: name, child: Text(name)))
+                            .toList(),
+                        onChanged: (val) => setState(() => entry.selected = val),
+                        decoration: const InputDecoration(border: InputBorder.none),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent),
+                    onPressed: () {
+                      if (_medicines.length > 1) {
+                        setState(() => _medicines.removeAt(index));
+                      } else {
+                        _snack('At least one medicine is required');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // Dosage / Tablet Count
+                  Row(
+                    children: [
+                      const Icon(Icons.numbers_rounded, size: 18, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      const Text('Dosage', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const Spacer(),
+                      _countBtn(
+                        icon: Icons.remove,
+                        onTap: () => setState(() {
+                          final v = int.tryParse(entry.tabletCtrl.text) ?? 1;
+                          if (v > 1) entry.tabletCtrl.text = '${v - 1}';
+                        }),
+                      ),
+                      Container(
+                        width: 50,
+                        alignment: Alignment.center,
+                        child: Text(
+                          entry.tabletCtrl.text,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      _countBtn(
+                        icon: Icons.add,
+                        onTap: () => setState(() {
+                          final v = int.tryParse(entry.tabletCtrl.text) ?? 1;
+                          entry.tabletCtrl.text = '${v + 1}';
+                        }),
+                      ),
+                    ],
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: _kBorder),
+                  ),
+
+                  // Meal Timing (THE OVERFLOW FIX: Using Wrap)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.restaurant_outlined, size: 18, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Text('Meal Timing', style: TextStyle(fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _mealChip(
+                            label: 'Before',
+                            selected: entry.beforeMeal,
+                            onTap: () => setState(() {
+                              entry.beforeMeal = true;
+                              entry.afterMeal = false;
+                            }),
+                          ),
+                          const SizedBox(width: 8),
+                          _mealChip(
+                            label: 'After',
+                            selected: entry.afterMeal,
+                            onTap: () => setState(() {
+                              entry.afterMeal = true;
+                              entry.beforeMeal = false;
+                            }),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Time of Day
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _timeChip(
+                          emoji: '🌅',
+                          label: 'Morning',
+                          selected: entry.morning,
+                          onTap: () => setState(() => entry.morning = !entry.morning)),
+                      _timeChip(
+                          emoji: '☀️',
+                          label: 'Noon',
+                          selected: entry.afternoon,
+                          onTap: () => setState(() => entry.afternoon = !entry.afternoon)),
+                      _timeChip(
+                          emoji: '🌙',
+                          label: 'Night',
+                          selected: entry.night,
+                          onTap: () => setState(() => entry.night = !entry.night)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
