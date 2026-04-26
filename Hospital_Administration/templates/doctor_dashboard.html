@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div>
+      <h1 style="margin-bottom:4px;">Doctor Dashboard</h1>
+      <div style="color:#666; font-size:13px;">{{ doctor.name }} | {{ doctor.email }}</div>
+    </div>
+    <a href="/doctor-dashboard" class="btn btn-primary">All Doctors</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Patient</th>
+        <th>Email</th>
+        <th>Severity</th>
+        <th>Score</th>
+        <th>Confidence</th>
+        <th>Open Alerts</th>
+        <th>Top Drivers</th>
+        <th>Report</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for patient in patients %}
+      <tr>
+        <td>{{ patient.name }}</td>
+        <td>{{ patient.email }}</td>
+        <td><span class="badge badge-{{ patient.severity }}">{{ patient.severity|upper }}</span></td>
+        <td>{{ patient.score }}</td>
+        <td>{{ patient.confidence }}</td>
+        <td>{{ patient.openAlertCount }}</td>
+        <td>
+          {% for driver in patient.primaryDrivers %}
+            <div>{{ driver.displayName or driver.theme }}</div>
+          {% else %}
+            <span style="color:#888;">No drivers</span>
+          {% endfor %}
+        </td>
+        <td>
+          <a class="btn btn-primary" href="/doctor-dashboard/{{ doctor.uid }}/patients/{{ patient.uid }}/report">Open</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" style="text-align:center;color:#888;">No assigned patients</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

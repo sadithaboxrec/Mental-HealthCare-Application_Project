@@ -215,6 +215,21 @@ class GuardianService {
         'updatedAt':      now,
       });
     }
+
+    await _db.collection('medication_adherence_events').add({
+      'patientUid':      patientUid,
+      'prescriptionId':  null,
+      'medicineId':      null,
+      'slot':            'daily',
+      'scheduledAt':     now,
+      'status':          taken ? 'verified_taken' : 'missed',
+      'reportedBy':      'guardian',
+      'reportedAt':      now,
+      'guardianVerification': {
+        'guardianUid': guardianUid,
+        'medicationTaken': taken,
+      },
+    });
   }
 
 

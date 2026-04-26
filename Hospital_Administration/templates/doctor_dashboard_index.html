@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Doctor Dashboards</h1>
+  <p style="color:#666; margin-bottom:16px;">Select a doctor to review assigned patient XAI status and reports.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Specialization</th>
+        <th>Dashboard</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for doctor in doctors %}
+      <tr>
+        <td>{{ doctor.name }}</td>
+        <td>{{ doctor.email }}</td>
+        <td>{{ doctor.specialization }}</td>
+        <td><a class="btn btn-primary" href="/doctor-dashboard/{{ doctor.uid }}">Open</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" style="text-align:center;color:#888;">No doctors found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
