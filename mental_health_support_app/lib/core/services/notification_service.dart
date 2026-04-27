@@ -7,33 +7,29 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
   await NotificationService.show(
     title: message.notification?.title ?? 'Health Alert',
-    body:  message.notification?.body  ?? '',
-    type:  message.data['type']        ?? 'general',
+    body: message.notification?.body ?? '',
+    type: message.data['type'] ?? 'general',
   );
 }
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   static final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   static bool _initialized = false;
 
-  static const String _channelId   = 'health_alerts';
+  static const String _channelId = 'health_alerts';
   static const String _channelName = 'Health Alerts';
 
   static Future<void> init() async {
     if (_initialized) return;
 
     // 1. Request FCM permission
-    await _fcm.requestPermission(
-      alert: true,
-      sound: true,
-      badge: true,
-    );
+    await _fcm.requestPermission(alert: true, sound: true, badge: true);
 
     // 2. Initialize local notifications
     const AndroidInitializationSettings androidSettings =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     await _plugin.initialize(
       const InitializationSettings(android: androidSettings),
@@ -46,15 +42,17 @@ class NotificationService {
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       _channelId,
       _channelName,
-      description:     'Medication and appointment reminders',
-      importance:      Importance.max,
-      playSound:       true,
-      sound:           RawResourceAndroidNotificationSound('alarm_sound'),
+      description: 'Medication and appointment reminders',
+      importance: Importance.max,
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound('alarm_sound'),
       enableVibration: true,
     );
 
-    final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
-        _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final AndroidFlutterLocalNotificationsPlugin? androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
 
     await androidPlugin?.createNotificationChannel(channel);
 
@@ -62,8 +60,8 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage msg) {
       show(
         title: msg.notification?.title ?? 'Health Alert',
-        body:  msg.notification?.body  ?? '',
-        type:  msg.data['type']        ?? 'general',
+        body: msg.notification?.body ?? '',
+        type: msg.data['type'] ?? 'general',
       );
     });
 
@@ -107,11 +105,9 @@ class NotificationService {
   //   );
   // }
 
-
-                ///////////////////////
-              //  updated below      //
-              //////////////////////////
-
+  ///////////////////////
+  //  updated below      //
+  //////////////////////////
 
   //
   // static Future<void> saveToken(String uid) async {
@@ -134,10 +130,6 @@ class NotificationService {
   //   }
   // }
 
-
-
-
-
   static Future<void> saveToken(String uid) async {
     try {
       debugPrint('=== saveToken called for uid: $uid ===');
@@ -149,61 +141,48 @@ class NotificationService {
         return;
       }
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .update({'fcmToken': token});
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'fcmToken': token,
+      });
 
       debugPrint('=== FCM token saved to Firestore  ===');
 
       _fcm.onTokenRefresh.listen((String t) {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .update({'fcmToken': t});
+        FirebaseFirestore.instance.collection('users').doc(uid).update({
+          'fcmToken': t,
+        });
       });
     } catch (e) {
       debugPrint('=== Token error: $e ===');
     }
   }
 
-
-
-
-
-
-
-
- // When a notification is shown locally, also save it to Firestore.
-
-
-
+  // When a notification is shown locally, also save it to Firestore.
 
   static Future<void> show({
     required String title,
     required String body,
-    String type  = 'general',
-    String? uid,               // ← add this optional param
+    String type = 'general',
+    String? uid, // ← add this optional param
   }) async {
-    final bool isAlarm =
-        type == 'medication' || type == 'appointment';
+    final bool isAlarm = type == 'medication' || type == 'appointment';
 
     final AndroidNotificationDetails androidDetails =
-    AndroidNotificationDetails(
-      _channelId,
-      _channelName,
-      importance:       Importance.max,
-      priority:         Priority.high,
-      playSound:        true,
-      sound:            isAlarm
-          ? const RawResourceAndroidNotificationSound('alarm_sound')
-          : null,
-      enableVibration:  isAlarm,
-      fullScreenIntent: isAlarm,
-      autoCancel:       true,
-      timeoutAfter:     10000,
-      styleInformation: BigTextStyleInformation(body),
-    );
+        AndroidNotificationDetails(
+          _channelId,
+          _channelName,
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          sound: isAlarm
+              ? const RawResourceAndroidNotificationSound('alarm_sound')
+              : null,
+          enableVibration: isAlarm,
+          fullScreenIntent: isAlarm,
+          autoCancel: true,
+          timeoutAfter: 10000,
+          styleInformation: BigTextStyleInformation(body),
+        );
 
     await _plugin.show(
       DateTime.now().millisecondsSinceEpoch ~/ 1000 % 100000,
@@ -215,14 +194,12 @@ class NotificationService {
     // Save to Firestore inbox if uid provided
     if (uid != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('notifications')
-            .add({
-          'uid':       uid,
-          'title':     title,
-          'body':      body,
-          'type':      type,
-          'isRead':    false,
+        await FirebaseFirestore.instance.collection('notifications').add({
+          'uid': uid,
+          'title': title,
+          'body': body,
+          'type': type,
+          'isRead': false,
           'createdAt': DateTime.now().toIso8601String(),
         });
       } catch (e) {
@@ -230,9 +207,4 @@ class NotificationService {
       }
     }
   }
-
-
-
-
 }
-

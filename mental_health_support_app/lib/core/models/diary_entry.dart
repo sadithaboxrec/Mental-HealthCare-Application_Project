@@ -16,12 +16,12 @@ class DiaryEntry {
   });
 
   factory DiaryEntry.fromMap(String id, Map<String, dynamic> m) => DiaryEntry(
-        id: id,
-        patientUid: (m['patientUid'] ?? m['uid'] ?? '').toString(),
-        content: _readContent(m),
-        createdAt: _normalizeDate(m['createdAt']),
-        updatedAt: _normalizeNullableDate(m['updatedAt']),
-      );
+    id: id,
+    patientUid: (m['patientUid'] ?? m['uid'] ?? '').toString(),
+    content: _readContent(m),
+    createdAt: _normalizeDate(m['createdAt']),
+    updatedAt: _normalizeNullableDate(m['updatedAt']),
+  );
 
   DateTime? get createdAtDate => _parseDate(createdAt);
 
@@ -51,17 +51,15 @@ class DiaryEntry {
     if (updated != null && created != null) {
       return updated.isAfter(created);
     }
-    return updatedAt != null &&
-        updatedAt!.isNotEmpty &&
-        updatedAt != createdAt;
+    return updatedAt != null && updatedAt!.isNotEmpty && updatedAt != createdAt;
   }
 
   Map<String, dynamic> toMap() => {
-        'patientUid': patientUid,
-        'content': content,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-      };
+    'patientUid': patientUid,
+    'content': content,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+  };
 
   static String _readContent(Map<String, dynamic> m) {
     const fallbackFields = ['content', 'entry', 'entryText', 'text', 'body'];
@@ -91,15 +89,18 @@ class DiaryEntry {
     }
 
     if (value is int) {
-      return DateTime.fromMillisecondsSinceEpoch(value, isUtc: true)
-          .toIso8601String();
+      return DateTime.fromMillisecondsSinceEpoch(
+        value,
+        isUtc: true,
+      ).toIso8601String();
     }
 
     if (value is Map) {
       final seconds = value['_seconds'] ?? value['seconds'];
       if (seconds is int) {
         final nanoseconds = value['_nanoseconds'] ?? value['nanoseconds'] ?? 0;
-        final milliseconds = (seconds * 1000) + ((nanoseconds as int) ~/ 1000000);
+        final milliseconds =
+            (seconds * 1000) + ((nanoseconds as int) ~/ 1000000);
         return DateTime.fromMillisecondsSinceEpoch(
           milliseconds,
           isUtc: true,

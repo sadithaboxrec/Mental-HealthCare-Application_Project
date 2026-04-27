@@ -4,7 +4,7 @@ class AppNotification {
   final String title;
   final String body;
   final String type;
-  final bool   isRead;
+  final bool isRead;
   final String createdAt;
 
   const AppNotification({
@@ -19,21 +19,21 @@ class AppNotification {
 
   factory AppNotification.fromMap(String id, Map<String, dynamic> m) =>
       AppNotification(
-        id:        id,
-        uid:       m['uid']       ?? '',
-        title:     m['title']     ?? '',
-        body:      m['body']      ?? '',
-        type:      m['type']      ?? 'general',
-        isRead:    m['isRead']    ?? false,
+        id: id,
+        uid: m['uid'] ?? '',
+        title: m['title'] ?? '',
+        body: m['body'] ?? '',
+        type: m['type'] ?? 'general',
+        isRead: m['isRead'] ?? false,
         createdAt: m['createdAt'] ?? '',
       );
 
   Map<String, dynamic> toMap() => {
-    'uid':       uid,
-    'title':     title,
-    'body':      body,
-    'type':      type,
-    'isRead':    isRead,
+    'uid': uid,
+    'title': title,
+    'body': body,
+    'type': type,
+    'isRead': isRead,
     'createdAt': createdAt,
   };
 }

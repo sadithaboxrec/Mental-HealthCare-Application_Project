@@ -71,7 +71,7 @@ class ClinicalReport {
       moodTrend: m['moodTrend'] as List<dynamic>? ?? [],
       adherenceSummary: m['adherenceSummary'] as Map<String, dynamic>? ?? {},
       appointmentSummary:
-      m['appointmentSummary'] as Map<String, dynamic>? ?? {},
+          m['appointmentSummary'] as Map<String, dynamic>? ?? {},
       topDrivers: m['topDrivers'] as List<dynamic>? ?? [],
       themeCounts: m['themeCounts'] as Map<String, dynamic>? ?? {},
       sourceBreakdown: m['sourceBreakdown'] as Map<String, dynamic>? ?? {},

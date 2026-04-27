@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/app_user.dart';
 
 import '../../test_presentation/screens/test_login_screen.dart';
-import '../../test_presentation/screens/test_doctor_screen.dart';
 // import '../../test_presentation/screens/test_patient_screen.dart';
 //  import '../../test_presentation/screens/test_counselor_screen.dart';
 //import '../../test_presentation/screens/counselor/test_counselor_screen.dart';
@@ -10,9 +9,7 @@ import '../../test_presentation/screens/test_doctor_screen.dart';
 // import '../../presentation/screens/login_screen.dart';
 // import '../../test_presentation/screens/doctor/test_doctor_home.dart';
 // import '../../test_presentation/screens/patient/test_patient_home.dart';
- import '../../test_presentation/screens/guardian/test_guardian_home.dart';
 //import '../../test_presentation/screens/doctor/test_doctor_root.dart';
-import '../../test_presentation/screens/patient/test_patient_root.dart';
 
 // presentation
 // import '../../presentation/screens/counselor/counselor_home.dart';
@@ -21,20 +18,16 @@ import '../../presentation/screens/counselor/counselor_screen.dart';
 import '../../presentation/screens/patient/patient_root.dart';
 import '../../presentation/screens/doctor/doctor_root.dart';
 
-
-
-
 // Decides where to go after login
 // Maps roles  screens
 class NavigationHelper {
-
   //  Navigate based on role
   static void goToRoleScreen(BuildContext context, AppUser user) {
     final screen = _screenForRole(user);
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => screen),
-          (_) => false,
+      (_) => false,
     );
   }
 
@@ -43,7 +36,7 @@ class NavigationHelper {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const TestLoginScreen()),
-          (_) => false,
+      (_) => false,
     );
   }
 
@@ -71,18 +64,16 @@ class NavigationHelper {
         return DoctorRoot(user: user);
       case 'patient':
         // return TestPatientHome(user: user);
-  //    return TestPatientRoot(user: user);
-     return PatientRoot(user: user);
+        //    return TestPatientRoot(user: user);
+        return PatientRoot(user: user);
       case 'guardian':
-       //  return TestGuardianHome(user: user);
+        //  return TestGuardianHome(user: user);
         return GuardianHome(user: user);
       case 'counselor':
-      //  return TestCounselorScreen(user: user);
+        //  return TestCounselorScreen(user: user);
         return CounselorScreen(user: user);
       default:
         return const TestLoginScreen();
     }
-
-
   }
 }
