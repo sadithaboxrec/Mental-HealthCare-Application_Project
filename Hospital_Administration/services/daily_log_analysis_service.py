@@ -24,7 +24,7 @@ def analyze_mood_signals(daily_logs):
         signals.append(scorer.signal_item(
             "low_mood",
             "Low mood rating",
-            2,
+            scorer.get_behavioral_weight("low_mood"),
             "mood",
             timestamp=timestamp,
             snippet="Recent mood rating was in the low range.",
@@ -34,7 +34,7 @@ def analyze_mood_signals(daily_logs):
         signals.append(scorer.signal_item(
             "mood_drop",
             "Mood drop from baseline",
-            2,
+            scorer.get_behavioral_weight("mood_drop"),
             "mood",
             timestamp=timestamp,
             snippet="Mood rating dropped significantly compared with the recent baseline.",
@@ -53,7 +53,7 @@ def analyze_sleep_signals(daily_logs):
         signals.append(scorer.signal_item(
             "sleep_disruption_metric",
             "Sleep disruption metric",
-            2,
+            scorer.get_behavioral_weight("sleep_disruption_metric"),
             "sleep",
             timestamp=recent_logs[-1].get("updatedAt") or recent_logs[-1].get("date", "") if recent_logs else "",
             snippet="Sleep duration was repeatedly low in recent logs.",
@@ -72,7 +72,7 @@ def analyze_medication_signals(daily_logs):
     return [scorer.signal_item(
         "medication_missed",
         "Medication missed",
-        2,
+        scorer.get_behavioral_weight("medication_missed"),
         "medication",
         timestamp=missed[-1].get("updatedAt") or missed[-1].get("date", ""),
         snippet=f"Medication was not marked as taken on {len(missed)} recent day(s).",

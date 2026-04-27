@@ -19,8 +19,47 @@ def _parse_date(value):
     return None
 
 
-def resolve_report_range(report_type, start_date=None, end_date=None):
-    end = _parse_date(end_date) or now_utc()
+def _patient_first_day(patient_uid, patient=None):
+    candidates = []
+    patient = patient or {}
+    created = _parse_date(patient.get("createdAt"))
+    if created:
+        candidates.append(created)
+
+    date_fields_by_collection = {
+        "diary_entries": ("createdAt", "updatedAt"),
+        "daily_logs": ("date", "createdAt", "updatedAt"),
+        "guardian_logs": ("date", "createdAt", "updatedAt"),
+        "appointments": ("date", "createdAt"),
+        "reschedule_requests": ("createdAt", "requestedDate"),
+        "medication_adherence_events": ("scheduledAt", "reportedAt"),
+        "chat_sessions": ("createdAt", "updatedAt"),
+        "app_activity_logs": ("timestamp", "createdAt"),
+        "geolocations": ("timestamp", "createdAt"),
+    }
+
+    for collection, fields in date_fields_by_collection.items():
+        try:
+            docs = db.collection(collection).where("patientUid", "==", patient_uid).stream()
+            for doc in docs:
+                data = doc.to_dict() or {}
+                for field in fields:
+                    parsed = _parse_date(data.get(field))
+                    if parsed:
+                        candidates.append(parsed)
+        except Exception:
+            continue
+
+    return min(candidates) if candidates else None
+
+
+def resolve_report_range(report_type, start_date=None, end_date=None, patient_uid=None, patient=None):
+    today = now_utc()
+    first_day = _patient_first_day(patient_uid, patient) if patient_uid else None
+    end = _parse_date(end_date) or today
+    if end > today:
+        end = today
+
     report_type = (report_type or "monthly").lower()
     if report_type == "daily":
         start = end.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -29,12 +68,23 @@ def resolve_report_range(report_type, start_date=None, end_date=None):
     elif report_type == "yearly":
         start = end - timedelta(days=365)
     elif report_type == "custom":
-        start = _parse_date(start_date) or (end - timedelta(days=30))
+        start = _parse_date(start_date)
+        if start is None:
+            start = first_day
+        if start is None:
+            start = end
     else:
         report_type = "monthly"
         start = end - timedelta(days=30)
+
+    if first_day and start < first_day:
+        start = first_day
+    if start > today:
+        start = today
     if start > end:
         start, end = end, start
+    if first_day and start < first_day:
+        start = first_day
     return report_type, start, end
 
 
@@ -92,10 +142,22 @@ def _mood_trend(daily_logs):
 
 
 def generate_clinical_report(patient_uid, report_type="monthly", start_date=None, end_date=None, persist=True):
-    report_type, start, end = resolve_report_range(report_type, start_date, end_date)
     patient = _patient_doc(patient_uid)
+    report_type, start, end = resolve_report_range(
+        report_type,
+        start_date,
+        end_date,
+        patient_uid=patient_uid,
+        patient=patient,
+    )
     doctor_uid = patient.get("assignedDoctor")
-    xai_summary = analyze_patient_xai(patient_uid, persist=True, notify=False)
+    xai_summary = analyze_patient_xai(
+        patient_uid,
+        persist=False,
+        notify=False,
+        start=start,
+        end=end,
+    )
 
     daily_logs = fetch_daily_logs(patient_uid, start, end)
     guardian_logs = fetch_guardian_logs(patient_uid, start, end)
@@ -109,6 +171,8 @@ def generate_clinical_report(patient_uid, report_type="monthly", start_date=None
         "type": report_type,
         "startDate": _date_str(start),
         "endDate": _date_str(end),
+        "earliestAvailableDate": _date_str(_patient_first_day(patient_uid, patient) or start),
+        "latestAvailableDate": _date_str(now_utc()),
         "generatedAt": now_utc().isoformat(),
         "aggregatedSeverity": xai_summary.get("severity", "stable"),
         "band": xai_summary.get("band", 0),
