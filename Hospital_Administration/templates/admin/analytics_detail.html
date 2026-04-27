@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}XAI Detail — {{ summary.patientName }} — MindCare{% endblock %}
+{% block page_title %}XAI Detail: {{ summary.patientName or '—' }}{% endblock %}
+{% block breadcrumb %}AI clinical analysis — individual patient{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('admin_routes.analytics') }}" class="btn btn-ghost btn-sm">
+  <i class="ph-bold ph-arrow-left"></i> Back to Analytics
+</a>
+{% endblock %}
+
+{% block content %}
+{% set sev = summary.severity | default('stable') %}
+
+<!-- Header card -->
+<div class="card mb-6" style="border-left: 4px solid var(--{% if sev == 'critical' %}critical{% elif sev == 'warning' %}warning{% else %}stable{% endif %});">
+  <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div class="flex items-center gap-4">
+      <div class="avatar" style="width:52px;height:52px;font-size:20px;background:{% if sev=='critical' %}var(--critical){% elif sev=='warning' %}var(--warning){% else %}linear-gradient(135deg,var(--lavender-deep),var(--sky-deep)){% endif %}">
+        {{ (summary.patientName or 'P')[0].upper() }}
+      </div>
+      <div>
+        <h2 class="font-extrabold" style="font-size:18px;">{{ summary.patientName }}</h2>
+        <div class="text-xs text-slate">{{ summary.patientUid }}</div>
+        <div class="text-xs text-slate mt-1">
+          Analysis window: {{ summary.startDate or '—' }} → {{ summary.endDate or '—' }}
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-3 items-center">
+      <div style="text-align:center;">
+        <div style="font-size:32px;font-weight:800;color:var(--{% if sev=='critical' %}critical{% elif sev=='warning' %}warning{% else %}stable{% endif %});">
+          {{ "%.1f" | format(summary.score | default(0)) }}
+        </div>
+        <div class="text-xs text-slate font-bold">XAI Score</div>
+      </div>
+      <span class="badge badge-{{ sev }}" style="font-size:13px;padding:6px 16px;">{{ sev | title }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="form-grid-2">
+  <!-- Source Breakdown -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Data Sources</h2></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Source</th><th>Score</th><th>Evidence</th></tr></thead>
+        <tbody>
+          {% for src, info in (summary.sourceBreakdown or {}).items() %}
+          <tr>
+            <td><span style="font-weight:600;text-transform:capitalize;">{{ src }}</span></td>
+            <td class="font-bold">{{ "%.2f" | format(info.score | default(0)) }}</td>
+            <td class="text-slate">{{ info.evidenceCount | default(0) }} items</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="text-slate" style="text-align:center;padding:24px;">No source data</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Signal Counts</h2></div>
+    <div class="card-body">
+      {% set metrics = [
+        ('Diary Entries',       summary.entryCount),
+        ('Chat Messages',       summary.chatMessageCount),
+        ('Guardian Observations', summary.guardianObservationCount),
+        ('Behavioral Signals',  summary.behavioralSignalCount),
+        ('App Activity Logs',   summary.appActivityCount),
+        ('Medication Events',   summary.medicationEventCount),
+      ] %}
+      {% for label, val in metrics %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--divider);">
+        <span class="text-sm text-slate">{{ label }}</span>
+        <span class="font-bold">{{ val | default(0) }}</span>
+      </div>
+      {% endfor %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+        <span class="text-sm text-slate">Confidence</span>
+        <span class="font-bold">{{ "%.0f%%" | format((summary.confidence | default(0)) * 100) }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Primary Drivers -->
+<div class="card mt-4">
+  <div class="card-header"><h2 class="card-title">Primary Risk Drivers</h2></div>
+  <div class="card-body">
+    {% if summary.primaryDrivers %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Theme / Driver</th>
+          <th>Score Contribution</th>
+          <th>Evidence Snippet</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in summary.primaryDrivers[:10] %}
+        <tr>
+          <td>
+            <span style="background:var(--lavender-mist);color:var(--lavender-deep);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">
+              {{ d.displayName or d.theme or '—' }}
+            </span>
+          </td>
+          <td class="font-bold">{{ "%.2f" | format(d.scoreContribution | default(0)) }}</td>
+          <td class="text-slate text-sm" style="max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            {{ d.evidenceSnippet or '—' }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-slate text-sm" style="text-align:center;padding:24px;">No risk drivers detected in this window.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Action recommendation -->
+<div class="card mt-4" style="background:var(--lavender-mist);border:1px solid var(--lavender);">
+  <div class="card-body" style="display:flex;align-items:center;gap:14px;">
+    <i class="ph-duotone ph-lightbulb" style="font-size:28px;color:var(--lavender-deep);flex-shrink:0;"></i>
+    <div>
+      <div class="font-bold" style="color:var(--lavender-deep);margin-bottom:4px;">Recommended Action</div>
+      <div class="text-sm" style="color:var(--ink-light);">{{ summary.action or 'Monitor and review at next appointment.' }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

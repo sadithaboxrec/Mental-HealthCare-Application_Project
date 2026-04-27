@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Clinical Report — {{ patient.name }} — MindCare Portal{% endblock %}
+{% block page_title %}Clinical Report{% endblock %}
+{% block breadcrumb %}{{ patient.name }} — {{ report.type | title }} report{% endblock %}
+
+{% block header_actions %}
+<div class="flex gap-2">
+  <a href="{{ url_for('doctor_portal_routes.patient_detail', patient_uid=patient.uid) }}" class="btn btn-ghost btn-sm">
+    <i class="ph-bold ph-arrow-left"></i> Back
+  </a>
+  {% if report.id %}
+  <a href="{{ url_for('doctor_portal_routes.report_pdf', report_id=report.id) }}" class="btn btn-primary btn-sm">
+    <i class="ph-bold ph-download-simple"></i> Export PDF
+  </a>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+{% set sev = report.aggregatedSeverity | default('stable') %}
+
+<!-- Report type selector -->
+<div class="card mb-6">
+  <div class="card-header"><h2 class="card-title">Generate Report</h2></div>
+  <div class="card-body">
+    <form method="GET" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+      <div>
+        <label class="form-label">Report Type</label>
+        <select name="type" class="form-select" style="min-width:140px;" onchange="toggleDates(this.value)">
+          {% for t in ['daily','weekly','monthly','yearly','custom'] %}
+          <option value="{{ t }}" {% if report.type == t %}selected{% endif %}>{{ t | title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div id="date-fields" style="display:{% if report.type == 'custom' %}flex{% else %}none{% endif %};gap:12px;">
+        <div>
+          <label class="form-label">Start Date</label>
+          <input type="date" name="startDate" class="form-input" value="{{ report.startDate or '' }}" />
+        </div>
+        <div>
+          <label class="form-label">End Date</label>
+          <input type="date" name="endDate" class="form-input" value="{{ report.endDate or '' }}" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-sky" style="margin-bottom:0;">
+        <i class="ph-bold ph-arrows-clockwise"></i> Generate
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Report summary -->
+<div class="card mb-6" style="border-left:4px solid var(--{% if sev=='critical' %}critical{% elif sev=='warning' %}warning{% else %}stable{% endif %});">
+  <div class="card-body" style="display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:13px;color:var(--slate);font-weight:600;margin-bottom:4px;">{{ report.startDate }} → {{ report.endDate }}</div>
+      <div style="font-size:22px;font-weight:800;">{{ patient.name }}</div>
+      <div class="text-sm text-slate">{{ report.type | title }} Report · Generated {{ (report.generatedAt or '')[:10] }}</div>
+    </div>
+    <div class="flex gap-6">
+      <div style="text-align:center;">
+        <div style="font-size:32px;font-weight:800;color:var(--{% if sev=='critical' %}critical{% elif sev=='warning' %}warning{% else %}stable{% endif %});">
+          {{ "%.1f" | format(report.score | default(0)) }}
+        </div>
+        <div class="text-xs text-slate font-bold">SCORE</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:32px;font-weight:800;color:var(--ink);">
+          {{ "%.0f%%" | format((report.confidence | default(0)) * 100) }}
+        </div>
+        <div class="text-xs text-slate font-bold">CONFIDENCE</div>
+      </div>
+      <div style="text-align:center;">
+        <span class="badge badge-{{ sev }}" style="font-size:13px;padding:6px 14px;">{{ sev | title }}</span>
+        <div class="text-xs text-slate font-bold mt-1">SEVERITY</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="form-grid-2">
+  <!-- Adherence -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Medication Adherence</h2></div>
+    <div class="card-body">
+      {% set adh = report.adherenceSummary or {} %}
+      {% if adh.trackedDays %}
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:36px;font-weight:800;color:{% if (adh.adherencePercent or 0) >= 80 %}var(--stable){% elif (adh.adherencePercent or 0) >= 50 %}var(--warning){% else %}var(--critical){% endif %};">
+          {{ adh.adherencePercent or 0 }}%
+        </div>
+        <div class="text-xs text-slate">Adherence Rate</div>
+      </div>
+      <div style="display:flex;justify-content:space-around;text-align:center;">
+        <div><div class="font-bold" style="font-size:20px;">{{ adh.trackedDays }}</div><div class="text-xs text-slate">Tracked</div></div>
+        <div><div class="font-bold" style="font-size:20px;color:var(--stable);">{{ adh.takenDays }}</div><div class="text-xs text-slate">Taken</div></div>
+        <div><div class="font-bold" style="font-size:20px;color:var(--critical);">{{ adh.missedDays }}</div><div class="text-xs text-slate">Missed</div></div>
+      </div>
+      {% else %}
+      <p class="text-slate text-sm" style="text-align:center;padding:24px;">No medication data in this period.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Appointments -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Appointments</h2></div>
+    <div class="card-body">
+      {% set apt = report.appointmentSummary or {} %}
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:36px;font-weight:800;color:var(--sky-deep);">{{ apt.total or 0 }}</div>
+        <div class="text-xs text-slate">Total Appointments</div>
+      </div>
+      {% for status, count in (apt.byStatus or {}).items() %}
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--divider);">
+        <span class="text-sm text-slate" style="text-transform:capitalize;">{{ status }}</span>
+        <span class="font-bold">{{ count }}</span>
+      </div>
+      {% endfor %}
+      {% if apt.rescheduleRequests %}
+      <div style="display:flex;justify-content:space-between;padding:6px 0;">
+        <span class="text-sm text-slate">Reschedule Requests</span>
+        <span class="font-bold">{{ apt.rescheduleRequests }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Top drivers -->
+<div class="card mt-4">
+  <div class="card-header"><h2 class="card-title">Top Risk Drivers</h2></div>
+  <div class="card-body">
+    {% if report.topDrivers %}
+    <table class="data-table">
+      <thead><tr><th>Driver / Theme</th><th>Score Contribution</th><th>Evidence</th></tr></thead>
+      <tbody>
+        {% for d in report.topDrivers %}
+        <tr>
+          <td><span style="background:var(--lavender-mist);color:var(--lavender-deep);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;">{{ d.displayName or d.theme or '—' }}</span></td>
+          <td class="font-bold">{{ "%.2f" | format(d.scoreContribution | default(0)) }}</td>
+          <td class="text-slate text-sm" style="max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ d.evidenceSnippet or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-slate text-sm" style="text-align:center;padding:24px;">No drivers in this period.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Screening note -->
+{% if report.summary and report.summary.screeningNote %}
+<div class="card mt-4" style="background:var(--lavender-mist);">
+  <div class="card-body" style="display:flex;gap:14px;">
+    <i class="ph-duotone ph-clipboard-text" style="font-size:24px;color:var(--lavender-deep);flex-shrink:0;"></i>
+    <div>
+      <div class="font-bold" style="color:var(--lavender-deep);margin-bottom:4px;">Screening Note</div>
+      <div class="text-sm" style="line-height:1.6;">{{ report.summary.screeningNote }}</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDates(type) {
+  document.getElementById('date-fields').style.display = type === 'custom' ? 'flex' : 'none';
+}
+</script>
+{% endblock %}

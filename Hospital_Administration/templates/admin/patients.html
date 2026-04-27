@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Patients — MindCare Admin{% endblock %}
+{% block page_title %}Patients{% endblock %}
+{% block breadcrumb %}Patient directory & records{% endblock %}
+
+{% block header_actions %}
+<div class="flex gap-2">
+  <a href="{{ url_for('admin_routes.assign_doctor_page') }}" class="btn btn-ghost btn-sm">
+    <i class="ph-bold ph-user-focus"></i> Assign Doctor
+  </a>
+  <a href="{{ url_for('admin_routes.create_patient_page') }}" class="btn btn-primary">
+    <i class="ph-bold ph-plus"></i> Add Patient
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div x-data='{
+  search: "",
+  patients: {{ patients | tojson }},
+  get filtered() {
+    const q = this.search.toLowerCase().trim();
+    if (!q) return this.patients;
+    return this.patients.filter(p =>
+      (p.name || "").toLowerCase().includes(q) ||
+      (p.email || "").toLowerCase().includes(q) ||
+      (p.assignedDoctorName || "").toLowerCase().includes(q)
+    );
+  }
+}'>
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <div class="search-wrap">
+      <i class="ph-duotone ph-magnifying-glass"></i>
+      <input type="text" x-model="search" class="search-input" placeholder="Search by name, email, doctor…" />
+    </div>
+    <span class="text-sm text-slate"><span x-text="filtered.length" class="font-bold text-ink"></span> of {{ patients | length }} patients</span>
+  </div>
+
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Patient</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Assigned Doctor</th>
+          <th>Guardian</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="p in filtered" :key="p.uid">
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="avatar" x-text="p.name ? p.name[0].toUpperCase() : 'P'"></div>
+                <div>
+                  <div class="font-bold" x-text="p.name || '—'"></div>
+                  <div class="text-xs text-slate" x-text="p.gender ? (p.gender + (p.dob ? ' · ' + p.dob : '')) : ''"></div>
+                </div>
+              </div>
+            </td>
+            <td class="text-slate text-sm" x-text="p.email || '—'"></td>
+            <td class="text-slate text-sm" x-text="p.phone || '—'"></td>
+            <td>
+              <template x-if="p.assignedDoctorName">
+                <span style="background:var(--sky-mist);color:var(--sky-deep);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;">
+                  <i class="ph-duotone ph-stethoscope"></i>
+                  <span x-text="p.assignedDoctorName"></span>
+                </span>
+              </template>
+              <template x-if="!p.assignedDoctorName">
+                <span style="background:var(--fog);color:var(--slate);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;">Unassigned</span>
+              </template>
+            </td>
+            <td>
+              <template x-if="p.guardian && p.guardian.name">
+                <div>
+                  <div class="font-bold text-sm" x-text="p.guardian.name"></div>
+                  <div class="text-xs text-slate" x-text="p.guardian.phone || ''"></div>
+                </div>
+              </template>
+              <template x-if="!p.guardian || !p.guardian.name"><span class="text-slate">None</span></template>
+            </td>
+            <td>
+              <span x-show="p.accountStatus === 'disabled'" style="background:var(--critical-mist);color:var(--critical);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;">Disabled</span>
+              <span x-show="p.accountStatus !== 'disabled'" style="background:var(--stable-mist);color:var(--stable-deep);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;">Active</span>
+            </td>
+            <td class="text-slate text-sm" x-text="p.createdAt ? p.createdAt.substring(0,10) : '—'"></td>
+            <td class="text-right">
+              <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                <button @click="open = !open" class="text-slate hover:text-ink transition">
+                  <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+                </button>
+                <div x-show="open" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-divider py-2 z-10 text-left">
+                  <button @click="alert('Edit logic here')" class="w-full px-4 py-2 text-sm text-ink hover:bg-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-pencil-simple"></i> Edit Details
+                  </button>
+                  <button @click="toggleStatus(p.uid, true)" class="w-full px-4 py-2 text-sm text-ink hover:bg-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-prohibit"></i> Disable Account
+                  </button>
+                  <div class="h-px bg-divider my-1"></div>
+                  <button @click="deleteUser(p.uid)" class="w-full px-4 py-2 text-sm text-critical hover:bg-critical-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-trash"></i> Delete Account
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </template>
+        <tr x-show="filtered.length === 0">
+          <td colspan="7" class="text-center py-12 text-slate">No patients found matching your search.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+async function toggleStatus(uid, disabled) {
+  if(!confirm("Are you sure you want to change this account's status?")) return;
+  try {
+    const res = await fetch(`/admin/users/${uid}/toggle`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({disabled})
+    });
+    if(res.ok) location.reload();
+    else alert((await res.json()).error);
+  } catch(e) { alert(e.message); }
+}
+
+async function deleteUser(uid) {
+  if(!confirm("Are you sure you want to permanently delete this user?")) return;
+  try {
+    const res = await fetch(`/admin/users/${uid}/delete`, {
+      method: 'POST'
+    });
+    if(res.ok) location.reload();
+    else alert((await res.json()).error);
+  } catch(e) { alert(e.message); }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}XAI Analytics — MindCare Admin{% endblock %}
+{% block page_title %}XAI Clinical Analytics{% endblock %}
+{% block breadcrumb %}AI-generated mental health risk scores — all patients{% endblock %}
+
+{% block header_actions %}
+<button id="recompute-btn" class="btn btn-primary btn-sm">
+  <i class="ph-bold ph-arrows-clockwise"></i> Recompute All
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Summary ribbon -->
+{% set critical_count = summaries | selectattr('severity','eq','critical') | list | length %}
+{% set warning_count  = summaries | selectattr('severity','eq','warning')  | list | length %}
+{% set stable_count   = summaries | selectattr('severity','eq','stable')   | list | length %}
+<div class="kpi-grid" style="margin-bottom:24px;">
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-lavender"><i class="ph-duotone ph-brain"></i></div>
+    <div><div class="kpi-num">{{ summaries | length }}</div><div class="kpi-label">Analysed Patients</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-critical"><i class="ph-duotone ph-siren"></i></div>
+    <div><div class="kpi-num">{{ critical_count }}</div><div class="kpi-label">Critical</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-warning"><i class="ph-duotone ph-warning"></i></div>
+    <div><div class="kpi-num">{{ warning_count }}</div><div class="kpi-label">Warning</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-stable"><i class="ph-duotone ph-check-circle"></i></div>
+    <div><div class="kpi-num">{{ stable_count }}</div><div class="kpi-label">Stable</div></div>
+  </div>
+</div>
+
+<div id="recompute-banner" style="display:none;" class="flash-bar success mb-4">
+  <i class="ph-bold ph-check-circle"></i> <span id="recompute-msg"></span>
+</div>
+
+<div class="card">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Patient</th>
+        <th>Severity</th>
+        <th>Score</th>
+        <th>Confidence</th>
+        <th>Top Drivers</th>
+        <th>Last Entry</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in summaries %}
+      {% set sev = s.severity | default('stable') %}
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            <div class="avatar" style="background:{% if sev=='critical' %}var(--critical){% elif sev=='warning' %}var(--warning){% else %}linear-gradient(135deg,var(--lavender-deep),var(--sky-deep)){% endif %}">
+              {{ (s.patientName or 'P')[0].upper() }}
+            </div>
+            <div>
+              <div class="font-bold">{{ s.patientName or '—' }}</div>
+              <div class="text-xs text-slate">{{ s.patientUid[:10] }}…</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="badge badge-{{ sev }}">
+            <i class="ph-bold ph-{% if sev=='critical' %}siren{% elif sev=='warning' %}warning{% else %}check-circle{% endif %}"></i>
+            {{ sev | title }}
+          </span>
+        </td>
+        <td>
+          <div class="flex items-center gap-2">
+            <div class="score-bar-wrap">
+              <div class="score-bar score-bar-{{ sev }}" style="width:{{ [s.score * 10, 100] | min }}%"></div>
+            </div>
+            <span class="font-bold">{{ "%.1f" | format(s.score | default(0)) }}</span>
+          </div>
+        </td>
+        <td class="text-slate text-sm">{{ "%.0f%%" | format((s.confidence | default(0)) * 100) }}</td>
+        <td>
+          {% for d in (s.primaryDrivers or [])[:2] %}
+            <span style="background:var(--lavender-mist);color:var(--lavender-deep);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:4px;">
+              {{ d.displayName or d.theme or '—' }}
+            </span>
+          {% endfor %}
+        </td>
+        <td class="text-slate text-sm">{{ (s.lastEntryAt or '—')[:10] }}</td>
+        <td>
+          <a href="{{ url_for('admin_routes.analytics_detail', patient_uid=s.patientUid) }}" class="btn btn-ghost btn-sm">
+            <i class="ph-bold ph-chart-line"></i> Details
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center;padding:48px;color:var(--slate);">No analytics data available.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('recompute-btn').addEventListener('click', async function() {
+  this.disabled = true; this.textContent = 'Computing…';
+  try {
+    const r = await fetch('/analytics/recompute-all', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+    const j = await r.json();
+    const banner = document.getElementById('recompute-banner');
+    document.getElementById('recompute-msg').textContent = `Done — ${j.xaiCount} XAI + ${j.diaryCount} diary summaries updated.`;
+    banner.style.display = 'flex';
+    setTimeout(() => location.reload(), 2000);
+  } catch { alert('Recompute failed.'); }
+  this.disabled = false; this.innerHTML = '<i class="ph-bold ph-arrows-clockwise"></i> Recompute All';
+});
+</script>
+{% endblock %}

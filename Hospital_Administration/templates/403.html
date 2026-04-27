@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied — MindCare Admin{% endblock %}
+{% block page_title %}Access Denied{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 40px auto; text-align: center;">
+  <div class="card-body" style="padding: 40px 20px;">
+    <div style="width: 64px; height: 64px; background: var(--critical-mist); color: var(--critical); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 20px;">
+      <i class="ph-bold ph-lock-key"></i>
+    </div>
+    <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 10px;">403 - Forbidden</h2>
+    <p class="text-slate text-sm mb-6">You do not have permission to view this page or perform this action. Ensure you are logged in with the correct role.</p>
+    <a href="{{ url_for('auth_routes.login') }}" class="btn btn-primary">Return to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

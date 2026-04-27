@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Diary Reports — MindCare Admin{% endblock %}
+{% block page_title %}Diary Analysis Reports{% endblock %}
+{% block breadcrumb %}AI-analysed patient diary entries{% endblock %}
+
+{% block content %}
+<div class="card">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Patient</th>
+        <th>Severity</th>
+        <th>Score</th>
+        <th>Diary Entries</th>
+        <th>Last Entry</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in summaries %}
+      {% set sev = s.severity | default('stable') %}
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            <div class="avatar" style="background:{% if sev=='critical' %}var(--critical){% elif sev=='warning' %}var(--warning){% else %}linear-gradient(135deg,var(--lavender-deep),var(--sky-deep)){% endif %}">
+              {{ (s.patientName or 'P')[0].upper() }}
+            </div>
+            <div>
+              <div class="font-bold">{{ s.patientName or '—' }}</div>
+              <div class="text-xs text-slate">{{ (s.patientUid or '')[:10] }}…</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge badge-{{ sev }}">{{ sev | title }}</span></td>
+        <td class="font-bold">{{ "%.1f" | format(s.score | default(0)) }}</td>
+        <td class="text-slate">{{ s.entryCount | default(0) }}</td>
+        <td class="text-slate text-sm">{{ (s.lastEntryAt or '—')[:10] }}</td>
+        <td>
+          <a href="{{ url_for('admin_routes.diary_report_detail', patient_uid=s.patientUid) }}" class="btn btn-ghost btn-sm">
+            <i class="ph-bold ph-notebook"></i> View
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center;padding:48px;color:var(--slate);">No diary data available.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

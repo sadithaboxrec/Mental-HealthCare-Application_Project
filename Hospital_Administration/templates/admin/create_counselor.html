@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Add Counselor — MindCare Admin{% endblock %}
+{% block page_title %}Add Counselor{% endblock %}
+{% block breadcrumb %}Register a new counselor{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Counselor Details</h2>
+    </div>
+    <div class="card-body">
+      <form id="counselor-form">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-input" required placeholder="Sara Ahmed" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employee ID</label>
+            <input type="text" name="employeeId" class="form-input" required placeholder="COU-001" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" required />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-input" required placeholder="Min 8 characters" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" name="phone" class="form-input" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Specialization</label>
+          <input type="text" name="specialization" class="form-input" required placeholder="CBT, Grief Counseling…" />
+        </div>
+        <div id="form-error"   style="display:none;background:var(--critical-mist);color:var(--critical);padding:12px 16px;border-radius:10px;font-weight:600;margin-bottom:12px;"></div>
+        <div id="form-success" style="display:none;background:var(--stable-mist);color:var(--stable-deep);padding:12px 16px;border-radius:10px;font-weight:600;margin-bottom:12px;"></div>
+        <div class="flex gap-3 mt-4">
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            <i class="ph-bold ph-plus"></i> Create Counselor
+          </button>
+          <a href="{{ url_for('admin_routes.counselors') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('counselor-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn  = document.getElementById('submit-btn');
+  const err  = document.getElementById('form-error');
+  const ok   = document.getElementById('form-success');
+  err.style.display = ok.style.display = 'none';
+  btn.disabled = true;
+  const data = Object.fromEntries(new FormData(this));
+  try {
+    const resp = await fetch('{{ url_for("admin_routes.create_counselor") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+    });
+    const json = await resp.json();
+    if (resp.ok) { ok.textContent = 'Counselor created! UID: ' + json.uid; ok.style.display='block'; this.reset(); }
+    else         { err.textContent = json.error || 'Failed.'; err.style.display='block'; }
+  } catch { err.textContent='Network error.'; err.style.display='block'; }
+  btn.disabled = false;
+});
+</script>
+{% endblock %}

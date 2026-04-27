@@ -1,11 +1,12 @@
 from flask import request, jsonify
+from firebase_admin import auth
 from services.firebase_service import create_firebase_user
 from models.user_model import create_user
 from models.patient_model import create_patient
 from models.guardian_model import create_guardian
 
 def create_patient_controller():
-    data = request.json
+    data = request.get_json(silent=True) or request.form.to_dict()
 
     name            = data.get("name",           "").strip()
     email           = data.get("email",          "").strip()
@@ -25,6 +26,7 @@ def create_patient_controller():
         patient_uid  = create_firebase_user(email, password, name)
         guardian_uid = None
 
+        auth.set_custom_user_claims(patient_uid, {"role": "patient"})
         create_user(patient_uid, name, email, phone, "patient")
 
         if has_guardian:
@@ -37,6 +39,7 @@ def create_patient_controller():
                 return jsonify({"error": "All guardian fields are required"}), 400
 
             guardian_uid = create_firebase_user(g_email, g_password, g_name)
+            auth.set_custom_user_claims(guardian_uid, {"role": "guardian"})
             create_user(guardian_uid, g_name, g_email, g_phone, "guardian")
             create_guardian(guardian_uid, patient_uid,
                             g_name, g_email, g_phone)

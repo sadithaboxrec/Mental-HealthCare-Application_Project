@@ -1,0 +1,135 @@
+/* ============================================================
+   MindCare Admin — Custom CSS
+   Supplements Tailwind CDN. Covers animations, print,
+   scrollbar, badge fallbacks, and table hover.
+   ============================================================ */
+
+/* ── Custom animations ────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fadeInUp 0.25s ease-out both;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(155, 127, 232, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(155, 127, 232, 0.18); }
+}
+.glow-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F5FF;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #C9B8F5;
+  border-radius: 9999px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9B7FE8;
+}
+
+/* ── Severity badge fallbacks ─────────────────────────────── */
+.badge-stable {
+  background: #EBFAF3;
+  color: #4CB88A;
+}
+.badge-watch {
+  background: #FFF8EB;
+  color: #E8A84C;
+}
+.badge-warning {
+  background: #FFF2EE;
+  color: #E8764C;
+}
+.badge-critical {
+  background: #FFE8ED;
+  color: #E8475F;
+}
+
+/* ── Data table row hover ─────────────────────────────────── */
+.data-table tbody tr {
+  transition: background-color 0.12s ease;
+}
+.data-table tbody tr:hover td {
+  background-color: #F7F5FF;
+}
+
+/* ── line-clamp (Safari fallback) ────────────────────────── */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Print styles (patient_report page) ──────────────────── */
+@media print {
+  /* Hide navigation & chrome */
+  aside,
+  header,
+  footer,
+  .print\:hidden,
+  [aria-label="Notifications"],
+  nav[aria-label="Breadcrumb"] {
+    display: none !important;
+  }
+
+  /* Remove sidebar offset */
+  .lg\:ml-64 {
+    margin-left: 0 !important;
+  }
+
+  /* Reset backgrounds for ink saving */
+  body {
+    background: #fff !important;
+    color: #1A1040 !important;
+    font-size: 11pt;
+  }
+
+  /* Keep cards legible */
+  .shadow-card,
+  .shadow-float {
+    box-shadow: none !important;
+    border: 1px solid #E8E2FF !important;
+  }
+
+  /* Expand tables to full width */
+  table {
+    width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Score bars print in grayscale */
+  .bg-critical-deep { background: #333 !important; }
+  .bg-warning-deep  { background: #555 !important; }
+  .bg-watch-deep    { background: #777 !important; }
+  .bg-stable-deep   { background: #aaa !important; }
+
+  /* Ensure hero gradient prints dark enough */
+  .bg-gradient-to-r {
+    background: #1A1040 !important;
+    color: #fff !important;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+}

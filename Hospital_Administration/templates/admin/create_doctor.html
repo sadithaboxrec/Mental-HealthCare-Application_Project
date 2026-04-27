@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Add Doctor — MindCare Admin{% endblock %}
+{% block page_title %}Add Doctor{% endblock %}
+{% block breadcrumb %}Register a new physician{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Doctor Details</h2>
+    </div>
+    <div class="card-body" id="form-area">
+      <form id="doctor-form">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-input" required placeholder="Dr. John Smith" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employee ID</label>
+            <input type="text" name="employeeId" class="form-input" required placeholder="EMP-001" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" required placeholder="dr.smith@mindcare.io" />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-input" required placeholder="Min 8 characters" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" name="phone" class="form-input" required placeholder="+92 300 0000000" />
+          </div>
+        </div>
+        
+        <!-- NEW SOTA FIELDS -->
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Medical License Number</label>
+            <input type="text" name="licenseNumber" class="form-input" required placeholder="MD-12345" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input type="text" name="department" class="form-input" required placeholder="Adult Psychiatry" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Years of Experience</label>
+            <input type="number" name="yearsOfExperience" class="form-input" min="0" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Specializations</label>
+            <select name="specializationIds" id="specializations-select" multiple class="form-input" placeholder="Search specializations...">
+              <option value="spec_psychiatry">General Psychiatry</option>
+              <option value="spec_clin_psych">Clinical Psychology</option>
+              <option value="spec_cbt">Cognitive Behavioral Therapy (CBT)</option>
+              <option value="spec_child">Child & Adolescent Psychiatry</option>
+              <option value="spec_addiction">Addiction Medicine</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Professional Bio</label>
+          <textarea name="bio" class="form-input" rows="3" placeholder="Brief professional summary..."></textarea>
+        </div>
+
+        <div id="form-error" style="display:none;" class="error-box" style="margin-bottom:12px;"></div>
+        <div id="form-success" style="display:none;background:var(--stable-mist);color:var(--stable-deep);padding:12px 16px;border-radius:10px;font-weight:600;margin-bottom:12px;"></div>
+
+        <div class="flex gap-3 mt-4">
+          <button type="submit" class="btn btn-sky" id="submit-btn">
+            <i class="ph-bold ph-plus"></i> Create Doctor
+          </button>
+          <a href="{{ url_for('admin_routes.doctors') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+<script>
+// Initialize Tom Select for searchable multi-select
+new TomSelect("#specializations-select", {
+  plugins: ['remove_button'],
+  create: false,
+});
+
+document.getElementById('doctor-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const btn = document.getElementById('submit-btn');
+  const err = document.getElementById('form-error');
+  const suc = document.getElementById('form-success');
+  
+  btn.disabled = true;
+  err.style.display = 'none';
+  suc.style.display = 'none';
+  
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  
+  // Tom Select handles multiple values by appending them to FormData, but Object.fromEntries only keeps the last one.
+  // We need to manually get the array of specializations.
+  data.specializationIds = Array.from(formData.getAll('specializationIds'));
+  // Convert yearsOfExperience to integer
+  data.yearsOfExperience = parseInt(data.yearsOfExperience) || 0;
+
+  try {
+    const res = await fetch('{{ url_for("admin_routes.create_doctor") }}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await res.json();
+    if(res.ok) {
+      suc.textContent = 'Doctor created successfully! Redirecting...';
+      suc.style.display = 'block';
+      setTimeout(() => window.location.href = '{{ url_for("admin_routes.doctors") }}', 1000);
+    } else {
+      err.textContent = result.error || 'Creation failed';
+      err.style.display = 'flex';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    err.textContent = 'Network error. Try again.';
+    err.style.display = 'flex';
+    btn.disabled = false;
+  }
+});
+</script>
+{% endblock %}

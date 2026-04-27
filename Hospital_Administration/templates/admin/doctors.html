@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Doctors — MindCare Admin{% endblock %}
+{% block page_title %}Doctors{% endblock %}
+{% block breadcrumb %}Physician directory & records{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('admin_routes.create_doctor_page') }}" class="btn btn-sky">
+  <i class="ph-bold ph-plus"></i> Add Doctor
+</a>
+{% endblock %}
+
+{% block content %}
+<div x-data='{
+  search: "",
+  doctors: {{ doctors | tojson }},
+  get filtered() {
+    const q = this.search.toLowerCase().trim();
+    if (!q) return this.doctors;
+    return this.doctors.filter(d =>
+      (d.name || "").toLowerCase().includes(q) ||
+      (d.email || "").toLowerCase().includes(q) ||
+      (d.specialization || "").toLowerCase().includes(q)
+    );
+  }
+}'>
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <div class="search-wrap">
+      <i class="ph-duotone ph-magnifying-glass"></i>
+      <input type="text" x-model="search" class="search-input" placeholder="Search by name, email, specialization…" />
+    </div>
+    <span class="text-sm text-slate"><span x-text="filtered.length" class="font-bold text-ink"></span> of {{ doctors | length }} doctors</span>
+  </div>
+
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Doctor</th>
+          <th>Email</th>
+          <th>Specialization</th>
+          <th>Employee ID</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="d in filtered" :key="d.uid">
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="avatar avatar-sky" x-text="d.name ? d.name[0].toUpperCase() : 'D'"></div>
+                <div>
+                  <div class="font-bold" x-text="d.name || '—'"></div>
+                  <div class="text-xs text-slate" x-text="'UID: ' + (d.uid || '').slice(0,8) + '…'"></div>
+                </div>
+              </div>
+            </td>
+            <td class="text-slate text-sm" x-text="d.email || '—'"></td>
+            <td>
+              <span x-show="d.specialization"
+                style="background:var(--sky-mist);color:var(--sky-deep);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;"
+                x-text="d.specialization"></span>
+              <span x-show="!d.specialization" class="text-slate">—</span>
+            </td>
+            <td><span style="font-family:monospace;font-size:12px;background:var(--fog);padding:2px 8px;border-radius:6px;" x-text="d.employeeId || '—'"></span></td>
+            <td class="text-slate text-sm" x-text="d.phone || '—'"></td>
+            <td>
+              <span x-show="d.accountStatus === 'disabled'" style="background:var(--critical-mist);color:var(--critical);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;">Disabled</span>
+              <span x-show="d.accountStatus !== 'disabled'" style="background:var(--stable-mist);color:var(--stable-deep);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;">Active</span>
+            </td>
+            <td class="text-slate text-sm" x-text="d.createdAt ? d.createdAt.substring(0,10) : '—'"></td>
+            <td class="text-right">
+              <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                <button @click="open = !open" class="text-slate hover:text-ink transition">
+                  <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+                </button>
+                <div x-show="open" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-divider py-2 z-10 text-left">
+                  <button @click="alert('Edit logic here')" class="w-full px-4 py-2 text-sm text-ink hover:bg-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-pencil-simple"></i> Edit Details
+                  </button>
+                  <button @click="toggleStatus(d.uid, true)" class="w-full px-4 py-2 text-sm text-ink hover:bg-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-prohibit"></i> Disable Account
+                  </button>
+                  <div class="h-px bg-divider my-1"></div>
+                  <button @click="deleteUser(d.uid)" class="w-full px-4 py-2 text-sm text-critical hover:bg-critical-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-trash"></i> Delete Account
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </template>
+        <tr x-show="filtered.length === 0">
+          <td colspan="7" class="text-center py-12 text-slate">No doctors found matching your search.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+async function toggleStatus(uid, disabled) {
+  if(!confirm("Are you sure you want to change this account's status?")) return;
+  try {
+    const res = await fetch(`/admin/users/${uid}/toggle`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({disabled})
+    });
+    if(res.ok) location.reload();
+    else alert((await res.json()).error);
+  } catch(e) { alert(e.message); }
+}
+
+async function deleteUser(uid) {
+  if(!confirm("Are you sure you want to permanently delete this user?")) return;
+  try {
+    const res = await fetch(`/admin/users/${uid}/delete`, {
+      method: 'POST'
+    });
+    if(res.ok) location.reload();
+    else alert((await res.json()).error);
+  } catch(e) { alert(e.message); }
+}
+</script>
+{% endblock %}
+

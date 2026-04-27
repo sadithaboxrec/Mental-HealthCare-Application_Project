@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Register Patient — MindCare Admin{% endblock %}
+{% block page_title %}Register Patient{% endblock %}
+{% block breadcrumb %}Create a new patient (and optional guardian){% endblock %}
+
+{% block content %}
+<div style="max-width:700px;" x-data="{ hasGuardian: false }">
+  <div class="card mb-6">
+    <div class="card-header"><h2 class="card-title">Patient Information</h2></div>
+    <div class="card-body">
+      <form id="patient-form">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-input" required placeholder="Ali Hassan" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-input" required />
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-input" required placeholder="Min 8 characters"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" name="phone" class="form-input" required />
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <select name="gender" class="form-select" required>
+              <option value="">Select…</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <input type="date" name="dob" class="form-input" required />
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Employment Status</label>
+            <select name="employeeStatus" class="form-select" required>
+              <option value="">Select…</option>
+              <option>Employed</option>
+              <option>Unemployed</option>
+              <option>Student</option>
+              <option>Retired</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assign Doctor</label>
+            <select name="assignedDoctor" class="form-select" required>
+              <option value="">Select doctor…</option>
+              {% for d in doctors %}
+              <option value="{{ d.uid }}">{{ d.name }}{% if d.specialization %} — {{ d.specialization }}{% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Guardian toggle -->
+        <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+          <input type="checkbox" id="has-guardian" x-model="hasGuardian" style="width:16px;height:16px;accent-color:var(--lavender-deep);" />
+          <label for="has-guardian" class="form-label" style="margin:0;cursor:pointer;">Attach a Guardian</label>
+        </div>
+
+        <!-- Guardian section -->
+        <div x-show="hasGuardian" x-transition style="margin-top:8px;padding:16px;background:var(--mist);border-radius:12px;border:1px solid var(--divider);">
+          <p class="font-bold text-sm" style="margin-bottom:14px;color:var(--lavender-deep);">Guardian Details</p>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Guardian Name</label>
+              <input type="text" name="guardianName" class="form-input" placeholder="Fatima Hassan" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Guardian Email</label>
+              <input type="email" name="guardianEmail" class="form-input" />
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Guardian Password</label>
+              <input type="password" name="guardianPassword" class="form-input" placeholder="Min 8 characters" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Guardian Phone</label>
+              <input type="tel" name="guardianPhone" class="form-input" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden field for hasGuardian -->
+        <input type="hidden" name="hasGuardian" :value="hasGuardian" />
+
+        <div id="form-error"   style="display:none;background:var(--critical-mist);color:var(--critical);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:16px;"></div>
+        <div id="form-success" style="display:none;background:var(--stable-mist);color:var(--stable-deep);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:16px;"></div>
+
+        <div class="flex gap-3 mt-4">
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            <i class="ph-bold ph-user-plus"></i> Register Patient
+          </button>
+          <a href="{{ url_for('admin_routes.patients') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('patient-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const err = document.getElementById('form-error');
+  const ok  = document.getElementById('form-success');
+  err.style.display = ok.style.display = 'none';
+  btn.disabled = true;
+  const raw  = new FormData(this);
+  const data = Object.fromEntries(raw);
+  data.hasGuardian = data.hasGuardian === 'true';
+  try {
+    const resp = await fetch('{{ url_for("admin_routes.create_patient") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+    });
+    const json = await resp.json();
+    if (resp.ok) {
+      ok.textContent = 'Patient registered! UID: ' + json.patientUid + (json.guardianUid ? ' | Guardian: ' + json.guardianUid : '');
+      ok.style.display='block';
+      this.reset();
+    } else {
+      err.textContent = json.error || 'Failed to register patient.';
+      err.style.display = 'block';
+    }
+  } catch { err.textContent = 'Network error.'; err.style.display = 'block'; }
+  btn.disabled = false;
+});
+</script>
+{% endblock %}

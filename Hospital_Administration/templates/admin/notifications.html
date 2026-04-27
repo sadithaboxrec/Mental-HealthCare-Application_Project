@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Notifications — MindCare Admin{% endblock %}
+{% block page_title %}Notification Center{% endblock %}
+{% block breadcrumb %}Manually trigger FCM push notification reminders{% endblock %}
+
+{% block content %}
+<div style="max-width:720px;" x-data="notifPanel()">
+
+  <div id="result-banner" style="display:none;margin-bottom:16px;" class="flash-bar success">
+    <i class="ph-bold ph-check-circle"></i> <span id="result-msg"></span>
+  </div>
+
+  <!-- Bulk triggers -->
+  <div class="card mb-6">
+    <div class="card-header"><h2 class="card-title">Bulk Reminders</h2></div>
+    <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      {% set triggers = [
+        ('Medication Reminders', '/trigger/medications',  'pill',               'btn-primary'),
+        ('Appointment Reminders','/trigger/appointments', 'calendar',           'btn-sky'),
+        ('Water Intake',         '/trigger/water',        'drop',               'btn-ghost'),
+        ('Diary Reminders',      '/trigger/diary',        'notebook-text',      'btn-ghost'),
+      ] %}
+      {% for label, url, icon, cls in triggers %}
+      <button class="btn {{ cls }}" onclick="triggerNotif('{{ url }}', '{{ label }}')">
+        <i class="ph-bold ph-{{ icon }}"></i> {{ label }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Test notification -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Send Test Notification</h2></div>
+    <div class="card-body">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Patient</label>
+          <select id="test-uid" class="form-select">
+            <option value="">Select patient…</option>
+            {% for p in patients %}
+            <option value="{{ p.uid }}">{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notification Type</label>
+          <select id="test-type" class="form-select">
+            <option value="general">General</option>
+            <option value="medication">Medication</option>
+            <option value="appointment">Appointment</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary mt-4" onclick="sendTest()">
+        <i class="ph-bold ph-paper-plane-tilt"></i> Send Test
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function triggerNotif(url, label) {
+  const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
+  const j = await r.json();
+  const msg = document.getElementById('result-msg');
+  const banner = document.getElementById('result-banner');
+  msg.textContent = `${label} triggered — ${j.sent ?? ''} sent.`;
+  banner.style.display = 'flex';
+  setTimeout(() => banner.style.display = 'none', 5000);
+}
+
+async function sendTest() {
+  const uid   = document.getElementById('test-uid').value;
+  const type  = document.getElementById('test-type').value;
+  if (!uid) { alert('Please select a patient.'); return; }
+  const r = await fetch('/trigger/test', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({uid, type})});
+  const j = await r.json();
+  const msg = document.getElementById('result-msg');
+  const banner = document.getElementById('result-banner');
+  if (r.ok) { msg.textContent = 'Test notification sent successfully!'; }
+  else       { msg.textContent = 'Failed: ' + (j.error || 'Unknown error'); banner.className = 'flash-bar danger'; }
+  banner.style.display = 'flex';
+  setTimeout(() => banner.style.display = 'none', 6000);
+}
+</script>
+{% endblock %}

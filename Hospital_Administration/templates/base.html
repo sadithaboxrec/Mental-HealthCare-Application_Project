@@ -1,331 +1,484 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
-  <title>Mental Health Admin</title>
-  <!-- <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f0f2f5; }
-    nav {
-      background: #2c3e50; padding: 14px 30px;
-      display: flex; gap: 16px; align-items: center;
-    }
-    nav .brand { color: white; font-size: 18px; font-weight: bold; margin-right: auto; }
-    nav a {
-      color: #ecf0f1; text-decoration: none;
-      padding: 6px 14px; border-radius: 4px; font-size: 14px;
-    }
-    nav a:hover { background: #34495e; }
-    .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-    .card {
-      background: white; border-radius: 8px;
-      padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      margin-bottom: 24px;
-    }
-    h1 { font-size: 20px; color: #2c3e50; margin-bottom: 20px; }
-    h2 { font-size: 16px; color: #2c3e50; margin-bottom: 12px; }
-    label { display: block; font-size: 13px; color: #555; margin: 12px 0 4px; }
-    input, select {
-      width: 100%; padding: 10px 12px; border: 1px solid #ccc;
-      border-radius: 5px; font-size: 14px;
-    }
-    input:focus, select:focus { outline: none; border-color: #2980b9; }
-    .btn {
-      display: inline-block; padding: 10px 20px; border: none;
-      border-radius: 5px; cursor: pointer; font-size: 14px;
-      text-decoration: none;
-    }
-    .btn-primary { background: #2980b9; color: white; }
-    .btn-primary:hover { background: #2471a3; }
-    .btn-success { background: #27ae60; color: white; }
-    .btn-success:hover { background: #219a52; }
-    .btn-full { width: 100%; margin-top: 16px; }
-    .msg { margin-top: 14px; padding: 10px 14px; border-radius: 5px; display: none; font-size: 13px; }
-    .msg.success { background: #d4edda; color: #155724; }
-    .msg.error   { background: #f8d7da; color: #721c24; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #e0e0e0; padding: 10px 12px; text-align: left; font-size: 13px; }
-    th { background: #f7f7f7; font-weight: 600; }
-    tr:hover td { background: #fafafa; }
-    .badge {
-      display: inline-block; padding: 2px 10px;
-      border-radius: 10px; font-size: 11px; font-weight: bold;
-    }
-    .badge-doctor    { background: #d6eaf8; color: #1a5276; }
-    .badge-patient   { background: #d5f5e3; color: #1e8449; }
-    .badge-counselor { background: #f9ebea; color: #922b21; }
-    .badge-guardian  { background: #fef9e7; color: #7d6608; }
-    .badge-stable    { background: #d5f5e3; color: #1e8449; }
-    .badge-watch     { background: #d6eaf8; color: #1a5276; }
-    .badge-warning   { background: #fef9e7; color: #7d6608; }
-    .badge-critical  { background: #f9ebea; color: #922b21; }
-    .guardian-box {
-      background: #fafafa; border: 1px solid #e0e0e0;
-      border-radius: 6px; padding: 12px; margin-top: 16px; display: none;
-    }
-    .stat-row { display: flex; gap: 16px; margin-bottom: 24px; }
-    .stat-card {
-      flex: 1; background: white; border-radius: 8px;
-      padding: 20px; text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .stat-card .num { font-size: 32px; font-weight: bold; color: #2c3e50; }
-    .stat-card .lbl { font-size: 13px; color: #888; margin-top: 4px; }
-  </style> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}MindCare Admin{% endblock %}</title>
+  <meta name="description" content="MindCare Hospital Administration Platform" />
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   <style>
+    :root {
+      --lavender:       #A89CDE;
+      --lavender-deep:  #7C6FCD;
+      --lavender-mist:  #EDE9FA;
+      --sky:            #7EC8E3;
+      --sky-deep:       #5EA5D6;
+      --sky-mist:       #E0F3FB;
+      --mist:           #F4F2FC;
+      --cloud:          #FFFFFF;
+      --fog:            #F0EEF8;
+      --ink:            #1F1B33;
+      --ink-light:      #4A4666;
+      --slate:          #6B7280;
+      --divider:        #E5E3F0;
+      --stable:         #16A34A;
+      --stable-deep:    #15803D;
+      --stable-mist:    #DCFCE7;
+      --warning:        #D97706;
+      --warning-deep:   #B45309;
+      --warning-mist:   #FEF3C7;
+      --critical:       #DC2626;
+      --critical-deep:  #B91C1C;
+      --critical-mist:  #FEE2E2;
+      --watch:          #7C3AED;
+      --watch-mist:     #EDE9FA;
 
+      --radius-sm:   0.5rem;
+      --radius:      1rem;
+      --radius-lg:   1.25rem;
+      --radius-pill: 999px;
+      --shadow-card: 0 2px 12px rgba(124,111,205,0.10);
+      --shadow-lg:   0 8px 32px rgba(124,111,205,0.16);
+    }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--mist);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+    }
 
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    /* ── Sidebar ──────────────────────────────────────────────────────── */
+    .sidebar {
+      width: 256px;
+      min-height: 100vh;
+      background: var(--cloud);
+      border-right: 1px solid var(--divider);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-card);
+      z-index: 40;
+    }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 22px 20px 16px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .sidebar-brand-icon {
+      width: 38px; height: 38px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--lavender-deep), var(--sky-deep));
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(124,111,205,0.3);
+    }
+    .sidebar-brand-icon i { color: white; font-size: 20px; }
+    .sidebar-brand-text { display: flex; flex-direction: column; }
+    .sidebar-brand-name { font-weight: 800; font-size: 15px; color: var(--ink); letter-spacing: -0.3px; }
+    .sidebar-brand-role {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      margin-top: 2px;
+      display: inline-block;
+    }
+    .role-admin { background: var(--lavender-mist); color: var(--lavender-deep); }
+    .role-doctor { background: var(--sky-mist); color: var(--sky-deep); }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+    .sidebar-nav { flex: 1; padding: 12px 10px; }
+    .nav-section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--slate);
+      padding: 12px 10px 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--slate);
+      font-size: 13.5px; font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+    .nav-item:hover { background: var(--mist); color: var(--ink); }
+    .nav-item.active { background: var(--lavender-mist); color: var(--lavender-deep); }
+    .nav-item i { font-size: 18px; flex-shrink: 0; }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: #f6f8fb;
-  color: #2d3436;
-}
+    .sidebar-footer {
+      border-top: 1px solid var(--divider);
+      padding: 14px 10px;
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 4px;
+    }
+    .sidebar-avatar {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, var(--lavender-deep), var(--sky-deep));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 13px; color: white;
+      flex-shrink: 0;
+    }
+    .sidebar-user-info { min-width: 0; }
+    .sidebar-user-name { font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user-email { font-size: 11px; color: var(--slate); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nav-item.logout { color: var(--critical); }
+    .nav-item.logout:hover { background: var(--critical-mist); color: var(--critical-deep); }
 
-/* NAVBAR */
-nav {
-  background: rgba(44, 62, 80, 0.85);
-  backdrop-filter: blur(10px);
-  padding: 14px 30px;
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
+    /* ── Main content ─────────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      background: var(--cloud);
+      border-bottom: 1px solid var(--divider);
+      padding: 0 28px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      box-shadow: 0 1px 0 var(--divider);
+    }
+    .topbar-left { display: flex; flex-direction: column; }
+    .page-title { font-size: 17px; font-weight: 800; color: var(--ink); }
+    .page-breadcrumb { font-size: 12px; color: var(--slate); }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
 
-nav .brand {
-  color: #fff;
-  font-size: 18px;
-  font-weight: 600;
-  margin-right: auto;
-  letter-spacing: 0.3px;
-}
+    .content { padding: 28px; flex: 1; }
 
-nav a {
-  color: #ecf0f1;
-  text-decoration: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: 0.2s ease;
-}
+    /* ── Cards ────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--cloud);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--divider);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .card-title { font-size: 15px; font-weight: 800; color: var(--ink); }
+    .card-body { padding: 22px; }
 
-nav a:hover {
-  background: rgba(255,255,255,0.1);
-}
+    /* ── KPI Cards ───────────────────────────────────────────────────── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .kpi-card {
+      background: var(--cloud);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--divider);
+      box-shadow: var(--shadow-card);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .kpi-icon {
+      width: 46px; height: 46px;
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 22px;
+    }
+    .kpi-icon-lavender { background: var(--lavender-mist); color: var(--lavender-deep); }
+    .kpi-icon-sky      { background: var(--sky-mist);      color: var(--sky-deep); }
+    .kpi-icon-critical { background: var(--critical-mist); color: var(--critical); }
+    .kpi-icon-warning  { background: var(--warning-mist);  color: var(--warning); }
+    .kpi-icon-stable   { background: var(--stable-mist);   color: var(--stable); }
+    .kpi-num { font-size: 28px; font-weight: 800; color: var(--ink); line-height: 1; }
+    .kpi-label { font-size: 12px; color: var(--slate); font-weight: 600; margin-top: 2px; }
 
-/* CONTAINER */
-.container {
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 0 20px;
-}
+    /* ── Severity badges ─────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    }
+    .badge-critical { background: var(--critical-mist); color: var(--critical-deep); }
+    .badge-warning  { background: var(--warning-mist);  color: var(--warning-deep); }
+    .badge-watch    { background: var(--watch-mist);     color: var(--watch); }
+    .badge-stable   { background: var(--stable-mist);    color: var(--stable-deep); }
 
-/* CARD */
-.card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 28px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-  margin-bottom: 24px;
-  transition: 0.2s ease;
-}
+    /* ── Table ───────────────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .data-table thead tr { background: var(--fog); }
+    .data-table th {
+      padding: 10px 16px; text-align: left;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; color: var(--slate);
+    }
+    .data-table tbody tr { border-top: 1px solid var(--divider); transition: background 0.12s; }
+    .data-table tbody tr:hover { background: var(--mist); }
+    .data-table td { padding: 12px 16px; color: var(--ink); vertical-align: middle; }
 
-.card:hover {
-  transform: translateY(-2px);
-}
+    /* ── Buttons ─────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: var(--lavender-deep); color: white; box-shadow: 0 4px 14px rgba(124,111,205,0.3); }
+    .btn-sky     { background: var(--sky-deep);      color: white; box-shadow: 0 4px 14px rgba(94,165,214,0.3); }
+    .btn-danger  { background: var(--critical);      color: white; box-shadow: 0 4px 14px rgba(220,38,38,0.2); }
+    .btn-ghost   { background: var(--fog); color: var(--ink); border: 1px solid var(--divider); }
+    .btn-sm      { padding: 6px 12px; font-size: 12px; }
 
-/* HEADINGS */
-h1 {
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
+    /* ── Form ────────────────────────────────────────────────────────── */
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-light); margin-bottom: 6px; letter-spacing: 0.3px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--divider);
+      background: var(--cloud);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--lavender-deep);
+      box-shadow: 0 0 0 3px rgba(124,111,205,0.12);
+    }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-h2 {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 12px;
-}
+    /* ── Flash messages ──────────────────────────────────────────────── */
+    .flash-bar {
+      padding: 12px 22px;
+      font-size: 13.5px; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .flash-bar.warning  { background: var(--warning-mist);  color: var(--warning-deep); }
+    .flash-bar.danger   { background: var(--critical-mist); color: var(--critical-deep); }
+    .flash-bar.success  { background: var(--stable-mist);   color: var(--stable-deep); }
+    .flash-bar.info     { background: var(--lavender-mist); color: var(--lavender-deep); }
 
-/* FORM */
-label {
-  font-size: 13px;
-  color: #6c757d;
-  margin: 12px 0 6px;
-  display: block;
-}
+    /* ── Search box ──────────────────────────────────────────────────── */
+    .search-wrap { position: relative; max-width: 320px; flex: 1; }
+    .search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 16px; pointer-events: none; }
+    .search-input {
+      width: 100%; padding: 9px 14px 9px 38px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--divider);
+      background: var(--cloud);
+      font-family: inherit; font-size: 13.5px; color: var(--ink);
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-input:focus { border-color: var(--lavender-deep); box-shadow: 0 0 0 3px rgba(124,111,205,0.10); }
 
-input, select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #e0e6ed;
-  font-size: 14px;
-  transition: 0.2s;
-  background: #f9fbfd;
-}
+    /* ── Score bar ───────────────────────────────────────────────────── */
+    .score-bar-wrap { width: 80px; background: var(--fog); border-radius: var(--radius-pill); height: 6px; overflow: hidden; }
+    .score-bar { height: 100%; border-radius: var(--radius-pill); transition: width 0.4s; }
+    .score-bar-critical { background: var(--critical); }
+    .score-bar-warning  { background: var(--warning); }
+    .score-bar-watch    { background: var(--watch); }
+    .score-bar-stable   { background: var(--stable); }
 
-input:focus, select:focus {
-  border-color: #4f8cff;
-  background: #fff;
-  outline: none;
-}
+    /* ── Avatar ──────────────────────────────────────────────────────── */
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, var(--lavender-deep), var(--sky-deep));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 13px; color: white; flex-shrink: 0;
+    }
+    .avatar-sky { background: linear-gradient(135deg, var(--sky-deep), var(--sky)); }
 
-/* BUTTONS */
-.btn {
-  display: inline-block;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #4f8cff, #6c5ce7);
-  color: white;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-}
-
-.btn-success {
-  background: linear-gradient(135deg, #00b894, #00cec9);
-  color: white;
-}
-
-.btn-full {
-  width: 100%;
-  margin-top: 16px;
-}
-
-/* MESSAGE */
-.msg {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 8px;
-  display: none;
-  font-size: 13px;
-}
-
-.msg.success {
-  background: #eafaf1;
-  color: #1e8449;
-}
-
-.msg.error {
-  background: #fdecea;
-  color: #c0392b;
-}
-
-/* TABLE */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-th, td {
-  padding: 12px;
-  border-bottom: 1px solid #eef1f5;
-}
-
-th {
-  text-align: left;
-  font-weight: 600;
-  color: #555;
-}
-
-tr:hover td {
-  background: #f9fbff;
-}
-
-/* BADGES */
-.badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.badge-doctor { background: #e3f2fd; color: #1e88e5; }
-.badge-patient { background: #e8f5e9; color: #2e7d32; }
-.badge-counselor { background: #fce4ec; color: #c2185b; }
-.badge-guardian { background: #fff8e1; color: #f57c00; }
-
-.badge-stable { background: #e8f5e9; color: #2e7d32; }
-.badge-watch { background: #e3f2fd; color: #1e88e5; }
-.badge-warning { background: #fff3e0; color: #ef6c00; }
-.badge-critical { background: #ffebee; color: #c62828; }
-
-/* GUARDIAN BOX */
-.guardian-box {
-  background: #f9fbfd;
-  border: 1px dashed #dfe6ed;
-  border-radius: 8px;
-  padding: 14px;
-  margin-top: 16px;
-  display: none;
-}
-
-/* STATS */
-.stat-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.stat-card {
-  flex: 1;
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-}
-
-.stat-card .num {
-  font-size: 30px;
-  font-weight: 600;
-}
-
-.stat-card .lbl {
-  font-size: 13px;
-  color: #888;
-}
-
-
+    /* ── Utility ─────────────────────────────────────────────────────── */
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .mt-1 { margin-top: 4px; }
+    .mt-4 { margin-top: 16px; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-6 { margin-bottom: 24px; }
+    .text-sm { font-size: 13px; }
+    .text-xs { font-size: 11px; }
+    .text-slate { color: var(--slate); }
+    .text-ink { color: var(--ink); }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    a { color: inherit; }
   </style>
-
-
-
+  {% block head_extra %}{% endblock %}
 </head>
 <body>
-  <nav>
-    <span class="brand"> MindCare Health Admin</span>
-    <a href="/">Dashboard</a>
-    <a href="/doctors">Doctors</a>
-    <a href="/doctor-dashboard">Doctor Dashboard</a>
-    <a href="/diary-reports">XAI Reports</a>
-    <a href="/counselors">Counselors</a>
-    <a href="/patients">Patients</a>
-  </nav>
-  <div class="container">
-    {% block content %}{% endblock %}
+
+  <!-- ── Sidebar ───────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon"><i class="ph-bold ph-heartbeat"></i></div>
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">MindCare</span>
+        {% if current_user.is_authenticated %}
+          <span class="sidebar-brand-role {% if current_user.role == 'admin' %}role-admin{% else %}role-doctor{% endif %}">
+            {{ current_user.role }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        {% if current_user.is_authenticated and current_user.role in ['admin', 'super_admin'] %}
+          <a href="{{ url_for('admin_routes.dashboard') }}"
+             class="nav-item {% if request.endpoint == 'admin_routes.dashboard' %}active{% endif %}">
+            <i class="ph-duotone ph-squares-four"></i> Dashboard
+          </a>
+
+          <div class="nav-section-label">People</div>
+          {% if current_user.role == 'super_admin' %}
+          <a href="{{ url_for('admin_routes.admins') }}"
+             class="nav-item {% if 'admin' in request.endpoint and request.endpoint != 'admin_routes.dashboard' %}active{% endif %}">
+            <i class="ph-duotone ph-crown"></i> Administrators
+          </a>
+          {% endif %}
+          <a href="{{ url_for('admin_routes.doctors') }}"
+           class="nav-item {% if 'doctor' in request.endpoint %}active{% endif %}">
+          <i class="ph-duotone ph-stethoscope"></i> Doctors
+        </a>
+        <a href="{{ url_for('admin_routes.counselors') }}"
+           class="nav-item {% if 'counselor' in request.endpoint %}active{% endif %}">
+          <i class="ph-duotone ph-chats"></i> Counselors
+        </a>
+        <a href="{{ url_for('admin_routes.patients') }}"
+           class="nav-item {% if request.endpoint in ['admin_routes.patients','admin_routes.create_patient_page','admin_routes.assign_doctor_page'] %}active{% endif %}">
+          <i class="ph-duotone ph-users"></i> Patients
+        </a>
+
+        <div class="nav-section-label">Clinical AI</div>
+        <a href="{{ url_for('admin_routes.analytics') }}"
+           class="nav-item {% if 'analytics' in request.endpoint %}active{% endif %}">
+          <i class="ph-duotone ph-brain"></i> XAI Analytics
+        </a>
+        <a href="{{ url_for('admin_routes.diary_reports') }}"
+           class="nav-item {% if 'diary' in request.endpoint %}active{% endif %}">
+          <i class="ph-duotone ph-notebook"></i> Diary Reports
+        </a>
+
+        <div class="nav-section-label">System</div>
+        <a href="{{ url_for('admin_routes.notifications') }}"
+           class="nav-item {% if 'notification' in request.endpoint %}active{% endif %}">
+          <i class="ph-duotone ph-bell"></i> Notifications
+        </a>
+        <a href="{{ url_for('admin_routes.api_console') }}"
+           class="nav-item {% if 'api_console' in request.endpoint %}active{% endif %}">
+          <i class="ph-duotone ph-code"></i> API Console
+        </a>
+
+      {% elif current_user.is_authenticated and current_user.role == 'doctor' %}
+        <div class="nav-section-label">My Portal</div>
+        <a href="{{ url_for('doctor_portal_routes.portal_dashboard') }}"
+           class="nav-item {% if request.endpoint == 'doctor_portal_routes.portal_dashboard' %}active{% endif %}">
+          <i class="ph-duotone ph-squares-four"></i> Dashboard
+        </a>
+        <a href="{{ url_for('doctor_portal_routes.portal_dashboard') }}"
+           class="nav-item {% if 'patient' in request.endpoint %}active{% endif %}">
+          <i class="ph-duotone ph-users"></i> My Patients
+        </a>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-footer">
+      {% if current_user.is_authenticated %}
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">{{ (current_user.name or 'U')[0].upper() }}</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">{{ current_user.name }}</div>
+            <div class="sidebar-user-email">{{ current_user.email }}</div>
+          </div>
+        </div>
+        <a href="{{ url_for('auth_routes.logout') }}" class="nav-item logout">
+          <i class="ph-bold ph-sign-out"></i> Sign Out
+        </a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- ── Main ──────────────────────────────────────────────────────── -->
+  <div class="main">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="page-title">{% block page_title %}Dashboard{% endblock %}</span>
+        <span class="page-breadcrumb">{% block breadcrumb %}{% endblock %}</span>
+      </div>
+      <div class="topbar-actions">
+        {% block header_actions %}{% endblock %}
+      </div>
+    </header>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash-bar {{ category }}">
+          <i class="ph-bold ph-info"></i> {{ message }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <!-- Page content -->
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer style="padding:16px 28px; border-top:1px solid var(--divider); display:flex; align-items:center; justify-content:space-between;">
+      <span class="text-xs text-slate"><strong style="color:var(--lavender-deep)">MindCare</strong> Hospital Administration</span>
+      <span class="text-xs text-slate">© {{ now().strftime('%Y') }}</span>
+    </footer>
   </div>
+
+  {% block scripts %}{% endblock %}
 </body>
 </html>

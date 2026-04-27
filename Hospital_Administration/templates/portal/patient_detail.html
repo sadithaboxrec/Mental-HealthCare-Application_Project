@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.name }} — XAI Detail — MindCare Portal{% endblock %}
+{% block page_title %}{{ patient.name }}{% endblock %}
+{% block breadcrumb %}XAI Clinical Analysis — Doctor Portal{% endblock %}
+
+{% block header_actions %}
+<div class="flex gap-2">
+  <a href="{{ url_for('doctor_portal_routes.portal_dashboard') }}" class="btn btn-ghost btn-sm">
+    <i class="ph-bold ph-arrow-left"></i> Back
+  </a>
+  <a href="{{ url_for('doctor_portal_routes.patient_report', patient_uid=patient.uid) }}" class="btn btn-primary btn-sm">
+    <i class="ph-bold ph-file-text"></i> Generate Report
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+{% set sev = summary.severity | default('stable') %}
+
+<div class="card mb-6" style="border:1.5px solid var(--{% if sev=='critical' %}critical{% elif sev=='warning' %}warning{% else %}lavender{% endif %});">
+  <div class="card-body" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;">
+    <div class="flex items-center gap-4">
+      <div class="avatar" style="width:56px;height:56px;font-size:22px;">{{ (patient.name or 'P')[0].upper() }}</div>
+      <div>
+        <div style="font-size:20px;font-weight:800;">{{ patient.name }}</div>
+        <div class="text-sm text-slate">{{ patient.email }}</div>
+        <div class="text-xs text-slate mt-1">{{ patient.gender or '' }}{% if patient.dob %} · DOB {{ patient.dob }}{% endif %}</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <div style="text-align:center;">
+        <div style="font-size:38px;font-weight:800;color:var(--{% if sev=='critical' %}critical{% elif sev=='warning' %}warning{% else %}stable{% endif %});">
+          {{ "%.1f" | format(summary.score | default(0)) }}
+        </div>
+        <div class="text-xs text-slate font-bold">XAI SCORE / 10</div>
+      </div>
+      <span class="badge badge-{{ sev }}" style="font-size:13px;padding:7px 18px;">{{ sev | title }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="form-grid-2">
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Data Signals</h2></div>
+    <div class="card-body">
+      {% for label, val in [
+        ('Diary Entries', summary.entryCount | default(0)),
+        ('Chat Messages', summary.chatMessageCount | default(0)),
+        ('Guardian Observations', summary.guardianObservationCount | default(0)),
+        ('Behavioral Signals', summary.behavioralSignalCount | default(0)),
+        ('Medication Events', summary.medicationEventCount | default(0)),
+        ('Last Entry', (summary.lastEntryAt or '—')[:10]),
+      ] %}
+      <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--divider);">
+        <span class="text-sm text-slate">{{ label }}</span>
+        <span class="font-bold text-sm">{{ val }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Source Breakdown</h2></div>
+    <div class="card-body">
+      {% for src, info in (summary.sourceBreakdown or {}).items() %}
+      <div style="margin-bottom:14px;">
+        <div class="flex items-center justify-between mb-1">
+          <span style="font-size:12px;font-weight:700;text-transform:capitalize;">{{ src }}</span>
+          <span class="font-bold text-sm">{{ "%.2f" | format(info.score | default(0)) }}</span>
+        </div>
+        <div style="background:var(--fog);border-radius:999px;height:6px;overflow:hidden;">
+          <div style="height:100%;border-radius:999px;width:{{ [info.score * 10, 100] | min }}%;background:var(--lavender-deep);"></div>
+        </div>
+      </div>
+      {% else %}<p class="text-slate text-sm" style="text-align:center;padding:20px;">No data</p>{% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <div class="card-header"><h2 class="card-title">Primary Risk Drivers</h2></div>
+  <div class="card-body">
+    {% if summary.primaryDrivers %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;">
+      {% for d in summary.primaryDrivers %}
+      <div style="background:var(--mist);border-radius:10px;padding:12px;border-left:3px solid var(--lavender-deep);">
+        <div class="flex items-center justify-between mb-1">
+          <span style="background:var(--lavender-mist);color:var(--lavender-deep);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;">{{ d.displayName or d.theme or '—' }}</span>
+          <span class="font-bold text-sm">{{ "%.2f" | format(d.scoreContribution | default(0)) }}</span>
+        </div>
+        <div class="text-xs text-slate" style="margin-top:6px;">{{ d.evidenceSnippet or '—' }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-slate text-sm" style="text-align:center;padding:24px;">No risk drivers detected.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card mt-4" style="background:var(--lavender-mist);border:1px solid var(--lavender);">
+  <div class="card-body" style="display:flex;gap:16px;align-items:flex-start;">
+    <i class="ph-duotone ph-lightbulb" style="font-size:28px;color:var(--lavender-deep);flex-shrink:0;"></i>
+    <div>
+      <div class="font-bold" style="color:var(--lavender-deep);margin-bottom:6px;">Recommended Clinical Action</div>
+      <div class="text-sm" style="color:var(--ink-light);line-height:1.6;">{{ summary.action or 'Continue monitoring.' }}</div>
+    </div>
+  </div>
+</div>
+
+{% if reports %}
+<div class="card mt-4">
+  <div class="card-header">
+    <h2 class="card-title">Past Clinical Reports</h2>
+    <a href="{{ url_for('doctor_portal_routes.patient_report', patient_uid=patient.uid) }}" class="btn btn-primary btn-sm"><i class="ph-bold ph-plus"></i> New Report</a>
+  </div>
+  <table class="data-table">
+    <thead><tr><th>Date</th><th>Type</th><th>Severity</th><th>Score</th><th>PDF</th></tr></thead>
+    <tbody>
+      {% for r in reports %}
+      <tr>
+        <td class="text-sm">{{ (r.generatedAt or '—')[:10] }}</td>
+        <td><span style="background:var(--fog);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;text-transform:capitalize;">{{ r.type or 'monthly' }}</span></td>
+        <td><span class="badge badge-{{ r.aggregatedSeverity | default('stable') }}">{{ r.aggregatedSeverity | default('stable') | title }}</span></td>
+        <td class="font-bold">{{ "%.1f" | format(r.score | default(0)) }}</td>
+        <td>{% if r.id %}<a href="{{ url_for('doctor_portal_routes.report_pdf', report_id=r.id) }}" class="btn btn-ghost btn-sm"><i class="ph-bold ph-download-simple"></i> PDF</a>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Assign Doctor — MindCare Admin{% endblock %}
+{% block page_title %}Assign Doctor{% endblock %}
+{% block breadcrumb %}Link a patient to their primary physician{% endblock %}
+
+{% block content %}
+<div style="max-width:540px;">
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Doctor Assignment</h2></div>
+    <div class="card-body">
+      <form id="assign-form">
+        <div class="form-group">
+          <label class="form-label">Patient</label>
+          <select name="patientUid" class="form-select" required>
+            <option value="">Select patient…</option>
+            {% for p in patients %}
+            <option value="{{ p.uid }}">{{ p.name }} — {{ p.email or p.uid[:8] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign to Doctor</label>
+          <select name="doctorUid" class="form-select" required>
+            <option value="">Select doctor…</option>
+            {% for d in doctors %}
+            <option value="{{ d.uid }}">{{ d.name }}{% if d.specialization %} — {{ d.specialization }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div id="form-error"   style="display:none;background:var(--critical-mist);color:var(--critical);padding:12px 16px;border-radius:10px;font-weight:600;margin-bottom:12px;"></div>
+        <div id="form-success" style="display:none;background:var(--stable-mist);color:var(--stable-deep);padding:12px 16px;border-radius:10px;font-weight:600;margin-bottom:12px;"></div>
+        <div class="flex gap-3 mt-4">
+          <button type="submit" class="btn btn-sky" id="submit-btn">
+            <i class="ph-bold ph-user-focus"></i> Assign
+          </button>
+          <a href="{{ url_for('admin_routes.patients') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('assign-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const err = document.getElementById('form-error');
+  const ok  = document.getElementById('form-success');
+  err.style.display = ok.style.display = 'none';
+  const data = Object.fromEntries(new FormData(this));
+  try {
+    const resp = await fetch('{{ url_for("admin_routes.assign_doctor") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+    });
+    const json = await resp.json();
+    if (resp.ok) { ok.textContent = 'Doctor assigned successfully!'; ok.style.display = 'block'; }
+    else         { err.textContent = json.error || 'Failed.'; err.style.display = 'block'; }
+  } catch { err.textContent = 'Network error.'; err.style.display = 'block'; }
+});
+</script>
+{% endblock %}

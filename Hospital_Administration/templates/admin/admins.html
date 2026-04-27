@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Administrators — MindCare Super Admin{% endblock %}
+{% block page_title %}Administrators{% endblock %}
+{% block breadcrumb %}Platform managers and administrative staff{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('admin_routes.create_admin_page') }}" class="btn btn-sky">
+  <i class="ph-bold ph-plus"></i> Add Admin
+</a>
+{% endblock %}
+
+{% block content %}
+<div x-data='{
+  search: "",
+  admins: {{ admins | tojson }},
+  get filtered() {
+    const q = this.search.toLowerCase().trim();
+    if (!q) return this.admins;
+    return this.admins.filter(a =>
+      (a.name || "").toLowerCase().includes(q) ||
+      (a.email || "").toLowerCase().includes(q)
+    );
+  }
+}'>
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <div class="search-wrap">
+      <i class="ph-duotone ph-magnifying-glass"></i>
+      <input type="text" x-model="search" class="search-input" placeholder="Search by name, email..." />
+    </div>
+    <span class="text-sm text-slate"><span x-text="filtered.length" class="font-bold text-ink"></span> of {{ admins | length }} admins</span>
+  </div>
+
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Admin</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="a in filtered" :key="a.uid">
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-lavender-mist flex items-center justify-center text-lavender-deep font-bold" x-text="(a.name || '?')[0].toUpperCase()"></div>
+                <div class="font-semibold text-ink" x-text="a.name || 'Unnamed'"></div>
+              </div>
+            </td>
+            <td x-text="a.email"></td>
+            <td x-text="a.phone || 'N/A'"></td>
+            <td>
+              <span x-show="a.accountStatus === 'disabled'" style="background:var(--critical-mist);color:var(--critical);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;">Disabled</span>
+              <span x-show="a.accountStatus !== 'disabled'" style="background:var(--stable-mist);color:var(--stable-deep);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;">Active</span>
+            </td>
+            <td class="text-right">
+              <!-- Action Menu -->
+              <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                <button @click="open = !open" class="text-slate hover:text-ink transition">
+                  <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+                </button>
+                <div x-show="open" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-divider py-2 z-10 text-left">
+                  <button @click="alert('Edit logic here')" class="w-full px-4 py-2 text-sm text-ink hover:bg-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-pencil-simple"></i> Edit Details
+                  </button>
+                  <button @click="alert('Disable logic here')" class="w-full px-4 py-2 text-sm text-ink hover:bg-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-prohibit"></i> Disable Account
+                  </button>
+                  <div class="h-px bg-divider my-1"></div>
+                  <button @click="alert('Delete logic here')" class="w-full px-4 py-2 text-sm text-critical hover:bg-critical-mist flex items-center gap-2">
+                    <i class="ph-duotone ph-trash"></i> Delete Account
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </template>
+        <tr x-show="filtered.length === 0">
+          <td colspan="4" class="text-center py-12 text-slate">No administrators found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

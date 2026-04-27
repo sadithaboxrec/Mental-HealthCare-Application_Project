@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}API Console — MindCare Admin{% endblock %}
+{% block page_title %}API Console{% endblock %}
+{% block breadcrumb %}Swagger UI — all registered API endpoints{% endblock %}
+
+{% block head_extra %}
+<style>
+  .swagger-frame { border: none; width: 100%; height: calc(100vh - 120px); border-radius: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="overflow:hidden;">
+  <div class="card-header">
+    <h2 class="card-title">MindCare Hospital API — Swagger UI</h2>
+    <a href="/swagger/" target="_blank" class="btn btn-ghost btn-sm">
+      <i class="ph-bold ph-arrow-square-out"></i> Open Full Screen
+    </a>
+  </div>
+  <iframe src="/swagger/" class="swagger-frame"></iframe>
+</div>
+{% endblock %}

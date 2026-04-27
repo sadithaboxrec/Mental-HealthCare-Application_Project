@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard — Dr. {{ doctor.name }} — MindCare{% endblock %}
+{% block page_title %}My Patients{% endblock %}
+{% block breadcrumb %}Dr. {{ doctor.name }} — clinical overview{% endblock %}
+
+{% block content %}
+<!-- Stats row -->
+{% set critical_count = patients | selectattr('severity','eq','critical') | list | length %}
+{% set warning_count  = patients | selectattr('severity','eq','warning')  | list | length %}
+<div class="kpi-grid" style="margin-bottom:24px;">
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-lavender"><i class="ph-duotone ph-users"></i></div>
+    <div><div class="kpi-num">{{ patients | length }}</div><div class="kpi-label">Total Patients</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-critical"><i class="ph-duotone ph-siren"></i></div>
+    <div><div class="kpi-num">{{ critical_count }}</div><div class="kpi-label">Critical Alerts</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-warning"><i class="ph-duotone ph-warning"></i></div>
+    <div><div class="kpi-num">{{ warning_count }}</div><div class="kpi-label">Warnings</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-stable"><i class="ph-duotone ph-check-circle"></i></div>
+    <div>
+      <div class="kpi-num">{{ patients | rejectattr('severity','in',['critical','warning']) | list | length }}</div>
+      <div class="kpi-label">Stable</div>
+    </div>
+  </div>
+</div>
+
+<!-- Patient list -->
+{% if not patients %}
+<div class="card" style="text-align:center;padding:60px;">
+  <i class="ph-duotone ph-users" style="font-size:48px;color:var(--divider);display:block;margin-bottom:16px;"></i>
+  <p class="font-bold" style="font-size:16px;margin-bottom:8px;">No patients assigned yet</p>
+  <p class="text-slate text-sm">Contact the admin to have patients assigned to your account.</p>
+</div>
+{% else %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">
+  {% for p in patients %}
+  {% set sev = p.severity | default('stable') %}
+  <div class="card" style="border-left:4px solid var(--{% if sev=='critical' %}critical{% elif sev=='warning' %}warning{% elif sev=='watch' %}watch{% else %}stable{% endif %});transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.boxShadow='var(--shadow-card)'">
+    <div class="card-body">
+      <!-- Patient header -->
+      <div class="flex items-center gap-3" style="margin-bottom:14px;">
+        <div class="avatar" style="width:44px;height:44px;font-size:17px;background:{% if sev=='critical' %}var(--critical){% elif sev=='warning' %}var(--warning){% else %}linear-gradient(135deg,var(--lavender-deep),var(--sky-deep)){% endif %}">
+          {{ (p.name or 'P')[0].upper() }}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div class="font-extrabold truncate">{{ p.name }}</div>
+          <div class="text-xs text-slate truncate">{{ p.email or p.uid[:10] }}</div>
+        </div>
+        <span class="badge badge-{{ sev }}">
+          <i class="ph-bold ph-{% if sev=='critical' %}siren{% elif sev=='warning' %}warning{% else %}check-circle{% endif %}"></i>
+          {{ sev | title }}
+        </span>
+      </div>
+
+      <!-- Score bar -->
+      <div class="flex items-center gap-3" style="margin-bottom:14px;">
+        <div style="flex:1;background:var(--fog);border-radius:999px;height:8px;overflow:hidden;">
+          <div style="height:100%;border-radius:999px;width:{{ [p.score * 10, 100] | min }}%;background:{% if sev=='critical' %}var(--critical){% elif sev=='warning' %}var(--warning){% else %}var(--stable){% endif %};transition:width 0.5s;"></div>
+        </div>
+        <div style="font-size:20px;font-weight:800;color:{% if sev=='critical' %}var(--critical){% elif sev=='warning' %}var(--warning){% else %}var(--stable){% endif %};">
+          {{ "%.1f" | format(p.score | default(0)) }}
+        </div>
+      </div>
+
+      <!-- Top drivers -->
+      {% if p.primaryDrivers %}
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">
+        {% for d in p.primaryDrivers %}
+        <span style="background:var(--lavender-mist);color:var(--lavender-deep);font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;">
+          {{ d.displayName or d.theme or '—' }}
+        </span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Footer stats + actions -->
+      <div class="flex items-center justify-between">
+        <div class="flex gap-3">
+          {% if p.openAlertCount > 0 %}
+          <span style="background:var(--critical-mist);color:var(--critical);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;">
+            <i class="ph-bold ph-warning-circle"></i> {{ p.openAlertCount }} alert{{ 's' if p.openAlertCount != 1 }}
+          </span>
+          {% endif %}
+          <span class="text-xs text-slate">{{ "%.0f%%" | format((p.confidence | default(0)) * 100) }} conf.</span>
+        </div>
+        <div class="flex gap-2">
+          <a href="{{ url_for('doctor_portal_routes.patient_detail', patient_uid=p.uid) }}" class="btn btn-ghost btn-sm">
+            <i class="ph-bold ph-chart-line"></i> XAI
+          </a>
+          <a href="{{ url_for('doctor_portal_routes.patient_report', patient_uid=p.uid) }}" class="btn btn-primary btn-sm">
+            <i class="ph-bold ph-file-text"></i> Report
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

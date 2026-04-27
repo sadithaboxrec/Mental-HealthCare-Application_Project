@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Diary Detail — {{ summary.patientName }} — MindCare{% endblock %}
+{% block page_title %}Diary Report: {{ summary.patientName or '—' }}{% endblock %}
+{% block breadcrumb %}AI diary analysis — individual patient{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('admin_routes.diary_reports') }}" class="btn btn-ghost btn-sm">
+  <i class="ph-bold ph-arrow-left"></i> Back
+</a>
+{% endblock %}
+
+{% block content %}
+{% set sev = summary.severity | default('stable') %}
+<div class="form-grid-2">
+  <!-- Summary card -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Patient Summary</h2></div>
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <div class="avatar" style="width:52px;height:52px;font-size:20px;">{{ (summary.patientName or 'P')[0].upper() }}</div>
+        <div>
+          <div class="font-extrabold" style="font-size:16px;">{{ summary.patientName }}</div>
+          <span class="badge badge-{{ sev }}" style="margin-top:4px;">{{ sev | title }}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        {% for label, val in [
+          ('XAI Score', "%.1f" | format(summary.score | default(0))),
+          ('Confidence', "%.0f%%" | format((summary.confidence | default(0)) * 100)),
+          ('Diary Entries', summary.entryCount | default(0)),
+          ('Chat Messages', summary.chatMessageCount | default(0)),
+          ('Last Entry', (summary.lastEntryAt or '—')[:10]),
+          ('Analysis Window', (summary.startDate or '—') + ' → ' + (summary.endDate or '—')),
+        ] %}
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--divider);">
+          <span class="text-sm text-slate">{{ label }}</span>
+          <span class="font-bold text-sm">{{ val }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme counts -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Theme Counts</h2></div>
+    <div class="card-body">
+      {% if summary.themeCounts %}
+      {% for theme, count in (summary.themeCounts | dictsort(by='value', reverse=true))[:10] %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--divider);">
+        <span style="background:var(--lavender-mist);color:var(--lavender-deep);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;">{{ theme }}</span>
+        <span class="font-bold">{{ count }}</span>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p class="text-slate text-sm" style="text-align:center;padding:24px;">No themes detected.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Evidence snippets -->
+<div class="card mt-4">
+  <div class="card-header"><h2 class="card-title">Evidence Snippets</h2></div>
+  <div class="card-body">
+    {% if summary.evidence %}
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      {% for ev in summary.evidence[:8] %}
+      <div style="background:var(--mist);border-radius:10px;padding:12px 16px;border-left:3px solid var(--lavender-deep);">
+        <div class="text-xs text-slate mb-1">
+          {{ ev.source or 'diary' }} · {{ (ev.timestamp or '')[:10] }}
+          {% if ev.severity %} · <span class="badge badge-{{ ev.severity }}">{{ ev.severity }}</span>{% endif %}
+        </div>
+        <div class="text-sm">{{ ev.text or ev.snippet or '—' }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-slate text-sm" style="text-align:center;padding:24px;">No evidence snippets available.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
