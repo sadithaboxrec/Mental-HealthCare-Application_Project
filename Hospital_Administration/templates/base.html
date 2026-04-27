@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Mental Health Admin</title>
-  <style>
+  <!-- <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #f0f2f5; }
     nav {
@@ -55,6 +55,10 @@
     .badge-patient   { background: #d5f5e3; color: #1e8449; }
     .badge-counselor { background: #f9ebea; color: #922b21; }
     .badge-guardian  { background: #fef9e7; color: #7d6608; }
+    .badge-stable    { background: #d5f5e3; color: #1e8449; }
+    .badge-watch     { background: #d6eaf8; color: #1a5276; }
+    .badge-warning   { background: #fef9e7; color: #7d6608; }
+    .badge-critical  { background: #f9ebea; color: #922b21; }
     .guardian-box {
       background: #fafafa; border: 1px solid #e0e0e0;
       border-radius: 6px; padding: 12px; margin-top: 16px; display: none;
@@ -67,13 +71,256 @@
     }
     .stat-card .num { font-size: 32px; font-weight: bold; color: #2c3e50; }
     .stat-card .lbl { font-size: 13px; color: #888; margin-top: 4px; }
+  </style> -->
+
+
+  <style>
+
+
+
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f6f8fb;
+  color: #2d3436;
+}
+
+/* NAVBAR */
+nav {
+  background: rgba(44, 62, 80, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 14px 30px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+nav .brand {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  margin-right: auto;
+  letter-spacing: 0.3px;
+}
+
+nav a {
+  color: #ecf0f1;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+nav a:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* CONTAINER */
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* CARD */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+  transition: 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* HEADINGS */
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+/* FORM */
+label {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 12px 0 6px;
+  display: block;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e6ed;
+  font-size: 14px;
+  transition: 0.2s;
+  background: #f9fbfd;
+}
+
+input:focus, select:focus {
+  border-color: #4f8cff;
+  background: #fff;
+  outline: none;
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f8cff, #6c5ce7);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  color: white;
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* MESSAGE */
+.msg {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 8px;
+  display: none;
+  font-size: 13px;
+}
+
+.msg.success {
+  background: #eafaf1;
+  color: #1e8449;
+}
+
+.msg.error {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #eef1f5;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+}
+
+tr:hover td {
+  background: #f9fbff;
+}
+
+/* BADGES */
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge-doctor { background: #e3f2fd; color: #1e88e5; }
+.badge-patient { background: #e8f5e9; color: #2e7d32; }
+.badge-counselor { background: #fce4ec; color: #c2185b; }
+.badge-guardian { background: #fff8e1; color: #f57c00; }
+
+.badge-stable { background: #e8f5e9; color: #2e7d32; }
+.badge-watch { background: #e3f2fd; color: #1e88e5; }
+.badge-warning { background: #fff3e0; color: #ef6c00; }
+.badge-critical { background: #ffebee; color: #c62828; }
+
+/* GUARDIAN BOX */
+.guardian-box {
+  background: #f9fbfd;
+  border: 1px dashed #dfe6ed;
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 16px;
+  display: none;
+}
+
+/* STATS */
+.stat-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.stat-card .num {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.stat-card .lbl {
+  font-size: 13px;
+  color: #888;
+}
+
+
   </style>
+
+
+
 </head>
 <body>
   <nav>
-    <span class="brand">🏥 Mental Health Admin</span>
+    <span class="brand"> MindCare Health Admin</span>
     <a href="/">Dashboard</a>
     <a href="/doctors">Doctors</a>
+    <a href="/doctor-dashboard">Doctor Dashboard</a>
+    <a href="/diary-reports">XAI Reports</a>
     <a href="/counselors">Counselors</a>
     <a href="/patients">Patients</a>
   </nav>

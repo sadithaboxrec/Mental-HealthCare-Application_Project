@@ -42,10 +42,14 @@ class _PatientMedicationsState extends State<PatientMedications> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F8FD),
       appBar: AppBar(
-        title: const Text(
-          'My Medicines',
-          style: TextStyle(fontWeight: FontWeight.w700),
+
+        title: const Center(
+          child: Text(
+            'My Medicines',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
+
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black87,

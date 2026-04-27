@@ -450,6 +450,17 @@ import '../../components/test_section_title.dart';
 import 'test_mood_response.dart';
 import 'test_diary_screen.dart';
 
+
+
+import '../../../core/models/appointment.dart';
+import '../../../core/controllers/notification_controller.dart';
+import '../../components/test_notification_trigger.dart';
+
+
+
+import '../../../core/controllers/notification_inbox_controller.dart';
+import 'test_notification_screen.dart';
+
 class TestPatientHome extends StatefulWidget {
   final AppUser user;
   const TestPatientHome({super.key, required this.user});
@@ -465,6 +476,9 @@ class _TestPatientHomeState extends State<TestPatientHome> {
   int          _moodSlider  = 3;
   String       _selectedSleep = '';
 
+  // for appointments
+  Appointment? _nextAppointment;
+
   @override
   void initState() {
     super.initState();
@@ -477,6 +491,13 @@ class _TestPatientHomeState extends State<TestPatientHome> {
       final results = await Future.wait([
         PatientController.getTodayLog(widget.user.uid),
         PatientController.getActivePrescription(widget.user.uid),
+
+
+    // for appointments
+       PatientController.getNextAppointment(widget.user.uid),
+
+
+
       ]);
       if (mounted) setState(() {
         _todayLog     = results[0] as DailyLog?;
@@ -565,11 +586,92 @@ class _TestPatientHomeState extends State<TestPatientHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
+
+
+
+      ////////////////////////////////////////
+      // adding for local notifications save//
+      ///////////////////////////////////////
+
+
+      // appBar: AppBar(
+      //   title: Text('Hi, ${widget.user.name} 👋'),
+      //   backgroundColor: Colors.green,
+      //   foregroundColor: Colors.white,
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.book_outlined),
+      //       tooltip: 'Diary',
+      //       onPressed: () => Navigator.push(context, MaterialPageRoute(
+      //         builder: (_) => TestDiaryScreen(user: widget.user),
+      //       )),
+      //     ),
+      //     IconButton(
+      //       icon: const Icon(Icons.logout),
+      //       onPressed: () async {
+      //         await AuthController.logout();
+      //         if (context.mounted) NavigationHelper.goToLogin(context);
+      //       },
+      //     ),
+      //   ],
+      // ),
+
+
+
       appBar: AppBar(
         title: Text('Hi, ${widget.user.name} 👋'),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         actions: [
+          // Notification bell with badge
+          StreamBuilder<int>(
+            stream: NotificationInboxController
+                .unreadCountStream(widget.user.uid),
+            builder: (context, snap) {
+              final count = snap.data ?? 0;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TestNotificationScreen(
+                          uid: widget.user.uid,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 6,
+                      top:   6,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color:  Colors.red,
+                          shape:  BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth:  18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          count > 99 ? '99+' : '$count',
+                          style: const TextStyle(
+                            color:    Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+
           IconButton(
             icon: const Icon(Icons.book_outlined),
             tooltip: 'Diary',
@@ -586,6 +688,13 @@ class _TestPatientHomeState extends State<TestPatientHome> {
           ),
         ],
       ),
+
+
+
+
+
+
+
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -674,6 +783,72 @@ class _TestPatientHomeState extends State<TestPatientHome> {
             ),
 
             const SizedBox(height: 24),
+
+
+
+            //    for notifications
+
+            const SizedBox(height: 16),
+            TestNotificationTrigger(
+              patientName:     widget.user.name,
+              prescription:    _prescription,
+              nextAppointment: _nextAppointment,
+              isGuardian:      false,
+            ),
+
+
+            const SizedBox(height: 8),
+
+//  to force save fcm token
+            ElevatedButton(
+              onPressed: () async {
+                await NotificationController.saveToken(widget.user.uid);
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Token save attempted')));
+              },
+              child: const Text('Save FCM Token'),
+            ),
+
+
+            const SizedBox(height: 16),
+            Row(children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => NotificationController.testAlarm(),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text('Test Alarm',
+                      style: TextStyle(color: Colors.white, fontSize: 11)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => NotificationController.testGeneral(),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                  child: const Text('Test General',
+                      style: TextStyle(color: Colors.white, fontSize: 11)),
+                ),
+              ),
+            ]),
+
+
+
+
+
+
+
+            //  test ends
+
+
+
+
+
+
+
+
+
+
+
 
             // ── Water Intake ──────────────────────
             Row(children: [

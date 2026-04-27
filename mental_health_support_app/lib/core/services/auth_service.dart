@@ -2,27 +2,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/app_user.dart';
 
-
 // communicate with firebase
 
 class AuthService {
   static final _auth = FirebaseAuth.instance;
-  static final _db   = FirebaseFirestore.instance;
+  static final _db = FirebaseFirestore.instance;
 
   // ── Login
   static Future<AuthResult> login(String email, String password) async {
     try {
-          // firebase login
+      // firebase login
       final credential = await _auth.signInWithEmailAndPassword(
-        email:    email.trim(),
+        email: email.trim(),
         password: password.trim(),
       );
-           // fetch user from firestore
+      // fetch user from firestore
       final user = await _fetchUser(credential.user!.uid);
 
       // AuthResult returns a clean objects
 
-           // validations
+      // validations
       if (user == null) {
         await _auth.signOut();
         return AuthResult.failure('Account data not found. Contact admin.');
@@ -32,9 +31,9 @@ class AuthService {
         await _auth.signOut();
         return AuthResult.failure('No role assigned. Contact admin.');
       }
-// return the user
+      // return the user
       return AuthResult.success(user);
-// or failed to find the user
+      // or failed to find the user
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(_mapError(e.code));
     } catch (e) {
@@ -103,15 +102,11 @@ class AuthService {
 // ── Result wrapper ────────────────────────────────────────
 // Controller reads this, never raw exceptions
 class AuthResult {
-  final bool    isSuccess;
+  final bool isSuccess;
   final AppUser? user;
-  final String?  error;
+  final String? error;
 
-  const AuthResult._({
-    required this.isSuccess,
-    this.user,
-    this.error,
-  });
+  const AuthResult._({required this.isSuccess, this.user, this.error});
 
   factory AuthResult.success(AppUser user) =>
       AuthResult._(isSuccess: true, user: user);

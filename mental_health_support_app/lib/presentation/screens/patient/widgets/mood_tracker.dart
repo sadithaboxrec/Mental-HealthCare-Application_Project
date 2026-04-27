@@ -95,7 +95,7 @@ class MoodTracker extends StatelessWidget {
                   ),
                 ),
                 child: Slider(
-                  value: currentMood.toDouble(),
+                  value: currentMood.toDouble().clamp(1.0, 5.0),
                   min: 1,
                   max: 5,
                   divisions: 4,
@@ -111,7 +111,7 @@ class MoodTracker extends StatelessWidget {
   }
 
   Widget _moodIcon(int index, IconData icon, Color moodColor) {
-    final active = currentMood == index;
+    final active = currentMood.clamp(1, 5) == index;
     return AnimatedScale(
       scale: active ? 1.92 : 0.62,
       duration: const Duration(milliseconds: 300),

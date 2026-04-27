@@ -114,6 +114,7 @@ class PatientService {
         'updatedAt':       now,
       });
     }
+
   }
 
   //  Mark medication taken
@@ -141,20 +142,65 @@ class PatientService {
         'updatedAt':       now,
       });
     }
+
+    await _db.collection('medication_adherence_events').add({
+      'patientUid': patientUid,
+      'prescriptionId': null,
+      'medicineId': null,
+      'slot': 'daily',
+      'scheduledAt': now,
+      'status': taken ? 'taken' : 'missed',
+      'reportedBy': 'patient',
+      'reportedAt': now,
+      'guardianVerification': null,
+    });
   }
 
   // Save diary entry
   static Future<void> saveDiaryEntry(
       String patientUid, String content) async {
+    await createDiaryEntry(patientUid, content);
+  }
 
-    // create multiple reports in the database
+  static Future<String> createDiaryEntry(
+      String patientUid, String content) async {
+    final now = DateTime.now().toIso8601String();
 
-    await _db.collection('diary_entries').add({
+    final doc = await _db.collection('diary_entries').add({
       'patientUid': patientUid,
-      'content':    content,
-      'createdAt':  DateTime.now().toIso8601String(),
+      'content': content,
+      'createdAt': now,
+      'updatedAt': now,
     });
 
+    return doc.id;
+  }
+
+  static Future<List<DiaryEntry>> getDiaryEntries(String patientUid) async {
+    final snap = await _db
+        .collection('diary_entries')
+        .where('patientUid', isEqualTo: patientUid)
+        .get();
+
+    final entries = snap.docs
+        .map((d) => DiaryEntry.fromMap(d.id, d.data()))
+        .where((entry) => entry.content.trim().isNotEmpty)
+        .toList();
+
+    entries.sort((a, b) => b.sortKey.compareTo(a.sortKey));
+    return entries.take(20).toList();
+  }
+
+  static Future<void> updateDiaryEntry(
+      String entryId, String content) async {
+    await _db.collection('diary_entries').doc(entryId).update({
+      'content': content,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  static Future<void> deleteDiaryEntry(String entryId) async {
+    await _db.collection('diary_entries').doc(entryId).delete();
   }
 
   //  Get  prescription of patient

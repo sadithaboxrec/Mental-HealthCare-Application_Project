@@ -6,7 +6,6 @@ class AppUser {
   final String role;
   final String createdAt;
 
-
   // user object
   // Represents a user from Firestore
   // Converts raw Firebase data to Dart object
@@ -24,11 +23,11 @@ class AppUser {
 
   factory AppUser.fromMap(Map<String, dynamic> map) {
     return AppUser(
-      uid:       map['uid']       ?? '',
-      name:      map['name']      ?? '',
-      email:     map['email']     ?? '',
-      phone:     map['phone']     ?? '',
-      role:      map['role']      ?? '',
+      uid: map['uid'] ?? '',
+      name: map['name'] ?? '',
+      email: map['email'] ?? '',
+      phone: map['phone'] ?? '',
+      role: map['role'] ?? '',
       createdAt: map['createdAt'] ?? '',
     );
   }
@@ -36,8 +35,8 @@ class AppUser {
   // Helpers
   // helps to make UI logic cleaner
 
-  bool get isDoctor    => role == 'doctor';
-  bool get isPatient   => role == 'patient';
+  bool get isDoctor => role == 'doctor';
+  bool get isPatient => role == 'patient';
   bool get isCounselor => role == 'counselor';
-  bool get isGuardian  => role == 'guardian';
+  bool get isGuardian => role == 'guardian';
 }

@@ -235,6 +235,13 @@ import '../../../core/navigation/navigation_helper.dart';
 import '../../components/test_button.dart';
 import '../../components/test_section_title.dart';
 
+
+
+// for notifications
+import '../../../core/controllers/notification_controller.dart';
+import '../../components/test_notification_trigger.dart';
+
+
 class TestGuardianHome extends StatefulWidget {
   final AppUser user;
   const TestGuardianHome({super.key, required this.user});
@@ -252,6 +259,9 @@ class _TestGuardianHomeState extends State<TestGuardianHome> {
   bool _savingMed = false;
   int    _selectedMood  = 1;
   final  _obsCtrl       = TextEditingController();
+
+
+  String _patientName = '';
 
   @override
   void initState() {
@@ -274,6 +284,11 @@ class _TestGuardianHomeState extends State<TestGuardianHome> {
           GuardianController.getTodayLog(widget.user.uid),
           GuardianController.getPatientPrescription(_patientUid!),
           GuardianController.getPatientNextAppointment(_patientUid!),
+
+
+          GuardianController.fetchNameByUid(_patientUid!),
+
+
         ]);
         _todayLog        = results[0] as Map<String,dynamic>?;
         _prescription    = results[1] as Prescription?;
@@ -393,6 +408,59 @@ class _TestGuardianHomeState extends State<TestGuardianHome> {
                     : const Text('No upcoming appointment',
                     style: TextStyle(color: Colors.grey)),
               ),
+
+
+
+
+              //  for notifications
+
+
+              const SizedBox(height: 16),
+              TestNotificationTrigger(
+                patientName:     _patientName,
+                prescription:    _prescription,
+                nextAppointment: _nextAppointment,
+                isGuardian:      true,
+              ),
+
+
+
+              const SizedBox(height: 16),
+              Row(children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => NotificationController.testAlarm(),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('Test Alarm',
+                        style: TextStyle(color: Colors.white, fontSize: 11)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => NotificationController.testGeneral(),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                    child: const Text('Test General',
+                        style: TextStyle(color: Colors.white, fontSize: 11)),
+                  ),
+                ),
+              ]),
+              //  test ends
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
               const SizedBox(height: 20),
 

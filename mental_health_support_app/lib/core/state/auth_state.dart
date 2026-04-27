@@ -1,6 +1,5 @@
 import '../models/app_user.dart';
 
-
 //  stores the currently logged-in user in RAM.
 
 // static AppUser? _currentUser;
