@@ -4,29 +4,20 @@ import '../models/appointment.dart';
 
 import 'package:flutter/foundation.dart'; // for debugging
 
-
 // 1.  Daily Log Management
 // One log per guardian per day,Update if exists, create if not
 // 2. aPatient doctor Fetching
 // 3. Prescription and Appointment getting
 
-
-
-
 class GuardianService {
-
   static final _db = FirebaseFirestore.instance;
 
   static String _today() {
-
     final n = DateTime.now();
-    return '${n.year}-${n.month.toString().padLeft(2,'0')}-${n.day.toString().padLeft(2,'0')}';
-
+    return '${n.year}-${n.month.toString().padLeft(2, '0')}-${n.day.toString().padLeft(2, '0')}';
   }
 
-  static Future<Map<String, dynamic>?> _getTodayLog(
-      String guardianUid) async {
-
+  static Future<Map<String, dynamic>?> _getTodayLog(String guardianUid) async {
     final snap = await _db
         .collection('guardian_logs')
         .where('guardianUid', isEqualTo: guardianUid)
@@ -35,74 +26,76 @@ class GuardianService {
         .get();
     if (snap.docs.isEmpty) return null;
     return {'id': snap.docs.first.id, ...snap.docs.first.data()};
-
   }
 
   static Future<void> updateMood(
-      String guardianUid, String patientUid, int mood) async {
-
-
-    final now      = DateTime.now().toIso8601String();
+    String guardianUid,
+    String patientUid,
+    int mood,
+  ) async {
+    final now = DateTime.now().toIso8601String();
     final existing = await _getTodayLog(guardianUid);
 
     // Get today's log
     // if exists  update mood or create new log
 
     if (existing != null) {
-      await _db.collection('guardian_logs')
-          .doc(existing['id']).update({'mood': mood, 'updatedAt': now});
+      await _db.collection('guardian_logs').doc(existing['id']).update({
+        'mood': mood,
+        'updatedAt': now,
+      });
     } else {
       await _db.collection('guardian_logs').add({
-        'guardianUid':  guardianUid,
-        'patientUid':   patientUid,
-        'date':         _today(),
-        'mood':         mood,
-        'waterIntake':  0,
+        'guardianUid': guardianUid,
+        'patientUid': patientUid,
+        'date': _today(),
+        'mood': mood,
+        'waterIntake': 0,
         'observations': '',
-        'createdAt':    now,
-        'updatedAt':    now,
+        'createdAt': now,
+        'updatedAt': now,
       });
-
     }
-
   }
 
   static Future<void> addWater(
-      String guardianUid, String patientUid, int glasses) async {
-
-    final now      = DateTime.now().toIso8601String();
+    String guardianUid,
+    String patientUid,
+    int glasses,
+  ) async {
+    final now = DateTime.now().toIso8601String();
     final existing = await _getTodayLog(guardianUid);
-    final current  = existing?['waterIntake'] as int? ?? 0;
+    final current = existing?['waterIntake'] as int? ?? 0;
 
     // Get today's log
     // Read current water Add new glasses
     // Update OR create
 
     if (existing != null) {
-      await _db.collection('guardian_logs')
-          .doc(existing['id'])
-          .update({'waterIntake': current + glasses, 'updatedAt': now});
+      await _db.collection('guardian_logs').doc(existing['id']).update({
+        'waterIntake': current + glasses,
+        'updatedAt': now,
+      });
     } else {
       await _db.collection('guardian_logs').add({
-        'guardianUid':  guardianUid,
-        'patientUid':   patientUid,
-        'date':         _today(),
-        'mood':         0,
-        'waterIntake':  glasses,
+        'guardianUid': guardianUid,
+        'patientUid': patientUid,
+        'date': _today(),
+        'mood': 0,
+        'waterIntake': glasses,
         'observations': '',
-        'createdAt':    now,
-        'updatedAt':    now,
+        'createdAt': now,
+        'updatedAt': now,
       });
     }
-
   }
 
-
-
   static Future<void> updateObservations(
-      String guardianUid, String patientUid, String observations) async {
-
-    final now      = DateTime.now().toIso8601String();
+    String guardianUid,
+    String patientUid,
+    String observations,
+  ) async {
+    final now = DateTime.now().toIso8601String();
     final existing = await _getTodayLog(guardianUid);
 
     // Saves notes for the day
@@ -110,27 +103,26 @@ class GuardianService {
     // Create if not
 
     if (existing != null) {
-      await _db.collection('guardian_logs')
-          .doc(existing['id'])
-          .update({'observations': observations, 'updatedAt': now});
+      await _db.collection('guardian_logs').doc(existing['id']).update({
+        'observations': observations,
+        'updatedAt': now,
+      });
     } else {
       await _db.collection('guardian_logs').add({
-        'guardianUid':  guardianUid,
-        'patientUid':   patientUid,
-        'date':         _today(),
-        'mood':         0,
-        'waterIntake':  0,
+        'guardianUid': guardianUid,
+        'patientUid': patientUid,
+        'date': _today(),
+        'mood': 0,
+        'waterIntake': 0,
         'observations': observations,
-        'createdAt':    now,
-        'updatedAt':    now,
+        'createdAt': now,
+        'updatedAt': now,
       });
     }
-
   }
 
   // Finds which patient belongs to guardian
   static Future<String?> getPatientUid(String guardianUid) async {
-
     final doc = await _db.collection('guardians').doc(guardianUid).get();
     if (!doc.exists) return null;
     return doc.data()?['patientUid'] as String?;
@@ -143,14 +135,15 @@ class GuardianService {
   }
 
   static Future<Map<String, dynamic>?> getTodayLogPublic(
-      String guardianUid) async {
+    String guardianUid,
+  ) async {
     return await _getTodayLog(guardianUid);
   }
 
-
-// get the prescription of patient
+  // get the prescription of patient
   static Future<Prescription?> getPatientActivePrescription(
-      String patientUid) async {
+    String patientUid,
+  ) async {
     final snap = await _db
         .collection('prescriptions')
         .where('patientUid', isEqualTo: patientUid)
@@ -162,17 +155,15 @@ class GuardianService {
     return Prescription.fromMap(snap.docs.first.id, snap.docs.first.data());
   }
 
-
   // get the nearest upcoming appointment
 
   static Future<Appointment?> getPatientNextAppointment(
-      String patientUid) async {
-
+    String patientUid,
+  ) async {
     try {
       final today = DateTime.now();
       final todayStr =
-          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day
-          .toString().padLeft(2, '0')}';
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       final snap = await _db
           .collection('appointments')
           .where('patientUid', isEqualTo: patientUid)
@@ -187,44 +178,46 @@ class GuardianService {
       debugPrint('getPatientNextAppointment error: $e');
       return null;
     }
-
   }
-
 
   // to update medications whether the patient it took or not
 
   static Future<void> updateMedication(
-      String guardianUid, String patientUid, bool taken) async {
-    final now      = DateTime.now().toIso8601String();
+    String guardianUid,
+    String patientUid,
+    bool taken,
+  ) async {
+    final now = DateTime.now().toIso8601String();
     final existing = await _getTodayLog(guardianUid);
 
     if (existing != null) {
-      await _db.collection('guardian_logs')
-          .doc(existing['id'])
-          .update({'medicationTaken': taken, 'updatedAt': now});
+      await _db.collection('guardian_logs').doc(existing['id']).update({
+        'medicationTaken': taken,
+        'updatedAt': now,
+      });
     } else {
       await _db.collection('guardian_logs').add({
-        'guardianUid':    guardianUid,
-        'patientUid':     patientUid,
-        'date':           _today(),
-        'mood':           0,
-        'waterIntake':    0,
-        'observations':   '',
+        'guardianUid': guardianUid,
+        'patientUid': patientUid,
+        'date': _today(),
+        'mood': 0,
+        'waterIntake': 0,
+        'observations': '',
         'medicationTaken': taken,
-        'createdAt':      now,
-        'updatedAt':      now,
+        'createdAt': now,
+        'updatedAt': now,
       });
     }
 
     await _db.collection('medication_adherence_events').add({
-      'patientUid':      patientUid,
-      'prescriptionId':  null,
-      'medicineId':      null,
-      'slot':            'daily',
-      'scheduledAt':     now,
-      'status':          taken ? 'verified_taken' : 'missed',
-      'reportedBy':      'guardian',
-      'reportedAt':      now,
+      'patientUid': patientUid,
+      'prescriptionId': null,
+      'medicineId': null,
+      'slot': 'daily',
+      'scheduledAt': now,
+      'status': taken ? 'verified_taken' : 'missed',
+      'reportedBy': 'guardian',
+      'reportedAt': now,
       'guardianVerification': {
         'guardianUid': guardianUid,
         'medicationTaken': taken,
@@ -232,16 +225,10 @@ class GuardianService {
     });
   }
 
-
-
   // for notifications
   static Future<String?> getPatientName(String patientUid) async {
     final doc = await _db.collection('patients').doc(patientUid).get();
     if (!doc.exists) return null;
     return doc.data()?['name'] as String?;
   }
-
-
-
-
 }

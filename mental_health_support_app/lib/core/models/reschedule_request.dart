@@ -1,5 +1,4 @@
 class RescheduleRequest {
-
   final String id;
   final String patientUid;
   final String doctorUid;
@@ -10,7 +9,6 @@ class RescheduleRequest {
   final String createdAt;
 
   const RescheduleRequest({
-
     required this.id,
     required this.patientUid,
     required this.doctorUid,
@@ -19,32 +17,27 @@ class RescheduleRequest {
     required this.reason,
     required this.status,
     required this.createdAt,
-
   });
 
   factory RescheduleRequest.fromMap(String id, Map<String, dynamic> m) =>
-
       RescheduleRequest(
-
-        id:             id,
-        patientUid:     m['patientUid']     ?? '',
-        doctorUid:      m['doctorUid']      ?? '',
-        appointmentId:  m['appointmentId']  ?? '',
-        requestedDate:  m['requestedDate']  ?? '',
-        reason:         m['reason']         ?? '',
-        status:         m['status']         ?? 'pending',
-        createdAt:      m['createdAt']      ?? '',
-
+        id: id,
+        patientUid: m['patientUid'] ?? '',
+        doctorUid: m['doctorUid'] ?? '',
+        appointmentId: m['appointmentId'] ?? '',
+        requestedDate: m['requestedDate'] ?? '',
+        reason: m['reason'] ?? '',
+        status: m['status'] ?? 'pending',
+        createdAt: m['createdAt'] ?? '',
       );
 
   Map<String, dynamic> toMap() => {
-
-    'patientUid':    patientUid,
-    'doctorUid':     doctorUid,
+    'patientUid': patientUid,
+    'doctorUid': doctorUid,
     'appointmentId': appointmentId,
     'requestedDate': requestedDate,
-    'reason':        reason,
-    'status':        status,
-    'createdAt':     createdAt,
+    'reason': reason,
+    'status': status,
+    'createdAt': createdAt,
   };
 }

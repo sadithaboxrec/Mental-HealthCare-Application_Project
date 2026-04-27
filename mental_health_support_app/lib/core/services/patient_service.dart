@@ -159,14 +159,21 @@ class PatientService {
   // Save diary entry
   static Future<void> saveDiaryEntry(
       String patientUid, String content) async {
+    await createDiaryEntry(patientUid, content);
+  }
+
+  static Future<String> createDiaryEntry(
+      String patientUid, String content) async {
     final now = DateTime.now().toIso8601String();
 
-    await _db.collection('diary_entries').add({
+    final doc = await _db.collection('diary_entries').add({
       'patientUid': patientUid,
       'content': content,
       'createdAt': now,
       'updatedAt': now,
     });
+
+    return doc.id;
   }
 
   static Future<List<DiaryEntry>> getDiaryEntries(String patientUid) async {

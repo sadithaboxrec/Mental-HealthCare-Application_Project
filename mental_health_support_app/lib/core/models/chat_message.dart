@@ -13,19 +13,18 @@ class ChatMessage {
     required this.timestamp,
   });
 
-  factory ChatMessage.fromMap(String id, Map<String, dynamic> m) =>
-      ChatMessage(
-        id:         id,
-        senderUid:  m['senderUid']  ?? '',
-        senderRole: m['senderRole'] ?? '',
-        text:       m['text']       ?? '',
-        timestamp:  m['timestamp']  ?? '',
-      );
+  factory ChatMessage.fromMap(String id, Map<String, dynamic> m) => ChatMessage(
+    id: id,
+    senderUid: m['senderUid'] ?? '',
+    senderRole: m['senderRole'] ?? '',
+    text: m['text'] ?? '',
+    timestamp: m['timestamp'] ?? '',
+  );
 
   Map<String, dynamic> toMap() => {
-    'senderUid':  senderUid,
+    'senderUid': senderUid,
     'senderRole': senderRole,
-    'text':       text,
-    'timestamp':  timestamp,
+    'text': text,
+    'timestamp': timestamp,
   };
 }

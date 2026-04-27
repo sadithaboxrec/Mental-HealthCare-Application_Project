@@ -6,20 +6,19 @@ import '../models/reschedule_request.dart';
 import '../models/daily_log.dart';
 
 class DoctorService {
-
   static final _db = FirebaseFirestore.instance;
 
   // date sets
   static String _today() {
     final n = DateTime.now();
-    return '${n.year}-${n.month.toString().padLeft(2,'0')}-${n.day.toString().padLeft(2,'0')}';
+    return '${n.year}-${n.month.toString().padLeft(2, '0')}-${n.day.toString().padLeft(2, '0')}';
   }
 
   //  New patients (assigned but no prescription yet)
 
   static Future<List<Map<String, dynamic>>> getNewPatients(
-      String doctorUid) async {
-
+    String doctorUid,
+  ) async {
     final snap = await _db
         .collection('patients')
         .where('assignedDoctor', isEqualTo: doctorUid)
@@ -43,8 +42,8 @@ class DoctorService {
 
   //  Today's appointments
   static Future<List<Appointment>> getTodayAppointments(
-      String doctorUid) async {
-
+    String doctorUid,
+  ) async {
     final snap = await _db
         .collection('appointments')
         .where('doctorUid', isEqualTo: doctorUid)
@@ -52,25 +51,19 @@ class DoctorService {
         .orderBy('time')
         .get();
 
-    return snap.docs
-        .map((d) => Appointment.fromMap(d.id, d.data()))
-        .toList();
-
+    return snap.docs.map((d) => Appointment.fromMap(d.id, d.data())).toList();
   }
-
-
 
   // All patients of the doctor that logged in
   static Future<List<Map<String, dynamic>>> getAllPatients(
-      String doctorUid) async {
-
+    String doctorUid,
+  ) async {
     final snap = await _db
         .collection('patients')
         .where('assignedDoctor', isEqualTo: doctorUid)
         .get();
 
     return snap.docs.map((d) => d.data()).toList();
-
   }
 
   // Save dr's prescription
@@ -94,17 +87,16 @@ class DoctorService {
 
   //  Mark appointment status as scedule complete etc
   static Future<void> updateAppointmentStatus(
-      String appointmentId, String status) async {
-
-    await _db
-        .collection('appointments')
-        .doc(appointmentId)
-        .update({'status': status});
+    String appointmentId,
+    String status,
+  ) async {
+    await _db.collection('appointments').doc(appointmentId).update({
+      'status': status,
+    });
   }
 
   //  Get active prescription for patient
-  static Future<Prescription?> getActivePrescription(
-      String patientUid) async {
+  static Future<Prescription?> getActivePrescription(String patientUid) async {
     final snap = await _db
         .collection('prescriptions')
         .where('patientUid', isEqualTo: patientUid)
@@ -119,32 +111,35 @@ class DoctorService {
 
     prescriptions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return prescriptions.first;
-
   }
 
   //  Get all prescriptions for patient
   static Future<List<Prescription>> getAllPrescriptions(
-      String patientUid) async {
+    String patientUid,
+  ) async {
     final snap = await _db
         .collection('prescriptions')
         .where('patientUid', isEqualTo: patientUid)
         .orderBy('createdAt', descending: true)
         .get();
-    return snap.docs
-        .map((d) => Prescription.fromMap(d.id, d.data()))
-        .toList();
+    return snap.docs.map((d) => Prescription.fromMap(d.id, d.data())).toList();
   }
 
   // Get daily logs between dates
   static Future<List<DailyLog>> getDailyLogs(
-      String patientUid, String from, String to) async {
+    String patientUid,
+    String from,
+    String to,
+  ) async {
     final snap = await _db
         .collection('daily_logs')
         .where('patientUid', isEqualTo: patientUid)
         .get();
     final logs = snap.docs
         .map((d) => DailyLog.fromMap(d.id, d.data()))
-        .where((log) => log.date.compareTo(from) >= 0 && log.date.compareTo(to) <= 0)
+        .where(
+          (log) => log.date.compareTo(from) >= 0 && log.date.compareTo(to) <= 0,
+        )
         .toList();
 
     logs.sort((a, b) => a.date.compareTo(b.date));
@@ -152,7 +147,10 @@ class DoctorService {
   }
 
   static Future<List<DiaryEntry>> getDiaryEntries(
-      String patientUid, String from, String to) async {
+    String patientUid,
+    String from,
+    String to,
+  ) async {
     final snap = await _db
         .collection('diary_entries')
         .where('patientUid', isEqualTo: patientUid)
@@ -179,7 +177,8 @@ class DoctorService {
   }
 
   static Future<Map<String, dynamic>?> getXaiAnalysisSnapshot(
-      String patientUid) async {
+    String patientUid,
+  ) async {
     final directDoc = await _db
         .collection('analytics_snapshots')
         .doc(patientUid)
@@ -217,19 +216,19 @@ class DoctorService {
 
   //  Get guardian logs between dates
   static Future<List<Map<String, dynamic>>> getGuardianLogs(
-      String patientUid, String from, String to) async {
+    String patientUid,
+    String from,
+    String to,
+  ) async {
     final snap = await _db
         .collection('guardian_logs')
         .where('patientUid', isEqualTo: patientUid)
         .get();
 
-    final logs = snap.docs
-        .map((d) => d.data())
-        .where((log) {
-          final date = (log['date'] as String?) ?? '';
-          return date.compareTo(from) >= 0 && date.compareTo(to) <= 0;
-        })
-        .toList();
+    final logs = snap.docs.map((d) => d.data()).where((log) {
+      final date = (log['date'] as String?) ?? '';
+      return date.compareTo(from) >= 0 && date.compareTo(to) <= 0;
+    }).toList();
 
     logs.sort((a, b) {
       final aDate = (a['date'] as String?) ?? '';
@@ -246,12 +245,12 @@ class DoctorService {
     return snap.docs.map((d) => d.data()['name'] as String).toList();
   }
 
-
   // need more testing here
 
   // Get pending reschedule requests
   static Future<List<RescheduleRequest>> getPendingReschedules(
-      String doctorUid) async {
+    String doctorUid,
+  ) async {
     final snap = await _db
         .collection('reschedule_requests')
         .where('doctorUid', isEqualTo: doctorUid)
@@ -264,15 +263,16 @@ class DoctorService {
 
   //  Approve reschedule
   static Future<void> approveReschedule(
-      RescheduleRequest req, String newDate) async {
-    await _db
-        .collection('reschedule_requests')
-        .doc(req.id)
-        .update({'status': 'approved'});
+    RescheduleRequest req,
+    String newDate,
+  ) async {
+    await _db.collection('reschedule_requests').doc(req.id).update({
+      'status': 'approved',
+    });
 
-    await _db
-        .collection('appointments')
-        .doc(req.appointmentId)
-        .update({'date': newDate, 'status': 'rescheduled'});
+    await _db.collection('appointments').doc(req.appointmentId).update({
+      'date': newDate,
+      'status': 'rescheduled',
+    });
   }
 }

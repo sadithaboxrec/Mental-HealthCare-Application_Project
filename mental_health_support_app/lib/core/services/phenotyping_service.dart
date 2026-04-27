@@ -24,7 +24,23 @@ class PhenotypingService {
     });
   }
 
-  static Future<void> collectCoarseGeolocation(AppUser user) async {
+  static Future<void> recordTypingCadence(
+    AppUser user,
+    Map<String, dynamic> metrics,
+  ) async {
+    if (!user.isPatient) return;
+
+    final now = DateTime.now().toUtc();
+    await _db.collection('app_activity_logs').add({
+      'patientUid': user.uid,
+      'eventType': 'typing_cadence',
+      'timestamp': now.toIso8601String(),
+      'source': 'flutter_app',
+      'metrics': metrics,
+    });
+  }
+
+  static Future<void> collectPreciseGeolocation(AppUser user) async {
     if (!user.isPatient) return;
 
     final permissionOk = await _ensureLocationPermission();
@@ -39,19 +55,21 @@ class PhenotypingService {
     }
 
     final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.low,
+      desiredAccuracy: LocationAccuracy.high,
       timeLimit: const Duration(seconds: 12),
     );
     final now = DateTime.now().toUtc();
     final prefs = await SharedPreferences.getInstance();
     final key = 'coarse_location_samples_${user.uid}';
     final samples = _readSamples(prefs, key);
-    samples.add(_LocationSample(
-      latitude: position.latitude,
-      longitude: position.longitude,
-      timestamp: now,
-      coarseAreaHash: _coarseAreaHash(position.latitude, position.longitude),
-    ));
+    samples.add(
+      _LocationSample(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        timestamp: now,
+        coarseAreaHash: _coarseAreaHash(position.latitude, position.longitude),
+      ),
+    );
     final trimmed = samples.length > _sampleLimit
         ? samples.sublist(samples.length - _sampleLimit)
         : samples;
@@ -63,6 +81,8 @@ class PhenotypingService {
     await _db.collection('geolocations').add({
       'patientUid': user.uid,
       'timestamp': now.toIso8601String(),
+      'latitude': position.latitude,
+      'longitude': position.longitude,
       'mobilityRadius': _mobilityRadiusKm(trimmed),
       'homeStayRatio': _homeStayRatio(trimmed),
       'coarseAreaHash': trimmed.last.coarseAreaHash,
@@ -79,7 +99,7 @@ class PhenotypingService {
       return;
     }
     try {
-      await collectCoarseGeolocation(user);
+      await collectPreciseGeolocation(user);
     } catch (_) {
       try {
         await _db.collection('app_activity_logs').add({
@@ -104,7 +124,10 @@ class PhenotypingService {
         permission == LocationPermission.always;
   }
 
-  static List<_LocationSample> _readSamples(SharedPreferences prefs, String key) {
+  static List<_LocationSample> _readSamples(
+    SharedPreferences prefs,
+    String key,
+  ) {
     final raw = prefs.getString(key);
     if (raw == null || raw.isEmpty) return [];
     try {
@@ -128,12 +151,15 @@ class PhenotypingService {
     if (samples.length < 2) return 0;
     final avgLat =
         samples.fold<double>(0, (sum, sample) => sum + sample.latitude) /
-            samples.length;
+        samples.length;
     final avgLon =
         samples.fold<double>(0, (sum, sample) => sum + sample.longitude) /
-            samples.length;
+        samples.length;
     final maxDistance = samples
-        .map((sample) => _distanceKm(avgLat, avgLon, sample.latitude, sample.longitude))
+        .map(
+          (sample) =>
+              _distanceKm(avgLat, avgLon, sample.latitude, sample.longitude),
+        )
         .fold<double>(0, max);
     return double.parse(maxDistance.toStringAsFixed(2));
   }
@@ -148,11 +174,17 @@ class PhenotypingService {
     return double.parse((maxCount / samples.length).toStringAsFixed(2));
   }
 
-  static double _distanceKm(double lat1, double lon1, double lat2, double lon2) {
+  static double _distanceKm(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
     const earthRadiusKm = 6371.0;
     final dLat = _toRadians(lat2 - lat1);
     final dLon = _toRadians(lon2 - lon1);
-    final a = sin(dLat / 2) * sin(dLat / 2) +
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
         cos(_toRadians(lat1)) *
             cos(_toRadians(lat2)) *
             sin(dLon / 2) *
@@ -186,9 +218,9 @@ class _LocationSample {
   }
 
   Map<String, dynamic> toJson() => {
-        'latitude': latitude,
-        'longitude': longitude,
-        'timestamp': timestamp.toIso8601String(),
-        'coarseAreaHash': coarseAreaHash,
-      };
+    'latitude': latitude,
+    'longitude': longitude,
+    'timestamp': timestamp.toIso8601String(),
+    'coarseAreaHash': coarseAreaHash,
+  };
 }
