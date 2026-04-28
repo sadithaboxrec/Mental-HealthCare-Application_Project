@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 @pragma('vm:entry-point')
@@ -163,7 +163,8 @@ class NotificationService {
     required String title,
     required String body,
     String type = 'general',
-    String? uid, // ← add this optional param
+    String? uid,
+    IconData? icon,
   }) async {
     final bool isAlarm = type == 'medication' || type == 'appointment';
 
@@ -199,6 +200,7 @@ class NotificationService {
           'title': title,
           'body': body,
           'type': type,
+          if (icon != null) 'icon': _iconToMap(icon),
           'isRead': false,
           'createdAt': DateTime.now().toIso8601String(),
         });
@@ -207,4 +209,10 @@ class NotificationService {
       }
     }
   }
+
+  static Map<String, dynamic> _iconToMap(IconData icon) => {
+    'codePoint': icon.codePoint,
+    'fontFamily': icon.fontFamily,
+    'fontPackage': icon.fontPackage,
+  };
 }

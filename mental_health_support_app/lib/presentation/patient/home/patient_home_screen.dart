@@ -811,7 +811,7 @@ class _MedicationCard extends StatelessWidget {
             child: Switch.adaptive(
               value: taken,
               onChanged: onToggle,
-              activeColor: AppColors.mintDeep,
+              activeTrackColor: AppColors.mintDeep,
             ),
           ),
         ],
