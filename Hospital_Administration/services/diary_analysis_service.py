@@ -160,13 +160,18 @@ def _build_diary_summary(patient_uid, analyzed_entries):
 
 
 def _persist_diary_snapshot(summary):
-    db.collection("diary_analysis_snapshots").document(summary["patientUid"]).set(summary)
+    db.collection("diary_analysis_snapshots").document(summary["patientUid"]).set({
+        **summary,
+        "type": "diary_analysis",
+    })
 
 
-def analyze_patient_diary(patient_uid, persist=False, notify=False):
-    entries = fetch_diary_entries(patient_uid)
+def analyze_patient_diary(patient_uid, persist=False, notify=False, start=None, end=None):
+    entries = fetch_diary_entries(patient_uid, start=start, end=end)
     analyzed_entries = analyze_diary_entries(entries)
     summary = _build_diary_summary(patient_uid, analyzed_entries)
+    summary["startDate"] = start.date().isoformat() if start else None
+    summary["endDate"] = end.date().isoformat() if end else None
     summary["clinicalAlertId"] = None
     summary["doctorNotificationId"] = None
     if persist:
@@ -174,7 +179,7 @@ def analyze_patient_diary(patient_uid, persist=False, notify=False):
     return summary
 
 
-def analyze_all_patient_diaries(persist=False, notify=False):
+def analyze_all_patient_diaries(persist=False, notify=False, start=None, end=None):
     patient_docs = db.collection("patients").stream()
     summaries = []
 
@@ -188,6 +193,8 @@ def analyze_all_patient_diaries(persist=False, notify=False):
             patient_uid,
             persist=persist,
             notify=notify,
+            start=start,
+            end=end,
         )
         summary["patientName"] = patient.get("name", "Unknown Patient")
         summary["assignedDoctor"] = patient.get("assignedDoctor")

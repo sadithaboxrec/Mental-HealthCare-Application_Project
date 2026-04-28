@@ -35,7 +35,7 @@ def analyze_appointment_signals(appointments, reschedules):
         signals.append(scorer.signal_item(
             "appointment_no_show",
             "Appointment no-show or overdue scheduled visit",
-            3,
+            scorer.get_behavioral_weight("appointment_no_show"),
             "appointments",
             timestamp=source.get("date", ""),
             snippet="Appointment attendance risk was detected.",
@@ -46,7 +46,7 @@ def analyze_appointment_signals(appointments, reschedules):
         signals.append(scorer.signal_item(
             "appointment_avoidance",
             "Repeated appointment rescheduling",
-            2,
+            scorer.get_behavioral_weight("appointment_avoidance"),
             "appointments",
             timestamp=source.get("createdAt") or source.get("date", ""),
             snippet="Repeated appointment rescheduling was detected.",

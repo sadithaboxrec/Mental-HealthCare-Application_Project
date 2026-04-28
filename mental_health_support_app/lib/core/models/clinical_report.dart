@@ -1,12 +1,13 @@
+
 import 'package:mental_health_support_app/core/services/api_service.dart';
 
-/// Strongly-typed model for a clinical report returned by the backend.
 class ClinicalReport {
+
   final String id;
   final String patientUid;
   final String patientName;
   final String? doctorUid;
-  final String type; // daily | weekly | monthly | yearly | custom
+  final String type; // daily , weekly , monthly , yearly , custom
   final String startDate;
   final String endDate;
   final String generatedAt;
@@ -26,7 +27,8 @@ class ClinicalReport {
   final String? engineVersion;
   final String? lexiconVersion;
 
-  const ClinicalReport({
+  const ClinicalReport ( {
+
     required this.id,
     required this.patientUid,
     required this.patientName,
@@ -50,37 +52,42 @@ class ClinicalReport {
     required this.evidence,
     this.engineVersion,
     this.lexiconVersion,
-  });
 
-  factory ClinicalReport.fromMap(Map<String, dynamic> m) {
-    return ClinicalReport(
-      id: m['id'] as String? ?? '',
-      patientUid: m['patientUid'] as String? ?? '',
-      patientName: m['patientName'] as String? ?? 'Unknown',
-      doctorUid: m['doctorUid'] as String?,
-      type: m['type'] as String? ?? 'monthly',
-      startDate: m['startDate'] as String? ?? '',
-      endDate: m['endDate'] as String? ?? '',
-      generatedAt: m['generatedAt'] as String? ?? '',
-      aggregatedSeverity: m['aggregatedSeverity'] as String? ?? 'stable',
-      band: (m['band'] as num?)?.toInt() ?? 0,
-      score: m['score'] as num? ?? 0,
-      textConcernScore: m['textConcernScore'] as num? ?? 0,
-      confidence: (m['confidence'] as num?)?.toDouble() ?? 0.0,
-      summary: m['summary'] as Map<String, dynamic>? ?? {},
-      moodTrend: m['moodTrend'] as List<dynamic>? ?? [],
-      adherenceSummary: m['adherenceSummary'] as Map<String, dynamic>? ?? {},
-      appointmentSummary:
-          m['appointmentSummary'] as Map<String, dynamic>? ?? {},
-      topDrivers: m['topDrivers'] as List<dynamic>? ?? [],
-      themeCounts: m['themeCounts'] as Map<String, dynamic>? ?? {},
-      sourceBreakdown: m['sourceBreakdown'] as Map<String, dynamic>? ?? {},
-      evidence: m['evidence'] as List<dynamic>? ?? [],
-      engineVersion: m['engineVersion'] as String?,
-      lexiconVersion: m['lexiconVersion'] as String?,
+  } );
+
+  factory ClinicalReport.fromMap( Map<String , dynamic> m ) {
+
+    return ClinicalReport (
+
+      id : m[ 'id' ] as String? ?? '',
+      patientUid : m[ 'patientUid' ] as String? ?? '',
+      patientName : m[ 'patientName' ] as String? ?? 'Unknown',
+      doctorUid : m[ 'doctorUid' ] as String?,
+      type : m[ 'type' ] as String? ?? 'monthly',
+      startDate : m[ 'startDate' ] as String? ?? '',
+      endDate : m[ 'endDate' ] as String? ?? '',
+      generatedAt : m[ 'generatedAt' ] as String? ?? '',
+      aggregatedSeverity : m[ 'aggregatedSeverity' ] as String? ?? 'stable',
+      band : ( m[ 'band' ] as num? )?.toInt( ) ?? 0,
+      score : m[ 'score' ] as num? ?? 0,
+      textConcernScore : m[ 'textConcernScore' ] as num? ?? 0,
+      confidence : ( m[ 'confidence' ] as num? )?.toDouble( ) ?? 0.0,
+      summary : m[ 'summary' ] as Map<String, dynamic>? ?? { },
+      moodTrend : m[ 'moodTrend' ] as List<dynamic>? ?? [ ],
+      adherenceSummary : m[ 'adherenceSummary' ] as Map<String, dynamic>? ?? { },
+      appointmentSummary :
+        m[ 'appointmentSummary' ] as Map<String , dynamic>? ?? { },
+      topDrivers : m[ 'topDrivers' ] as List<dynamic>? ?? [ ],
+      themeCounts : m[ 'themeCounts' ] as Map<String, dynamic>? ?? { },
+      sourceBreakdown: m[ 'sourceBreakdown' ] as Map<String, dynamic>? ?? { },
+      evidence : m[ 'evidence' ] as List<dynamic>? ?? [ ],
+      engineVersion : m[ 'engineVersion' ] as String?,
+      lexiconVersion : m[ 'lexiconVersion' ] as String?,
+    
     );
+  
   }
 
-  String get pdfUrl =>
-      '${ApiService.backendBaseUrl}/api/clinical-reports/$id/pdf';
+  String get pdfUrl => '${ApiService.backendBaseUrl}/api/clinical-reports/$id/pdf';
+  
 }

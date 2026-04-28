@@ -1,0 +1,122 @@
+[
+  {
+    "id": "dept_adult_psychiatry",
+    "name": "Adult Psychiatry",
+    "type": "Medical",
+    "description": "Comprehensive inpatient and outpatient psychiatric evaluation, diagnosis, and pharmacological management for adults presenting with the full spectrum of mental health disorders."
+  },
+  {
+    "id": "dept_child_adolescent",
+    "name": "Child & Adolescent Psychiatry",
+    "type": "Medical",
+    "description": "Specialized psychiatric care for children and teenagers, addressing neurodevelopmental, mood, anxiety, and behavioral disorders using family-centered, developmentally appropriate treatment approaches."
+  },
+  {
+    "id": "dept_addiction_medicine",
+    "name": "Addiction Medicine",
+    "type": "Medical",
+    "description": "Multidisciplinary evaluation and treatment of substance use disorders including alcohol, opioids, stimulants, and polysubstance dependencies, incorporating medically assisted treatment (MAT) and psychosocial rehabilitation."
+  },
+  {
+    "id": "dept_perinatal_womens",
+    "name": "Perinatal & Women's Mental Health",
+    "type": "Medical",
+    "description": "Specialized psychiatric care addressing mood, anxiety, and psychotic disorders during pregnancy and the postpartum period, with a focus on balancing pharmacological safety with maternal and fetal wellbeing."
+  },
+  {
+    "id": "dept_forensic_psychiatry",
+    "name": "Forensic Psychiatry",
+    "type": "Medical",
+    "description": "Clinical and consultative services at the intersection of psychiatry and law, including competency evaluations, criminal responsibility assessments, and management of mentally disordered offenders."
+  },
+  {
+    "id": "dept_geriatric_psychiatry",
+    "name": "Geriatric Psychiatry",
+    "type": "Medical",
+    "description": "Psychiatric care for adults aged 65 and above, specializing in late-life depression, dementia-related behavioral symptoms, and neuropsychiatric sequelae of neurodegenerative and chronic medical conditions."
+  },
+  {
+    "id": "dept_psychosis_center",
+    "name": "Schizophrenia & Psychosis Center",
+    "type": "Medical",
+    "description": "Dedicated center for the treatment of schizophrenia, schizoaffective disorder, delusional disorder, and first-episode psychosis using Coordinated Specialty Care (CSC) and evidence-based antipsychotic pharmacotherapy."
+  },
+  {
+    "id": "dept_sleep_neuropsychiatry",
+    "name": "Sleep Medicine & Neuropsychiatry",
+    "type": "Medical",
+    "description": "Diagnosis and integrated treatment of sleep disorders (insomnia, OSA, narcolepsy) and neuropsychiatric conditions, leveraging polysomnography, CBT-I, and psychopharmacological management."
+  },
+  {
+    "id": "dept_mood_bipolar",
+    "name": "Mood Disorders & Bipolar Center",
+    "type": "Medical",
+    "description": "Expert clinical management of unipolar and bipolar mood disorders through mood-stabilizing pharmacotherapy, psychoeducation, neuromodulation review, and long-term relapse prevention programming."
+  },
+  {
+    "id": "dept_eating_disorders",
+    "name": "Eating Disorders & Body Image Program",
+    "type": "Medical",
+    "description": "Multidisciplinary treatment program for anorexia nervosa, bulimia nervosa, binge eating disorder, and ARFID, providing medical stabilization, nutritional rehabilitation, and evidence-based psychotherapy."
+  },
+  {
+    "id": "dept_trauma_ptsd",
+    "name": "Trauma & PTSD Center",
+    "type": "Therapy",
+    "description": "Specialized center delivering first-line trauma treatments including Prolonged Exposure (PE), EMDR, and Cognitive Processing Therapy (CPT) for PTSD, complex trauma, and adverse childhood experience sequelae."
+  },
+  {
+    "id": "dept_substance_recovery",
+    "name": "Substance Use & Recovery Program",
+    "type": "Counseling",
+    "description": "Recovery-oriented counseling and group therapy program for individuals with substance use disorders, utilizing DBT-based relapse prevention, Motivational Interviewing, and community support models."
+  },
+  {
+    "id": "dept_adolescent_therapy",
+    "name": "Adolescent Therapy Center",
+    "type": "Therapy",
+    "description": "Individual and family therapy services for children, adolescents, and young adults addressing anxiety, depression, school-related difficulties, and the psychosocial impact of cultural and identity transitions."
+  },
+  {
+    "id": "dept_ocd_anxiety",
+    "name": "OCD & Anxiety Disorders Clinic",
+    "type": "Therapy",
+    "description": "Intensive outpatient clinic specializing in Exposure and Response Prevention (ERP) for OCD and its spectrum, alongside evidence-based cognitive and acceptance-based treatments for all anxiety disorder presentations."
+  },
+  {
+    "id": "dept_family_couples",
+    "name": "Family & Couples Therapy",
+    "type": "Counseling",
+    "description": "Therapeutic services for couples and family units using Emotionally Focused Therapy (EFT), the Gottman Method, and systemic family therapy approaches to resolve conflict and strengthen relational bonds."
+  },
+  {
+    "id": "dept_lgbtq_care",
+    "name": "LGBTQ+ Affirming Care Program",
+    "type": "Counseling",
+    "description": "Affirming, culturally competent mental health services for lesbian, gay, bisexual, transgender, queer, and intersex individuals, addressing minority stress, gender dysphoria, and LGBTQ+-specific identity and family issues."
+  },
+  {
+    "id": "dept_neuropsychology",
+    "name": "Neuropsychology & Cognitive Rehabilitation",
+    "type": "Medical",
+    "description": "Comprehensive neuropsychological assessment and cognitive rehabilitation services following TBI, stroke, and neurodegenerative disease, providing detailed cognitive profiles to guide rehabilitation planning."
+  },
+  {
+    "id": "dept_grief_bereavement",
+    "name": "Grief & Bereavement Center",
+    "type": "Counseling",
+    "description": "Individual therapy and peer-led support groups for individuals navigating acute grief, complicated grief disorder, and end-of-life care challenges, using evidence-based bereavement models."
+  },
+  {
+    "id": "dept_crisis_acute",
+    "name": "Crisis Intervention & Acute Care",
+    "type": "Counseling",
+    "description": "24/7 acute psychiatric crisis stabilization, suicide risk assessment, and emergency safety planning services across inpatient, emergency department, and community crisis response settings."
+  },
+  {
+    "id": "dept_community_mental_health",
+    "name": "Community Mental Health",
+    "type": "Counseling",
+    "description": "Recovery-oriented outreach and psychosocial rehabilitation services for individuals with severe and persistent mental illness, supporting community integration, independent living, and social inclusion."
+  }
+]

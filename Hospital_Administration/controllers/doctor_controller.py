@@ -1,0 +1,43 @@
+from flask import request, jsonify
+from firebase_admin import auth
+from services.firebase_service import create_firebase_user
+from models.user_model import create_user
+from models.doctor_model import create_doctor
+
+def create_doctor_controller():
+    data = request.get_json(silent=True) or request.form.to_dict()
+
+    name           = data.get("name",           "").strip()
+    email          = data.get("email",          "").strip()
+    password       = data.get("password",       "").strip()
+    phone          = data.get("phone",          "").strip()
+    specialization = data.get("specialization", "").strip()
+    specialization_ids = data.get("specializationIds", [])
+    if isinstance(specialization_ids, str):
+        specialization_ids = [specialization_ids]
+    employee_id    = data.get("employeeId",     "").strip()
+
+    if not all([name, email, password, phone, employee_id]):
+        return jsonify({"error": "All fields are required"}), 400
+
+    try:
+        uid = create_firebase_user(email, password, name)
+        auth.set_custom_user_claims(uid, {"role": "doctor"})
+        create_user(uid, name, email, phone, "doctor")
+        create_doctor({
+            "uid":            uid,
+            "name":           name,
+            "email":          email,
+            "phone":          phone,
+            "specialization": specialization,
+            "specializationIds": specialization_ids,
+            "licenseNumber": data.get("licenseNumber", "").strip(),
+            "departmentId": data.get("departmentId", data.get("department", "")).strip(),
+            "yearsOfExperience": data.get("yearsOfExperience", 0),
+            "bio": data.get("bio", "").strip(),
+            "employeeId":     employee_id
+        })
+        return jsonify({"success": True, "uid": uid}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -1,10 +1,4 @@
-/* ============================================================
-   MindCare Admin — Custom CSS
-   Supplements Tailwind CDN. Covers animations, print,
-   scrollbar, badge fallbacks, and table hover.
-   ============================================================ */
 
-/* ── Custom animations ────────────────────────────────────── */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -28,7 +22,6 @@
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -46,7 +39,6 @@
   background: #9B7FE8;
 }
 
-/* ── Severity badge fallbacks ─────────────────────────────── */
 .badge-stable {
   background: #EBFAF3;
   color: #4CB88A;
@@ -64,7 +56,6 @@
   color: #E8475F;
 }
 
-/* ── Data table row hover ─────────────────────────────────── */
 .data-table tbody tr {
   transition: background-color 0.12s ease;
 }
@@ -72,7 +63,6 @@
   background-color: #F7F5FF;
 }
 
-/* ── line-clamp (Safari fallback) ────────────────────────── */
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -80,9 +70,7 @@
   overflow: hidden;
 }
 
-/* ── Print styles (patient_report page) ──────────────────── */
 @media print {
-  /* Hide navigation & chrome */
   aside,
   header,
   footer,
@@ -92,38 +80,32 @@
     display: none !important;
   }
 
-  /* Remove sidebar offset */
   .lg\:ml-64 {
     margin-left: 0 !important;
   }
 
-  /* Reset backgrounds for ink saving */
   body {
     background: #fff !important;
     color: #1A1040 !important;
     font-size: 11pt;
   }
 
-  /* Keep cards legible */
   .shadow-card,
   .shadow-float {
     box-shadow: none !important;
     border: 1px solid #E8E2FF !important;
   }
 
-  /* Expand tables to full width */
   table {
     width: 100% !important;
     page-break-inside: avoid;
   }
 
-  /* Score bars print in grayscale */
   .bg-critical-deep { background: #333 !important; }
   .bg-warning-deep  { background: #555 !important; }
   .bg-watch-deep    { background: #777 !important; }
   .bg-stable-deep   { background: #aaa !important; }
 
-  /* Ensure hero gradient prints dark enough */
   .bg-gradient-to-r {
     background: #1A1040 !important;
     color: #fff !important;

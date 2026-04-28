@@ -25,6 +25,19 @@ class XaiLexiconScorer:
         self.critical_overrides = set(self.scoring.get("criticalOverrideCategories", []))
         self.warning_overrides = set(self.scoring.get("warningOverrideCategories", []))
         self.severity_bands = self.lexicon.get("severityBands", [])
+        # Wire nonLexiconSignals so service files read weights from the JSON, not hardcode
+        self.non_lexicon_signals = {
+            sig["key"]: sig
+            for sig in self.lexicon.get("nonLexiconSignals", [])
+        }
+
+    def get_behavioral_weight(self, key, default=2):
+        """Return the configured weight for a behavioral (non-lexicon) signal key.
+        Falls back to `default` if the key is not in the nonLexiconSignals catalog."""
+        sig = self.non_lexicon_signals.get(key)
+        if sig is None:
+            return default
+        return int(sig.get("weight", default))
 
     def analyze_text(self, text, source="text", source_id="", timestamp=""):
         raw_text = text or ""

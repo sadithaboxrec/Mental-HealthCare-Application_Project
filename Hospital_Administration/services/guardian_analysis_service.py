@@ -44,7 +44,7 @@ def analyze_guardian_signals(daily_logs, guardian_logs):
         signals.append(scorer.signal_item(
             "guardian_inconsistency",
             "Guardian verification inconsistency",
-            3,
+            scorer.get_behavioral_weight("guardian_inconsistency"),
             "guardian_verification",
             timestamp=mismatches[-1].get("updatedAt") or mismatches[-1].get("date", ""),
             snippet="Guardian medication verification conflicts with patient self-report.",
@@ -56,7 +56,7 @@ def analyze_guardian_signals(daily_logs, guardian_logs):
         signals.append(scorer.signal_item(
             "guardian_low_mood_observation",
             "Guardian low mood observation",
-            2,
+            scorer.get_behavioral_weight("guardian_low_mood_observation"),
             "guardian_verification",
             timestamp=low_guardian_mood[-1].get("updatedAt") or low_guardian_mood[-1].get("date", ""),
             snippet="Guardian reported low observed mood.",

@@ -1,0 +1,302 @@
+[
+  {
+    "id": "spec_gen_psychiatry",
+    "name": "General Psychiatry",
+    "category": "Medical",
+    "description": "Comprehensive diagnosis and pharmacological management of the full spectrum of mental health disorders including mood, psychotic, and anxiety disorders. Encompasses both inpatient and outpatient clinical evaluation and treatment planning."
+  },
+  {
+    "id": "spec_cbt",
+    "name": "Cognitive Behavioral Therapy (CBT)",
+    "category": "Therapy",
+    "description": "A structured, evidence-based psychotherapy that identifies and restructures maladaptive thought patterns and behaviors to alleviate psychological distress. Widely applied for depression, anxiety, OCD, and PTSD."
+  },
+  {
+    "id": "spec_addiction_med",
+    "name": "Addiction Medicine & Substance Use Disorders",
+    "category": "Medical",
+    "description": "Medical specialty focused on the prevention, evaluation, diagnosis, and treatment of substance use disorders including alcohol, opioid, stimulant, and polysubstance dependencies. Includes medically assisted treatment (MAT) protocols."
+  },
+  {
+    "id": "spec_adolescent_psych",
+    "name": "Adolescent & Child Psychiatry",
+    "category": "Medical",
+    "description": "Specialized psychiatric care for children and teenagers presenting with neurodevelopmental, mood, anxiety, and behavioral disorders. Integrates family-centered approaches with pharmacological and psychotherapeutic interventions."
+  },
+  {
+    "id": "spec_emdr",
+    "name": "Eye Movement Desensitization and Reprocessing (EMDR)",
+    "category": "Therapy",
+    "description": "An evidence-based, trauma-focused psychotherapy protocol that uses bilateral stimulation to help patients reprocess distressing memories and reduce PTSD symptomatology. Recognized by the WHO and APA as a first-line trauma treatment."
+  },
+  {
+    "id": "spec_forensic_psych",
+    "name": "Forensic Psychiatry",
+    "category": "Medical",
+    "description": "Intersection of psychiatry and law involving evaluation of individuals involved in legal proceedings, determination of criminal responsibility, and management of mentally disordered offenders. Includes competency and risk assessments."
+  },
+  {
+    "id": "spec_geriatric_psych",
+    "name": "Geriatric Psychiatry",
+    "category": "Medical",
+    "description": "Specialized psychiatric care for older adults (65+) addressing dementia, late-life depression, anxiety, and psychotic disorders. Focuses on the neuropsychiatric sequelae of aging and chronic medical comorbidities."
+  },
+  {
+    "id": "spec_trauma_therapy",
+    "name": "Trauma-Informed Therapy",
+    "category": "Therapy",
+    "description": "A clinical framework and therapeutic approach that recognizes the widespread impact of trauma and integrates this knowledge into all aspects of treatment to support healing and avoid re-traumatization. Applicable across PTSD, complex trauma, and adverse childhood experiences (ACEs)."
+  },
+  {
+    "id": "spec_dbt",
+    "name": "Dialectical Behavior Therapy (DBT)",
+    "category": "Therapy",
+    "description": "A comprehensive, evidence-based behavioral treatment originally developed for borderline personality disorder, focusing on skills training in mindfulness, distress tolerance, emotion regulation, and interpersonal effectiveness. Effective for suicidality and chronic self-harm."
+  },
+  {
+    "id": "spec_eating_disorders",
+    "name": "Eating Disorders & Body Image",
+    "category": "Medical",
+    "description": "Multidisciplinary treatment for anorexia nervosa, bulimia nervosa, binge eating disorder, and ARFID, integrating medical stabilization, nutritional rehabilitation, and evidence-based psychotherapy. Emphasizes long-term recovery and relapse prevention."
+  },
+  {
+    "id": "spec_psychoanalysis",
+    "name": "Psychoanalytic & Psychodynamic Therapy",
+    "category": "Therapy",
+    "description": "Long-term therapeutic approach exploring unconscious processes, early developmental experiences, and relational patterns that contribute to current psychological distress. Aims to foster insight, self-awareness, and character change."
+  },
+  {
+    "id": "spec_couples_therapy",
+    "name": "Couples & Relationship Therapy",
+    "category": "Counseling",
+    "description": "Therapeutic interventions designed to help couples identify and resolve conflict, improve communication patterns, and strengthen relational bonds. Draws from Emotionally Focused Therapy (EFT) and the Gottman Method."
+  },
+  {
+    "id": "spec_family_therapy",
+    "name": "Family Systems Therapy",
+    "category": "Counseling",
+    "description": "A psychotherapeutic approach that addresses the family unit as an interconnected emotional system, working to resolve dysfunctional patterns, improve communication, and support individual members within the systemic context."
+  },
+  {
+    "id": "spec_neuropsychiatry",
+    "name": "Neuropsychiatry",
+    "category": "Medical",
+    "description": "A subspecialty at the interface of neurology and psychiatry, managing psychiatric manifestations of neurological conditions such as TBI, epilepsy, Parkinson's disease, and stroke. Integrates neuroimaging, cognitive assessment, and pharmacotherapy."
+  },
+  {
+    "id": "spec_sleep_disorders",
+    "name": "Sleep Medicine & Sleep Disorders",
+    "category": "Medical",
+    "description": "Diagnosis and treatment of sleep-related disorders including insomnia, obstructive sleep apnea, narcolepsy, and parasomnias, with an emphasis on their bidirectional relationship with psychiatric conditions. Uses polysomnography and CBT-I protocols."
+  },
+  {
+    "id": "spec_mindfulness",
+    "name": "Mindfulness-Based Cognitive Therapy (MBCT)",
+    "category": "Therapy",
+    "description": "An evidence-based group psychotherapy combining mindfulness meditation practices with cognitive therapy techniques to prevent depressive relapse and reduce ruminative thought patterns. Clinically indicated for recurrent major depressive disorder."
+  },
+  {
+    "id": "spec_grief_counseling",
+    "name": "Grief & Bereavement Counseling",
+    "category": "Counseling",
+    "description": "Specialized counseling that supports individuals navigating loss, complicated grief, and bereavement through evidence-based models including the Dual Process Model and Prolonged Grief Disorder treatment protocols."
+  },
+  {
+    "id": "spec_ocd_spectrum",
+    "name": "OCD & Obsessive-Compulsive Spectrum Disorders",
+    "category": "Therapy",
+    "description": "Specialized treatment of Obsessive-Compulsive Disorder and related conditions (BDD, hoarding, trichotillomania) using Exposure and Response Prevention (ERP) and inference-based CBT. Includes pharmacological augmentation strategies."
+  },
+  {
+    "id": "spec_bipolar_disorder",
+    "name": "Bipolar Disorder & Mood Stabilization",
+    "category": "Medical",
+    "description": "Expert management of Bipolar I, II, and cyclothymic disorders through mood-stabilizing pharmacotherapy, psychoeducation, and lifestyle interventions. Focuses on relapse prevention and long-term functional recovery."
+  },
+  {
+    "id": "spec_anxiety_disorders",
+    "name": "Anxiety & Panic Disorders",
+    "category": "Medical",
+    "description": "Comprehensive evaluation and treatment of generalized anxiety disorder, panic disorder, social anxiety, agoraphobia, and specific phobias through integrated pharmacotherapy and psychotherapy approaches."
+  },
+  {
+    "id": "spec_perinatal_psych",
+    "name": "Perinatal & Reproductive Psychiatry",
+    "category": "Medical",
+    "description": "Specialized psychiatric care addressing mental health conditions during pregnancy and the postpartum period, including perinatal depression, anxiety, and postpartum psychosis. Balances pharmacological safety with maternal and fetal wellbeing."
+  },
+  {
+    "id": "spec_act",
+    "name": "Acceptance and Commitment Therapy (ACT)",
+    "category": "Therapy",
+    "description": "A third-wave behavioral therapy that uses acceptance, mindfulness, and values-based committed action strategies to increase psychological flexibility and reduce experiential avoidance. Applicable across a wide range of mental health presentations."
+  },
+  {
+    "id": "spec_somatic_therapy",
+    "name": "Somatic & Body-Based Therapy",
+    "category": "Therapy",
+    "description": "A body-centered therapeutic approach that addresses the physical manifestations of psychological trauma and stress stored in the body. Incorporates techniques from Somatic Experiencing (SE) and Sensorimotor Psychotherapy."
+  },
+  {
+    "id": "spec_autism_spectrum",
+    "name": "Autism Spectrum Disorder (ASD) & Neurodevelopmental Disorders",
+    "category": "Medical",
+    "description": "Comprehensive diagnostic evaluation and therapeutic management of Autism Spectrum Disorder, ADHD, and other neurodevelopmental conditions across the lifespan. Integrates behavioral, developmental, and pharmacological interventions."
+  },
+  {
+    "id": "spec_psychosis",
+    "name": "Psychosis & Schizophrenia Spectrum Disorders",
+    "category": "Medical",
+    "description": "Advanced treatment of schizophrenia, schizoaffective disorder, delusional disorder, and first-episode psychosis using evidence-based antipsychotic pharmacotherapy, Coordinated Specialty Care (CSC), and cognitive remediation."
+  },
+  {
+    "id": "spec_group_therapy",
+    "name": "Group Psychotherapy",
+    "category": "Therapy",
+    "description": "Facilitation of structured therapeutic group experiences leveraging interpersonal learning, universality, and group cohesion to address shared psychological concerns. Based on Yalom's therapeutic factors and interpersonal process group principles."
+  },
+  {
+    "id": "spec_school_counseling",
+    "name": "School-Based & Pediatric Counseling",
+    "category": "Counseling",
+    "description": "Counseling services tailored to children and adolescents in educational settings, addressing academic stress, behavioral issues, social difficulties, and early mental health intervention. Collaborates with families and school systems."
+  },
+  {
+    "id": "spec_cultural_psych",
+    "name": "Cultural & Multicultural Psychology",
+    "category": "Counseling",
+    "description": "A culturally responsive clinical approach that acknowledges the influence of race, ethnicity, immigration, and acculturation on mental health presentation and treatment outcomes. Integrates culturally adapted evidence-based therapies."
+  },
+  {
+    "id": "spec_neuropsychology",
+    "name": "Clinical Neuropsychology",
+    "category": "Medical",
+    "description": "Comprehensive neuropsychological assessment of cognitive functioning including memory, attention, executive function, and language following brain injury, neurological disease, or neurodegenerative conditions. Informs rehabilitation planning."
+  },
+  {
+    "id": "spec_sex_therapy",
+    "name": "Sex Therapy & Sexual Health",
+    "category": "Counseling",
+    "description": "Specialized clinical counseling addressing sexual dysfunctions, gender identity, intimacy disorders, and paraphilias within an evidence-based, non-judgmental therapeutic framework. Incorporates both individual and couples modalities."
+  },
+  {
+    "id": "spec_chronic_pain",
+    "name": "Chronic Pain & Health Psychology",
+    "category": "Therapy",
+    "description": "Psychological treatment of chronic pain conditions using CBT-pain protocols, acceptance-based strategies, and biofeedback to reduce pain-related disability, catastrophizing, and psychiatric comorbidities."
+  },
+  {
+    "id": "spec_sport_psych",
+    "name": "Sport & Performance Psychology",
+    "category": "Counseling",
+    "description": "Applied psychological services for athletes and high-performance individuals addressing performance anxiety, burnout, identity, and career transitions. Uses mental skills training and mindfulness-based interventions."
+  },
+  {
+    "id": "spec_vocational",
+    "name": "Vocational & Occupational Counseling",
+    "category": "Counseling",
+    "description": "Career counseling and psychological support for individuals experiencing work-related stress, burnout, career transitions, and occupational impairment due to mental health conditions. Integrates vocational rehabilitation principles."
+  },
+  {
+    "id": "spec_ect",
+    "name": "Electroconvulsive Therapy (ECT) & Neuromodulation",
+    "category": "Medical",
+    "description": "Specialized administration and monitoring of ECT, TMS, and emerging neuromodulation therapies for treatment-resistant depression, severe mania, and catatonia. Includes pre-treatment evaluation and post-treatment neuropsychological monitoring."
+  },
+  {
+    "id": "spec_lgbtq_affirming",
+    "name": "LGBTQ+ Affirming Therapy",
+    "category": "Counseling",
+    "description": "Culturally affirming therapeutic support for lesbian, gay, bisexual, transgender, queer, and intersex individuals addressing minority stress, identity development, discrimination-related trauma, and family rejection."
+  },
+  {
+    "id": "spec_play_therapy",
+    "name": "Play Therapy & Expressive Arts",
+    "category": "Therapy",
+    "description": "A developmentally appropriate therapeutic modality for children that uses play, art, and creative expression as the primary medium of communication and healing. Addresses behavioral disorders, attachment disruptions, and childhood trauma."
+  },
+  {
+    "id": "spec_narrative_therapy",
+    "name": "Narrative Therapy",
+    "category": "Therapy",
+    "description": "A postmodern therapeutic approach that helps individuals re-author their life stories, separating their identity from their problems and highlighting alternative narratives of competence and resilience."
+  },
+  {
+    "id": "spec_crisis_intervention",
+    "name": "Crisis Intervention & Suicide Prevention",
+    "category": "Counseling",
+    "description": "Specialized clinical skills for acute risk assessment, safety planning, and stabilization of individuals in psychiatric crisis. Includes suicide risk stratification using validated tools such as the Columbia Protocol (C-SSRS)."
+  },
+  {
+    "id": "spec_biofeedback",
+    "name": "Biofeedback & Neurofeedback Therapy",
+    "category": "Therapy",
+    "description": "Technology-assisted therapeutic technique that trains individuals to regulate physiological processes (heart rate variability, EEG brainwave activity) to improve self-regulation, reduce anxiety, and address ADHD symptoms."
+  },
+  {
+    "id": "spec_psychopharmacology",
+    "name": "Clinical Psychopharmacology",
+    "category": "Medical",
+    "description": "Advanced expertise in the use, monitoring, and optimization of psychotropic medications across all psychiatric diagnostic categories. Emphasizes polypharmacy management, drug-drug interactions, and treatment-resistant cases."
+  },
+  {
+    "id": "spec_ptsd",
+    "name": "Post-Traumatic Stress Disorder (PTSD) Treatment",
+    "category": "Therapy",
+    "description": "Specialized delivery of first-line PTSD therapies including Prolonged Exposure (PE), Cognitive Processing Therapy (CPT), and EMDR within military, civilian, and disaster-response populations."
+  },
+  {
+    "id": "spec_personality_disorders",
+    "name": "Personality Disorders",
+    "category": "Medical",
+    "description": "Expert clinical management of Cluster A, B, and C personality disorders using transdiagnostic approaches including Schema Therapy, Transference-Focused Psychotherapy (TFP), and DBT. Emphasizes long-term therapeutic alliance and functional recovery."
+  },
+  {
+    "id": "spec_motivational_interviewing",
+    "name": "Motivational Interviewing (MI)",
+    "category": "Counseling",
+    "description": "A collaborative, person-centered counseling method designed to strengthen an individual's motivation for and commitment to behavior change. Widely used in substance use, chronic disease management, and treatment engagement contexts."
+  },
+  {
+    "id": "spec_positive_psych",
+    "name": "Positive Psychology & Wellbeing Coaching",
+    "category": "Counseling",
+    "description": "A strengths-based counseling approach grounded in the science of wellbeing, resilience, and flourishing. Utilizes PERMA framework interventions to enhance life satisfaction, meaning, and psychological capital."
+  },
+  {
+    "id": "spec_telepsychiatry",
+    "name": "Telepsychiatry & Digital Mental Health",
+    "category": "Medical",
+    "description": "Delivery of psychiatric assessments, medication management, and psychotherapy via synchronous and asynchronous digital platforms. Specializes in expanding access to care for rural, underserved, and mobility-impaired populations."
+  },
+  {
+    "id": "spec_anger_management",
+    "name": "Anger Management & Impulse Control",
+    "category": "Counseling",
+    "description": "Structured therapeutic programs addressing anger dysregulation, intermittent explosive disorder, and impulse control deficits through cognitive restructuring, skills training, and emotional regulation techniques."
+  },
+  {
+    "id": "spec_dissociative",
+    "name": "Dissociative Disorders & DID Therapy",
+    "category": "Therapy",
+    "description": "Specialized psychotherapy for dissociative identity disorder, depersonalization/derealization, and other dissociative conditions using phase-based trauma treatment, internal family systems (IFS), and stabilization techniques."
+  },
+  {
+    "id": "spec_community_mental_health",
+    "name": "Community Mental Health & Psychosocial Rehabilitation",
+    "category": "Counseling",
+    "description": "Recovery-oriented services supporting individuals with severe and persistent mental illness in achieving community integration, independent living, and social inclusion. Employs Assertive Community Treatment (ACT) and psychosocial rehabilitation models."
+  },
+  {
+    "id": "spec_hypnotherapy",
+    "name": "Clinical Hypnotherapy",
+    "category": "Therapy",
+    "description": "Evidence-informed therapeutic use of hypnotic induction and suggestion to facilitate access to unconscious material, alleviate phobias, manage chronic pain, and address habit disorders under a licensed clinical framework."
+  },
+  {
+    "id": "spec_existential_therapy",
+    "name": "Existential & Humanistic Therapy",
+    "category": "Therapy",
+    "description": "A philosophical approach to psychotherapy that addresses existential concerns such as meaning, freedom, mortality, and isolation as sources of psychological distress. Draws from Viktor Frankl's Logotherapy and Carl Rogers' Person-Centered Therapy."
+  }
+]

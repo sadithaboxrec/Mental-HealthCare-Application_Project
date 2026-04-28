@@ -77,7 +77,7 @@ def _compute_confidence(diaries, chats, daily_logs, guardian_logs, appointments,
     return min(0.95, round(confidence, 2))
 
 
-def _build_summary(patient_uid, analyzed_entries, chat_results, guardian_observation_results, behavioral_signals, source_docs):
+def _build_summary(patient_uid, analyzed_entries, chat_results, guardian_observation_results, behavioral_signals, source_docs, start=None, end=None):
     all_items = analyzed_entries + chat_results + guardian_observation_results + behavioral_signals
     generated_at = now_utc().isoformat()
     scorer = get_default_scorer()
@@ -86,6 +86,8 @@ def _build_summary(patient_uid, analyzed_entries, chat_results, guardian_observa
             "patientUid": patient_uid,
             "type": "xai_analysis",
             "analysisType": "xai_analysis_v1",
+            "startDate": start.date().isoformat() if start else None,
+            "endDate": end.date().isoformat() if end else None,
             "generatedAt": generated_at,
             "entryCount": 0,
             "chatMessageCount": 0,
@@ -111,7 +113,10 @@ def _build_summary(patient_uid, analyzed_entries, chat_results, guardian_observa
         }
 
     text_items = analyzed_entries + chat_results + guardian_observation_results
-    text_score = max([item.get("score", 0) for item in text_items] or [0])
+    # Sum all text-source scores (mirrors behavioral_score logic) and cap to prevent
+    # runaway inflation from many low-weight diary entries. Cap of 14 allows full
+    # representation of two critical-band (score 8) entries without unbounded accumulation.
+    text_score = min(sum(item.get("score", 0) for item in text_items), 14)
     behavioral_score = sum(item.get("score", 0) for item in behavioral_signals)
 
     recent_warning_count = 0
@@ -150,6 +155,8 @@ def _build_summary(patient_uid, analyzed_entries, chat_results, guardian_observa
         "patientUid": patient_uid,
         "type": "xai_analysis",
         "analysisType": "xai_analysis_v1",
+        "startDate": start.date().isoformat() if start else None,
+        "endDate": end.date().isoformat() if end else None,
         "generatedAt": generated_at,
         "entryCount": len(analyzed_entries),
         "chatMessageCount": len(chat_results),
@@ -161,7 +168,7 @@ def _build_summary(patient_uid, analyzed_entries, chat_results, guardian_observa
         "severity": severity,
         "band": band,
         "score": score,
-        "textConcernScore": score,
+        "textConcernScore": text_score,
         "confidence": _compute_confidence(**source_docs),
         "action": overall_action_for(severity),
         "screeningNote": SCREENING_NOTE,
@@ -227,11 +234,13 @@ def _persist_snapshot(summary):
         "patientUid": summary["patientUid"],
         "type": "xai_analysis",
         "analysisType": "xai_analysis_v1",
+        "startDate": summary.get("startDate"),
+        "endDate": summary.get("endDate"),
         "generatedAt": summary["generatedAt"],
         "severity": summary["severity"],
         "band": summary["band"],
         "score": summary["score"],
-        "textConcernScore": summary["score"],
+        "textConcernScore": summary.get("textConcernScore", summary["score"]),
         "confidence": summary["confidence"],
         "action": summary["action"],
         "entryCount": summary["entryCount"],
@@ -252,9 +261,9 @@ def _persist_snapshot(summary):
     })
 
 
-def analyze_patient_xai(patient_uid, persist=True, notify=False):
-    end = now_utc()
-    start = end - timedelta(days=ANALYSIS_WINDOW_DAYS)
+def analyze_patient_xai(patient_uid, persist=True, notify=False, start=None, end=None):
+    end = end or now_utc()
+    start = start or (end - timedelta(days=ANALYSIS_WINDOW_DAYS))
     patient_snapshot = patient_doc(patient_uid)
     patient = patient_snapshot.to_dict() if patient_snapshot.exists else {}
 
@@ -297,6 +306,8 @@ def analyze_patient_xai(patient_uid, persist=True, notify=False):
         guardian_observations,
         behavioral_signals,
         source_docs,
+        start=start,
+        end=end,
     )
 
     alert_id = None
@@ -308,7 +319,7 @@ def analyze_patient_xai(patient_uid, persist=True, notify=False):
     return summary
 
 
-def analyze_all_patient_xai(persist=False, notify=False):
+def analyze_all_patient_xai(persist=False, notify=False, start=None, end=None):
     patient_docs = db.collection("patients").stream()
     summaries = []
 
@@ -322,6 +333,8 @@ def analyze_all_patient_xai(persist=False, notify=False):
             patient_uid,
             persist=persist,
             notify=notify,
+            start=start,
+            end=end,
         )
         summary["patientName"] = patient.get("name", "Unknown Patient")
         summary["assignedDoctor"] = patient.get("assignedDoctor")

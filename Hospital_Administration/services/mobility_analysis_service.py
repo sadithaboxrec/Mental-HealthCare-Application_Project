@@ -17,17 +17,20 @@ def analyze_mobility_signals(geolocations):
         for item in geolocations
         if safe_float(item.get("mobilityRadius")) is not None
     ]
+    has_precise = any("latitude" in item and "longitude" in item for item in geolocations)
+    precision_label = "Precise" if has_precise else "Coarse"
+
     if len(mobility_values) >= 3:
         latest = mobility_values[-1]
         avg = sum(mobility_values) / len(mobility_values)
         if avg > 0 and latest <= avg * 0.5:
             signals.append(scorer.signal_item(
                 "mobility_drop",
-                "Coarse mobility drop",
-                2,
+                f"{precision_label} mobility drop",
+                scorer.get_behavioral_weight("mobility_drop"),
                 "mobility",
                 timestamp=geolocations[-1].get("timestamp", ""),
-                snippet="Coarse mobility radius dropped compared with recent baseline.",
+                snippet=f"{precision_label} GPS mobility radius dropped compared with recent baseline.",
                 why_it_matters="Reduced mobility can correlate with isolation or functional decline.",
             ))
 
@@ -39,10 +42,10 @@ def analyze_mobility_signals(geolocations):
         signals.append(scorer.signal_item(
             "high_home_stay",
             "High home-stay ratio",
-            2,
+            scorer.get_behavioral_weight("high_home_stay"),
             "mobility",
             timestamp=high_home_stay[-1].get("timestamp", ""),
-            snippet="Coarse mobility data suggests unusually high home-stay time.",
+            snippet=f"{precision_label} mobility data suggests unusually high home-stay time.",
             why_it_matters="A high home-stay ratio can support isolation concerns when combined with other signals.",
         ))
     return signals

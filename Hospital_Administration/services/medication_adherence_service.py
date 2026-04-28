@@ -25,7 +25,7 @@ def analyze_medication_adherence_events(events):
         signals.append(scorer.signal_item(
             "dose_adherence_missed",
             "Dose-level medication misses",
-            3,
+            scorer.get_behavioral_weight("dose_adherence_missed"),
             "medication_adherence",
             timestamp=missed[-1].get("reportedAt") or missed[-1].get("scheduledAt", ""),
             snippet=f"Dose-level adherence logs show {len(missed)} missed dose event(s).",
@@ -35,7 +35,7 @@ def analyze_medication_adherence_events(events):
         signals.append(scorer.signal_item(
             "dose_adherence_late",
             "Dose-level late medication pattern",
-            2,
+            scorer.get_behavioral_weight("dose_adherence_late"),
             "medication_adherence",
             timestamp=late[-1].get("reportedAt") or late[-1].get("scheduledAt", ""),
             snippet=f"Dose-level adherence logs show {len(late)} late dose event(s).",
