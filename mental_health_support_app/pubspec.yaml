@@ -47,6 +47,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_lints: ^6.0.0
 
 flutter:
@@ -56,4 +58,3 @@ flutter:
     - assets/illustrations/
     - assets/onboarding/
     - assets/states/
-
