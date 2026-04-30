@@ -2,20 +2,22 @@
 library;
 
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
 class ApiService {
 
   ApiService._();
 
-  /// For local dev: http://localhost:5000
-  /// For production: https://your-backend.com
-  static const String backendBaseUrl = String.fromEnvironment (
-
-    'BACKEND_URL',
-    defaultValue : 'http://localhost:5000',
-  
-  );
+  /// For local dev: Android emulator uses 10.0.2.2, others use localhost.
+  /// Override via --dart-define=BACKEND_URL=... for production.
+  static String get backendBaseUrl {
+    const envUrl = String.fromEnvironment('BACKEND_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:5000';
+    return 'http://localhost:5000';
+  }
 
   static final _client = http.Client( );
 

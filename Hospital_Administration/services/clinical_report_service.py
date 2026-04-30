@@ -177,6 +177,7 @@ def generate_clinical_report(patient_uid, report_type="monthly", start_date=None
         "aggregatedSeverity": xai_summary.get("severity", "stable"),
         "band": xai_summary.get("band", 0),
         "score": xai_summary.get("score", 0),
+        "textConcernScore": xai_summary.get("textConcernScore", xai_summary.get("score", 0)),
         "confidence": xai_summary.get("confidence", 0),
         "summary": {
             "action": xai_summary.get("action"),

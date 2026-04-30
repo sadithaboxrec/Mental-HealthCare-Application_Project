@@ -63,11 +63,12 @@ class _DoctorPatientsScreenState extends ConsumerState<DoctorPatientsScreen> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = e.toString();
           _loading = false;
         });
+      }
     }
   }
 
