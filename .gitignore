@@ -1,0 +1,91 @@
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.suo
+*.user
+
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+Hospital_Administration/serviceAccountKey.json
+Hospital_Administration/.env
+Hospital_Administration/.env.*
+mental_health_support_app/android/app/google-services.json
+mental_health_support_app/ios/Runner/GoogleService-Info.plist
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+.Python
+
+# ── Python virtual environments ──────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env_folder/
+ENV/
+
+# ── pytest / coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.coveragerc
+
+# ── Flask ────────────────────────────────────────────────────────────────────
+instance/
+*.pyc
+
+# ── Flutter / Dart ───────────────────────────────────────────────────────────
+mental_health_support_app/.dart_tool/
+mental_health_support_app/.flutter-plugins
+mental_health_support_app/.flutter-plugins-dependencies
+mental_health_support_app/.pub-cache/
+mental_health_support_app/.pub/
+mental_health_support_app/build/
+mental_health_support_app/coverage/
+mental_health_support_app/**/*.g.dart
+mental_health_support_app/**/*.freezed.dart
+
+# ── Android build artifacts ──────────────────────────────────────────────────
+mental_health_support_app/android/.gradle/
+mental_health_support_app/android/app/debug/
+mental_health_support_app/android/app/profile/
+mental_health_support_app/android/app/release/
+mental_health_support_app/android/captures/
+mental_health_support_app/android/local.properties
+mental_health_support_app/android/key.properties
+
+# ── iOS build artifacts ──────────────────────────────────────────────────────
+mental_health_support_app/ios/Pods/
+mental_health_support_app/ios/.symlinks/
+mental_health_support_app/ios/Flutter/Flutter.framework
+mental_health_support_app/ios/Flutter/Flutter.podspec
+mental_health_support_app/ios/**/*.xcworkspace
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+
+# ── Misc ─────────────────────────────────────────────────────────────────────
+*.swp
+*.swo
+*.orig
+*.bak
+.history/

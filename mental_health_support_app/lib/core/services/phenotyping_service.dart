@@ -152,10 +152,10 @@ class PhenotypingService {
   static double _mobilityRadiusKm(List<_LocationSample> samples) {
     if (samples.length < 2) return 0;
     final avgLat =
-        samples.fold<double>(0, (sum, sample) => sum + sample.latitude) /
+        samples.fold<double>(0, (acc, sample) => acc + sample.latitude) /
         samples.length;
     final avgLon =
-        samples.fold<double>(0, (sum, sample) => sum + sample.longitude) /
+        samples.fold<double>(0, (acc, sample) => acc + sample.longitude) /
         samples.length;
     final maxDistance = samples
         .map(

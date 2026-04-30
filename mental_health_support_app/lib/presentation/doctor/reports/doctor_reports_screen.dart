@@ -102,11 +102,12 @@ class _DoctorReportsScreenState extends ConsumerState<DoctorReportsScreen> {
 
       if (mounted) setState(() => _reports = all.take(30).toList());
     } on ApiException catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(
           () => _error =
               'Backend error ${e.statusCode}: check server connection.',
         );
+      }
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {
@@ -133,8 +134,9 @@ class _DoctorReportsScreenState extends ConsumerState<DoctorReportsScreen> {
         setState(() => _reports = [report, ..._reports]);
       }
     } on ApiException catch (e) {
-      if (mounted)
+      if (mounted) {
         _showSnack('Backend error ${e.statusCode}. Is the server running?');
+      }
     } catch (e) {
       if (mounted) _showSnack('Failed: $e');
     } finally {

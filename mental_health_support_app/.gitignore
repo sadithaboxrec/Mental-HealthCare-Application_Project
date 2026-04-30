@@ -1,0 +1,53 @@
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+# Uncomment if you do not want to share VS Code launch configs:
+# .vscode/
+
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+android/key.properties
+android/app/upload-keystore.jks
+android/app/*.keystore
+
+# ── Flutter / Dart / Pub ─────────────────────────────────────────────────────
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# ── Generated code ───────────────────────────────────────────────────────────
+**/*.g.dart
+**/*.freezed.dart
+**/*.mocks.dart
+
+# ── Obfuscation / symbolication ──────────────────────────────────────────────
+app.*.symbols
+app.*.map.json
+
+# ── Android ──────────────────────────────────────────────────────────────────
+android/.gradle/
+android/captures/
+android/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# ── iOS ──────────────────────────────────────────────────────────────────────
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/**/*.xcworkspace

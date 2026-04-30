@@ -85,6 +85,10 @@ swagger = Swagger ( app , config=swagger_config , template=swagger_template )
 def inject_now ( ) :
     return { "now" : datetime.now }
 
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "service": "MindCare API"}), 200
+
 @app.route("/")
 def index():
     return redirect(url_for("auth_routes.login"))
