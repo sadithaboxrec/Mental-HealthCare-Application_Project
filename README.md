@@ -1,279 +1,112 @@
-# MindCare — Mental Healthcare Application
+# MindCare
 
-A full-stack mental healthcare platform built with **Flutter** (mobile) and **Flask** (backend). MindCare supports five distinct user roles — Patient, Doctor, Counselor, Guardian, and Admin — connected through Firebase and powered by an on-device/on-server **Explainable AI (XAI)** engine that continuously analyses patient data to surface clinical insights, severity scores, and evidence-backed alerts.
+MindCare is a mental healthcare platform consisting of a Flutter mobile application and a Flask administration backend. The system supports five user roles: Patient, Doctor, Counsellor, Guardian, and Admin. Patient data is continuously analysed by a server-side explainable AI (XAI) engine that produces severity scores, clinical alerts, and structured reports.
 
 ---
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Key Features](#key-features)
-3. [User Roles](#user-roles)
-4. [Tech Stack](#tech-stack)
-5. [Architecture](#architecture)
-6. [Project Structure](#project-structure)
-7. [Prerequisites](#prerequisites)
-8. [Firebase Setup](#firebase-setup)
-9. [Backend Setup (Flask)](#backend-setup-flask)
-10. [Flutter App Setup](#flutter-app-setup)
-11. [Running the Application](#running-the-application)
-12. [Environment Variables & Secrets](#environment-variables--secrets)
-13. [API Reference](#api-reference)
-14. [XAI Engine](#xai-engine)
-15. [Digital Phenotyping](#digital-phenotyping)
-16. [Firestore Data Model](#firestore-data-model)
-17. [Testing](#testing)
-18. [Security Notes](#security-notes)
-19. [Contributing](#contributing)
+1. [System Requirements](#system-requirements)
+2. [Repository Layout](#repository-layout)
+3. [Firebase Setup](#firebase-setup)
+4. [Backend Setup](#backend-setup)
+5. [Flutter App Setup](#flutter-app-setup)
+6. [App Icon](#app-icon)
+7. [Backend URL Discovery](#backend-url-discovery)
+8. [Running Locally](#running-locally)
+9. [Building the APK](#building-the-apk)
+10. [Environment Variables](#environment-variables)
+11. [API Endpoints](#api-endpoints)
+12. [XAI Engine](#xai-engine)
+13. [Digital Phenotyping](#digital-phenotyping)
+14. [Firestore Collections](#firestore-collections)
+15. [Tests](#tests)
+16. [Security](#security)
+17. [Dependencies](#dependencies)
 
 ---
 
-## Overview
+## System Requirements
 
-MindCare digitises the care pathway for mental health patients. Patients log daily moods, write diary entries, chat with their assigned counsellor, and track medication. Doctors receive automated XAI-generated clinical alerts and detailed reports. Guardians observe their patient's wellness trends. Admins manage the entire organisation from a web dashboard.
-
-The platform is built around **privacy-first explainability**: every severity score is backed by a ranked list of evidence snippets, theme counts, and driver contributions so clinicians can audit exactly why the system flagged a patient.
-
----
-
-## Key Features
-
-| Area | Feature |
+| Tool | Version |
 |---|---|
-| **Authentication** | Firebase Auth · Role-based access control · Persistent sessions |
-| **Patient** | Daily mood & log · Diary journaling · Medication tracking · Appointment booking · AI chat counsellor |
-| **Doctor** | Patient list & detail · XAI alerts · Clinical report generation (daily/weekly/monthly/yearly/custom) · PDF export · Schedule management |
-| **Counsellor** | Dedicated chat interface · Patient overview |
-| **Guardian** | Wellness trend monitoring · Guardian log submission |
-| **Admin** | Full user management (create/assign/deactivate) · Analytics dashboard · Notification console · Diary & XAI report viewer |
-| **XAI Engine** | Lexicon-based NLP · Explainable severity bands (stable/watch/warning/critical) · Primary drivers · Theme counts · Source breakdown · Evidence snippets |
-| **Digital Phenotyping** | Location radius · App activity patterns · Mobility analysis · Behavioural signal aggregation |
-| **Notifications** | Firebase Cloud Messaging · Medication reminders · Appointment reminders · Water intake prompts · Diary prompts |
-| **Clinical Reports** | Auto-generated structured reports · Firestore-persisted · PDF download |
+| Flutter SDK | ≥ 3.10.7 |
+| Dart SDK | ≥ 3.0 (bundled with Flutter) |
+| Python | ≥ 3.11 |
+| Node.js | ≥ 18 |
+| Firebase CLI | latest (`npm install -g firebase-tools`) |
+| FlutterFire CLI | latest (`dart pub global activate flutterfire_cli`) |
+| Android Studio | latest (for emulator) |
 
 ---
 
-## User Roles
-
-```
-Admin
-  └── Manages all users, views all analytics, controls notifications
-
-Doctor
-  └── Views assigned patients, receives XAI alerts, generates clinical reports
-
-Counsellor
-  └── Chats with assigned patients, views session history
-
-Guardian
-  └── Submits observations, views assigned patient's wellness trend
-
-Patient
-  └── Logs daily data, writes diary, chats, tracks medication & appointments
-```
-
-Role assignment is managed by Admins through the web portal. Each role sees a completely different UI shell in the Flutter app, routed by GoRouter redirect logic after sign-in.
-
----
-
-## Tech Stack
-
-### Flutter App
-| Package | Purpose |
-|---|---|
-| `firebase_core` `firebase_auth` `cloud_firestore` `firebase_messaging` | Firebase services |
-| `flutter_riverpod` | Reactive state management |
-| `go_router` | Declarative, role-aware navigation |
-| `phosphor_flutter` | Icon set |
-| `google_fonts` | Typography |
-| `fl_chart` | Mood & score trend charts |
-| `geolocator` | GPS for digital phenotyping |
-| `flutter_local_notifications` | In-app notification display |
-| `shimmer` | Loading skeleton UX |
-| `http` | REST calls to Flask backend |
-| `shared_preferences` | Lightweight local persistence |
-| `intl` | Date/time formatting |
-
-### Flask Backend
-| Package | Purpose |
-|---|---|
-| `Flask` | Web framework |
-| `Flask-Login` | Session management for admin portal |
-| `firebase-admin` | Firestore read/write + FCM |
-| `APScheduler` | Cron-style background jobs |
-| `flasgger` | Swagger / OpenAPI documentation |
-| `reportlab` | PDF generation |
-| `jsonschema` | Request body validation |
-| `requests` | Internal HTTP calls |
-| `pytest` `coverage` `pytest-cov` | Testing |
-| `python-dotenv` | Environment variable loading |
-| `gunicorn` | Production WSGI server |
-
-### Infrastructure
-| Service | Use |
-|---|---|
-| **Firebase Auth** | Identity & sessions |
-| **Cloud Firestore** | Real-time NoSQL database |
-| **Firebase Cloud Messaging** | Push notifications |
-| **Firebase Storage** | Media assets (optional) |
-
----
-
-## Architecture
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                     Flutter Mobile App                       │
-│                                                              │
-│  Presentation Layer (Atomic Design)                          │
-│   atoms → molecules → organisms → screens                    │
-│                                                              │
-│  State: Riverpod providers  │  Navigation: GoRouter          │
-│  Services: Firestore SDK    │  API: http → Flask             │
-└──────────────────────────────────────────────────────────────┘
-              │ Firebase SDK           │ REST / JSON
-              ▼                        ▼
-┌─────────────────────┐   ┌───────────────────────────────────┐
-│   Cloud Firestore   │   │         Flask Backend             │
-│   Firebase Auth     │   │                                   │
-│   Firebase Messaging│   │  Routes → Services → Firestore    │
-└─────────────────────┘   │                                   │
-                          │  XAI Engine                       │
-                          │  ├── Diary analysis               │
-                          │  ├── Chat analysis                │
-                          │  ├── Daily log signals            │
-                          │  ├── Guardian observations        │
-                          │  ├── Activity & mobility          │
-                          │  └── Medication adherence         │
-                          │                                   │
-                          │  Scheduler (APScheduler)          │
-                          │  ├── Medication reminders         │
-                          │  ├── Appointment reminders        │
-                          │  └── Wellness prompts             │
-                          └───────────────────────────────────┘
-```
-
-### Flutter App Layers
-
-```
-lib/
-├── core/
-│   ├── controllers/   # Business logic wrappers (auth, chat, patient…)
-│   ├── models/        # Dart data classes with fromMap / toMap
-│   ├── services/      # Firestore queries, API calls, phenotyping
-│   ├── theme/         # Colors, typography, spacing constants
-│   └── utils/         # Date helpers, severity badges, cadence tracker
-├── presentation/
-│   ├── auth/          # Login screen
-│   ├── components/    # Atomic design components
-│   │   ├── atoms/
-│   │   ├── molecules/
-│   │   └── organisms/
-│   ├── patient/       # All patient-role screens
-│   ├── doctor/        # All doctor-role screens
-│   ├── counselor/     # All counsellor-role screens
-│   ├── guardian/      # Guardian home screen
-│   └── (admin is web-only via Flask portal)
-├── providers/         # Riverpod provider declarations
-└── router/            # GoRouter config with role-based redirects
-```
-
-### Flask Backend Layers
-
-```
-Hospital_Administration/
-├── routes/        # Blueprint endpoints (auth, admin, doctor_portal, analytics, notifications)
-├── controllers/   # User creation / management logic
-├── models/        # Firestore-backed user models
-├── services/      # Analysis, reporting, notification services
-├── templates/     # Jinja2 HTML for admin web portal
-├── data/          # Seed JSON (doctors, counsellors, medications, departments)
-└── tests/         # Unit + integration + security test suite
-```
-
----
-
-## Project Structure
+## Repository Layout
 
 ```
 Mental-HealthCare-Application_Project/
-│
-├── README.md                        ← this file
-│
-├── mental_health_support_app/       ← Flutter mobile app
+├── mental_health_support_app/          Flutter mobile app
+│   ├── assets/
+│   │   ├── brand/mindcare_logo.png     Launcher icon source
+│   │   ├── illustrations/
+│   │   ├── onboarding/
+│   │   └── states/
 │   ├── lib/
 │   │   ├── core/
-│   │   │   ├── assets/app_assets.dart
-│   │   │   ├── controllers/         # auth, chat, doctor, guardian, notification, patient
-│   │   │   ├── models/              # appointment, clinical_report, daily_log, diary_entry…
-│   │   │   ├── services/            # api_service, auth_service, chat_service, phenotyping…
-│   │   │   ├── theme/               # app_colors, app_spacing, app_typography, app_theme
-│   │   │   └── utils/
-│   │   ├── firebase_options.dart
-│   │   ├── main.dart
+│   │   │   ├── controllers/            auth, chat, doctor, guardian, notification, patient
+│   │   │   ├── models/                 appointment, clinical_report, daily_log, diary_entry, …
+│   │   │   ├── services/               api_service, auth_service, chat_service, phenotyping, …
+│   │   │   ├── theme/                  colors, spacing, typography, theme
+│   │   │   └── utils/                  date helpers, severity utils, typing cadence
 │   │   ├── presentation/
-│   │   │   ├── auth/login_screen.dart
-│   │   │   ├── components/          # atoms / molecules / organisms
-│   │   │   ├── counselor/           # chat, home
-│   │   │   ├── doctor/              # home, patients, reports, schedule
-│   │   │   ├── guardian/home/
-│   │   │   └── patient/             # care, chat, home, journal, profile
-│   │   ├── providers/auth_provider.dart
-│   │   └── router/app_router.dart
-│   ├── assets/
-│   │   ├── brand/                   # Logos
-│   │   ├── illustrations/           # SVG/PNG illustrations
-│   │   ├── onboarding/              # Onboarding images
-│   │   └── states/                  # Empty-state images
+│   │   │   ├── auth/                   login screen
+│   │   │   ├── components/             atoms / molecules / organisms
+│   │   │   ├── counselor/              chat, home
+│   │   │   ├── doctor/                 home, patients, reports, schedule
+│   │   │   ├── guardian/               home
+│   │   │   └── patient/                care, chat, home, journal, profile
+│   │   ├── providers/                  Riverpod providers
+│   │   ├── router/                     GoRouter with role-based redirects
+│   │   ├── firebase_options.dart       generated by FlutterFire CLI
+│   │   └── main.dart
 │   ├── android/
 │   ├── ios/
 │   ├── pubspec.yaml
 │   └── analysis_options.yaml
 │
-└── Hospital_Administration/         ← Flask backend + admin portal
-    ├── app.py                       # Flask entry point
-    ├── config.py                    # Firebase Admin SDK init
+└── Hospital_Administration/            Flask backend + admin portal
+    ├── app.py                          entry point, blueprint registration, scheduler
+    ├── config.py                       Firebase Admin SDK initialisation
     ├── requirements.txt
     ├── pytest.ini
-    ├── serviceAccountKey.json       # ⚠ NOT committed — see setup
     ├── routes/
-    │   ├── auth_routes.py           # Login / logout / role guard
-    │   ├── admin_routes.py          # Full admin dashboard
-    │   ├── doctor_portal_routes.py  # Doctor web portal
-    │   ├── analytics_routes.py      # XAI & diary analytics API
-    │   └── notification_routes.py   # FCM trigger endpoints
-    ├── controllers/
-    │   ├── admin_controller.py
-    │   ├── doctor_controller.py
-    │   ├── counselor_controller.py
-    │   └── patient_controller.py
-    ├── models/
-    │   ├── user_model.py
-    │   ├── doctor_model.py
-    │   ├── counselor_model.py
-    │   ├── guardian_model.py
-    │   └── patient_model.py
+    │   ├── auth_routes.py              login / logout / role guard
+    │   ├── admin_routes.py             admin dashboard endpoints
+    │   ├── doctor_portal_routes.py     doctor portal endpoints
+    │   ├── analytics_routes.py         XAI and diary analytics API
+    │   └── notification_routes.py      FCM trigger endpoints
+    ├── controllers/                    user creation and management logic
+    ├── models/                         Firestore-backed user models
     ├── services/
-    │   ├── xai_analysis_service.py       # Main XAI orchestrator
-    │   ├── xai_scoring_service.py        # Lexicon scoring engine
-    │   ├── xai_utils.py                  # Shared utilities
-    │   ├── diary_analysis_service.py     # Diary entry NLP
-    │   ├── chat_analysis_service.py      # Chat message NLP
-    │   ├── daily_log_analysis_service.py # Mood / sleep / medication signals
-    │   ├── guardian_analysis_service.py  # Guardian observation NLP
-    │   ├── activity_analysis_service.py  # App activity signals
-    │   ├── mobility_analysis_service.py  # Geolocation signals
+    │   ├── xai_analysis_service.py     main XAI orchestrator
+    │   ├── xai_scoring_service.py      lexicon scoring engine
+    │   ├── xai_utils.py
+    │   ├── diary_analysis_service.py
+    │   ├── chat_analysis_service.py
+    │   ├── daily_log_analysis_service.py
+    │   ├── guardian_analysis_service.py
+    │   ├── activity_analysis_service.py
+    │   ├── mobility_analysis_service.py
     │   ├── appointment_analysis_service.py
     │   ├── medication_adherence_service.py
-    │   ├── clinical_report_service.py    # Report generation & PDF
-    │   └── firebase_service.py           # FCM helpers
+    │   ├── clinical_report_service.py
+    │   └── firebase_service.py
     ├── data/
-    │   ├── analysis/xai_lexicons.json    # Symptom / theme lexicon
+    │   ├── analysis/xai_lexicons.json  symptom and theme lexicon
     │   ├── doctor/doctor_seed.json
     │   ├── doctor/medication_catalog.json
     │   ├── counselor/counselor_seed.json
-    │   └── shared/{departments,specializations}.json
-    ├── templates/                        # Jinja2 HTML for admin portal
+    │   └── shared/departments.json, specializations.json
+    ├── templates/                      Jinja2 templates for admin portal
     ├── static/mindcare-admin.css
     └── tests/
         ├── unit/
@@ -283,531 +116,492 @@ Mental-HealthCare-Application_Project/
 
 ---
 
-## Prerequisites
-
-### Global Tools
-| Tool | Version | Install |
-|---|---|---|
-| Flutter SDK | ≥ 3.10.7 | https://docs.flutter.dev/get-started/install |
-| Dart SDK | ≥ 3.0 (bundled with Flutter) | — |
-| Python | ≥ 3.11 | https://www.python.org/downloads/ |
-| pip | ≥ 23 | bundled with Python |
-| Git | any recent | https://git-scm.com |
-| Android Studio / Xcode | latest | for device emulation |
-| Firebase CLI | latest | `npm install -g firebase-tools` |
-| FlutterFire CLI | latest | `dart pub global activate flutterfire_cli` |
-| Node.js | ≥ 18 (for Firebase CLI) | https://nodejs.org |
-
-### Accounts
-- **Firebase project** — create one at https://console.firebase.google.com
-- **Google account** — for Firebase and Play Store (optional)
-
----
-
 ## Firebase Setup
 
-### 1. Create Firebase Project
-1. Go to https://console.firebase.google.com
-2. Click **Add project** → name it (e.g. `mindcare-app`) → disable Google Analytics if not needed
-3. Enable **Authentication** → Sign-in providers → **Email/Password**
-4. Enable **Cloud Firestore** → Start in **production mode** → choose a region
-5. Enable **Cloud Messaging** (FCM) — no extra config needed
+### 1. Create a project
 
-### 2. Generate Service Account Key (Backend)
-1. Firebase Console → Project Settings → **Service accounts**
-2. Click **Generate new private key** → download the JSON file
-3. Rename it to `serviceAccountKey.json`
-4. Place it in `Hospital_Administration/serviceAccountKey.json`
-5. **Never commit this file** — it is in `.gitignore`
+1. Open https://console.firebase.google.com and create a new project.
+2. Enable **Authentication** → Sign-in method → **Email/Password**.
+3. Enable **Cloud Firestore** in production mode and select a region.
+4. **Cloud Messaging** is enabled by default.
 
-### 3. Configure Flutter App with FlutterFire CLI
+### 2. Service account key (backend)
+
+1. Firebase Console → Project Settings → **Service accounts** → **Generate new private key**.
+2. Save the file as `Hospital_Administration/serviceAccountKey.json`.
+3. This file is listed in `.gitignore` and must not be committed.
+
+### 3. Flutter configuration
+
 ```bash
-# Activate the CLI (once globally)
-dart pub global activate flutterfire_cli
-
-# Inside the Flutter project root
 cd mental_health_support_app
-
-# Log in to Firebase
 firebase login
-
-# Configure — this regenerates firebase_options.dart automatically
 flutterfire configure --project=<your-firebase-project-id>
 ```
 
-Select **Android** (and **iOS** / **Web** if needed) when prompted. This writes `lib/firebase_options.dart` with the correct app-specific keys.
+`flutterfire configure` writes `lib/firebase_options.dart` and places `android/app/google-services.json` automatically. Select Android (and iOS if required) when prompted.
 
-### 4. Firestore Security Rules
-Deploy the bundled rules from the project root:
+### 4. Firestore rules and indexes
+
+Run from the repository root:
+
 ```bash
 firebase deploy --only firestore:rules
 firebase deploy --only firestore:indexes
 ```
 
-The rules enforce:
-- Patients can only read/write their own data
-- Doctors can read data of their assigned patients
-- Admins have full access via backend SDK (bypasses rules)
-
-### 5. Android Configuration
-Ensure `mental_health_support_app/android/app/google-services.json` exists (FlutterFire CLI places it automatically). If building manually, download it from Firebase Console → Project Settings → Your apps → Android app.
-
 ---
 
-## Backend Setup (Flask)
+## Backend Setup
 
-### 1. Clone and Navigate
 ```bash
-git clone <repo-url>
-cd Mental-HealthCare-Application_Project/Hospital_Administration
-```
+cd Hospital_Administration
 
-### 2. Create Virtual Environment
-```bash
 python -m venv venv
-
 # Windows
 venv\Scripts\activate
-
 # macOS / Linux
 source venv/bin/activate
-```
 
-### 3. Install Dependencies
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Place Service Account Key
-```bash
-# Copy your downloaded serviceAccountKey.json into:
-Hospital_Administration/serviceAccountKey.json
-```
+Place `serviceAccountKey.json` in `Hospital_Administration/` (see [Firebase Setup](#firebase-setup)).
 
-### 5. Environment Variables (Optional)
-Create a `.env` file in `Hospital_Administration/` for production overrides:
+Optional `.env` file for overrides:
+
 ```env
-FLASK_SECRET_KEY=your-very-long-random-secret-key
+FLASK_SECRET_KEY=change-this-in-production
 FLASK_ENV=development
 FIREBASE_CREDENTIAL_PATH=serviceAccountKey.json
 ```
 
-> In `config.py` the credential path defaults to `serviceAccountKey.json` next to the file. Override `FIREBASE_CREDENTIAL_PATH` for Docker / CI environments.
+Start the server:
 
-### 6. Seed Initial Data (Optional)
-The admin portal lets you create users manually. Alternatively run seed scripts using the data in `data/`:
-- `data/doctor/doctor_seed.json` — sample doctors
-- `data/counselor/counselor_seed.json` — sample counsellors
-- `data/doctor/medication_catalog.json` — 4 000+ medications
-
-### 7. Run the Development Server
 ```bash
-cd Hospital_Administration
 python app.py
 ```
 
-The server starts at **http://localhost:5000**
+The server listens on `http://localhost:5000`.
 
-Admin portal: http://localhost:5000/auth/login  
-Swagger UI: http://localhost:5000/swagger/
-
-Default admin credentials are set by the first admin you create through the CLI or Firestore directly.
+| URL | Description |
+|---|---|
+| `http://localhost:5000/health` | Liveness check |
+| `http://localhost:5000/auth/login` | Admin portal |
+| `http://localhost:5000/swagger/` | API documentation |
 
 ---
 
 ## Flutter App Setup
 
-### 1. Install Dependencies
 ```bash
 cd mental_health_support_app
 flutter pub get
 ```
 
-### 2. Verify Firebase Options
-Ensure `lib/firebase_options.dart` exists. If not, re-run FlutterFire configure:
-```bash
-flutterfire configure --project=<your-firebase-project-id>
-```
+Confirm `lib/firebase_options.dart` exists. If it is missing, re-run `flutterfire configure`.
 
-### 3. Connect Backend URL
-The Flutter app talks to the Flask backend via `lib/core/services/api_service.dart`.
+### Required Android permissions
 
-| Platform | Default base URL |
+The following are already declared in `android/app/src/main/AndroidManifest.xml`:
+
+| Permission | Used by |
 |---|---|
-| Android Emulator | `http://10.0.2.2:5000` (auto-detected) |
-| iOS Simulator / Web | `http://localhost:5000` (auto-detected) |
-| Physical device | Set via `--dart-define=BACKEND_URL=http://<your-lan-ip>:5000` |
-| Production | Set via `--dart-define=BACKEND_URL=https://your-api-domain.com` |
+| `INTERNET` | Firebase, API requests |
+| `ACCESS_FINE_LOCATION` | Digital phenotyping (GPS) |
+| `ACCESS_WIFI_STATE` | Backend URL discovery |
+| `RECEIVE_BOOT_COMPLETED` | Scheduled notifications |
+| `POST_NOTIFICATIONS` | FCM (Android 13+) |
 
-**Physical device (example):**
-```bash
-flutter run --dart-define=BACKEND_URL=http://192.168.1.42:5000
-```
+### iOS location permission
 
-### 4. Android Permissions
-The app requires the following — already declared in `android/app/src/main/AndroidManifest.xml`:
-- `ACCESS_FINE_LOCATION` — digital phenotyping GPS
-- `INTERNET` — API + Firebase
-- `RECEIVE_BOOT_COMPLETED` — scheduled notifications
-- `POST_NOTIFICATIONS` — FCM (Android 13+)
+Add to `ios/Runner/Info.plist` if targeting iOS:
 
-### 5. iOS Permissions
-Add to `ios/Runner/Info.plist` if not already present:
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>MindCare uses your location to support digital phenotyping features.</string>
+<string>Used for digital phenotyping features.</string>
 ```
 
 ---
 
-## Running the Application
+## App Icon
 
-### Start the Flask backend
+The launcher icon is generated from `assets/brand/mindcare_logo.png` using `flutter_launcher_icons`. All Android mipmap densities (mdpi through xxxhdpi) and the adaptive icon format are produced automatically.
+
+To regenerate after replacing the logo file:
+
+```bash
+cd mental_health_support_app
+dart run flutter_launcher_icons
+```
+
+Configuration is in `pubspec.yaml` under the `flutter_launcher_icons` key.
+
+The application label on the home screen is set to **MindCare** in `android/app/src/main/AndroidManifest.xml`.
+
+---
+
+## Backend URL Discovery
+
+`ApiService` (`lib/core/services/api_service.dart`) resolves the Flask server address once at startup by calling `ApiService.init()` in `main.dart`. No manual IP address or build flag is required for local development.
+
+### Resolution order
+
+1. `--dart-define=BACKEND_URL=<url>` — used immediately if present, skips all probing.
+2. Android emulator — probes `http://10.0.2.2:5000/health`.
+3. iOS simulator / web — probes `http://localhost:5000/health`.
+4. Cached URL in `SharedPreferences` — probed on every subsequent launch; used if reachable.
+5. WiFi subnet scan — reads the device IP via `network_info_plus`, then probes addresses in the same `/24` subnet in parallel. The first address that responds to `GET /health` with `200 OK` is stored in `SharedPreferences` and used.
+
+Each probe has a 2-second timeout. Step 5 covers addresses `.1`–`.20`, a window around the device's own octet, `.100`, and `.254`.
+
+### Health endpoint
+
+```
+GET /health
+200 OK
+{"status": "ok", "service": "MindCare API"}
+```
+
+### Physical device on a different network
+
+If subnet scanning is not suitable (e.g. guest WiFi with client isolation, production), pass the URL at build or run time:
+
+```bash
+flutter run --dart-define=BACKEND_URL=http://192.168.1.42:5000
+flutter build apk --release --dart-define=BACKEND_URL=https://api.example.com
+```
+
+---
+
+## Running Locally
+
+Start the backend:
+
 ```bash
 cd Hospital_Administration
-source venv/bin/activate   # or venv\Scripts\activate on Windows
+source venv/bin/activate
 python app.py
 ```
 
-### Run the Flutter app (emulator)
+Run the Flutter app:
+
 ```bash
 cd mental_health_support_app
 flutter run
 ```
 
-### Run the Flutter app (physical device)
+No additional configuration is needed for the Android emulator or for physical devices on the same network as the development machine.
+
+---
+
+## Building the APK
+
+### Debug
+
 ```bash
-flutter run --dart-define=BACKEND_URL=http://<your-machine-ip>:5000
+flutter build apk --debug
+# Output: build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-### Build release APK
+### Release
+
 ```bash
-flutter build apk --release --dart-define=BACKEND_URL=https://your-api.com
+flutter build apk --release
+# Output: build/app/outputs/flutter-apk/app-release.apk
 ```
 
-### Build release AAB (Play Store)
+With a fixed backend URL:
+
 ```bash
-flutter build appbundle --release --dart-define=BACKEND_URL=https://your-api.com
+flutter build apk --release --dart-define=BACKEND_URL=https://api.example.com
 ```
 
-### Run Flask in production (gunicorn)
+### Android App Bundle (Google Play)
+
 ```bash
-gunicorn -w 4 -b 0.0.0.0:5000 app:app
+flutter build appbundle --release
+# Output: build/app/outputs/bundle/release/app-release.aab
+```
+
+### Install on a connected device
+
+```bash
+adb install build/app/outputs/flutter-apk/app-release.apk
+```
+
+Regenerate the launcher icon before building if `assets/brand/mindcare_logo.png` has changed:
+
+```bash
+dart run flutter_launcher_icons
 ```
 
 ---
 
-## Environment Variables & Secrets
+## Environment Variables
 
-### Backend (`Hospital_Administration/.env`)
+### Backend
+
 | Variable | Default | Description |
 |---|---|---|
-| `FLASK_SECRET_KEY` | hardcoded fallback | Session signing key — **change in production** |
+| `FLASK_SECRET_KEY` | hardcoded value in `app.py` | Flask session signing key |
 | `FLASK_ENV` | `development` | `development` or `production` |
-| `FIREBASE_CREDENTIAL_PATH` | `serviceAccountKey.json` | Path to Firebase Admin SDK JSON |
+| `FIREBASE_CREDENTIAL_PATH` | `serviceAccountKey.json` | Path to Firebase Admin SDK credentials |
 
-### Flutter (via `--dart-define`)
-| Variable | Default | Description |
+### Flutter
+
+| Variable (`--dart-define`) | Default | Description |
 |---|---|---|
-| `BACKEND_URL` | Auto-detected per platform | Base URL of Flask API |
+| `BACKEND_URL` | resolved at runtime | Overrides URL discovery |
 
-### Files that must NEVER be committed
+### Files excluded from version control
+
 | File | Reason |
 |---|---|
-| `Hospital_Administration/serviceAccountKey.json` | Firebase Admin private key — full DB access |
-| `Hospital_Administration/.env` | Secrets |
-| `mental_health_support_app/android/app/google-services.json` | Firebase Android config (contains API key) |
+| `Hospital_Administration/serviceAccountKey.json` | Firebase Admin private key |
+| `Hospital_Administration/.env` | Backend secrets |
+| `mental_health_support_app/android/app/google-services.json` | Firebase Android config |
 | `mental_health_support_app/ios/Runner/GoogleService-Info.plist` | Firebase iOS config |
-
-All of the above are excluded in `.gitignore`.
 
 ---
 
-## API Reference
+## API Endpoints
 
-The Flask backend exposes both a **REST API** (consumed by the Flutter app) and a **web portal** (for admins and doctors).
+Full interactive documentation is available at `http://localhost:5000/swagger/`.
 
-Interactive Swagger docs are available at:
-```
-http://localhost:5000/swagger/
-```
+### System
 
-### Key REST Endpoints
-
-#### Clinical Reports
-| Method | Endpoint | Description |
+| Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/patients/:uid/clinical-report` | Generate a new clinical report |
+| `GET` | `/health` | Liveness check |
+
+### Clinical Reports
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/patients/:uid/clinical-report` | Generate a report for a patient |
 | `GET` | `/api/patients/:uid/clinical-reports` | List reports for a patient |
-| `GET` | `/api/clinical-reports/:id/pdf` | Download report as PDF |
+| `GET` | `/api/clinical-reports/:id/pdf` | Download a report as PDF |
 
-#### Analytics (XAI)
-| Method | Endpoint | Description |
+### Analytics
+
+| Method | Path | Description |
 |---|---|---|
-| `GET` | `/analytics/xai/:uid` | Run and return XAI analysis for a patient |
-| `GET` | `/analytics/diary/:uid` | Run diary analysis for a patient |
-| `GET` | `/analytics/diary` | Run diary analysis for all patients |
+| `GET` | `/analytics/xai/:uid` | Run XAI analysis for one patient |
 | `GET` | `/analytics/xai` | Run XAI analysis for all patients |
+| `GET` | `/analytics/diary/:uid` | Run diary analysis for one patient |
+| `GET` | `/analytics/diary` | Run diary analysis for all patients |
 
-#### Notifications
-| Method | Endpoint | Description |
+### Notifications
+
+| Method | Path | Description |
 |---|---|---|
-| `POST` | `/notifications/send` | Send a targeted FCM notification |
-| `POST` | `/trigger/medication-reminders` | Trigger medication reminder sweep |
-| `POST` | `/trigger/appointment-reminders` | Trigger appointment reminder sweep |
+| `POST` | `/notifications/send` | Send an FCM notification |
+| `POST` | `/trigger/medication-reminders` | Run the medication reminder sweep |
+| `POST` | `/trigger/appointment-reminders` | Run the appointment reminder sweep |
 
-#### Admin Portal (HTML)
-| Route | Description |
+### Admin Portal
+
+| Path | Description |
 |---|---|
 | `/auth/login` | Sign in |
-| `/admin/dashboard` | Overview |
-| `/admin/patients` | Patient list & management |
-| `/admin/doctors` | Doctor list & management |
-| `/admin/counselors` | Counsellor list |
-| `/admin/analytics` | XAI analytics overview |
+| `/admin/dashboard` | Dashboard |
+| `/admin/patients` | Patient management |
+| `/admin/doctors` | Doctor management |
+| `/admin/counselors` | Counsellor management |
+| `/admin/analytics` | Analytics overview |
 | `/admin/notifications` | Notification console |
-| `/swagger/` | API documentation |
 
 ---
 
 ## XAI Engine
 
-The XAI (Explainable AI) engine is the clinical intelligence core. It is entirely lexicon-driven — no ML model training required — making results fully auditable.
+The XAI engine scores patient data using a keyword lexicon defined in `data/analysis/xai_lexicons.json`. No model training is involved; all scoring is rule-based and auditable.
 
-### Pipeline
+### Inputs
 
-```
-Raw patient data (Firestore)
-        │
-        ├── Diary entries       → diary_analysis_service     → scored items
-        ├── Chat messages       → chat_analysis_service      → scored items
-        ├── Daily logs          → daily_log_analysis_service → behavioural signals
-        ├── Guardian logs       → guardian_analysis_service  → scored items
-        ├── App activity        → activity_analysis_service  → behavioural signals
-        ├── Geolocations        → mobility_analysis_service  → mobility signals
-        ├── Medication events   → medication_adherence_service → adherence signals
-        └── Appointments        → appointment_analysis_service → missed/rescheduled signals
-                │
-                ▼
-        xai_analysis_service._build_summary()
-                │
-                ├── Score aggregation (text + behavioural)
-                ├── Severity classification (stable/watch/warning/critical)
-                ├── Primary driver ranking
-                ├── Theme count merging
-                ├── Source breakdown
-                └── Evidence selection
-                │
-                ▼
-        XAI Summary dict
-        ├── severity / band / score / textConcernScore
-        ├── confidence (0.50–0.95 based on data richness)
-        ├── primaryDrivers (top 10 with scoreContribution, evidence)
-        ├── themeCounts (e.g. {"depression": 4, "anxiety": 2})
-        ├── sourceBreakdown (e.g. {"diary": {score, evidenceCount, driverCount}})
-        └── evidence (up to 20 anonymised text snippets)
-```
+Each of the following sources is fetched from Firestore for a given patient and date range, scored independently, then aggregated:
 
-### Severity Bands
+| Source | Service |
+|---|---|
+| Diary entries | `diary_analysis_service.py` |
+| Chat messages | `chat_analysis_service.py` |
+| Daily logs (mood, sleep, medication) | `daily_log_analysis_service.py` |
+| Guardian observations | `guardian_analysis_service.py` |
+| App activity logs | `activity_analysis_service.py` |
+| Geolocations | `mobility_analysis_service.py` |
+| Medication adherence events | `medication_adherence_service.py` |
+| Appointments and reschedule requests | `appointment_analysis_service.py` |
 
-| Band | Label | Score | Action |
+### Output fields
+
+| Field | Type | Description |
+|---|---|---|
+| `severity` | string | `stable`, `watch`, `warning`, or `critical` |
+| `band` | int | 0–3 |
+| `score` | float | Aggregated concern score |
+| `textConcernScore` | float | Text-source score contribution |
+| `confidence` | float | 0.50–0.95, based on data availability |
+| `primaryDrivers` | array | Top 10 scored drivers with evidence |
+| `themeCounts` | object | Count per clinical theme |
+| `sourceBreakdown` | object | Score and evidence count per data source |
+| `evidence` | array | Up to 20 text snippets (anonymised) |
+
+### Severity bands
+
+| Band | Label | Score range | Clinical action |
 |---|---|---|---|
-| 0 | `stable` | 0–1 | Routine monitoring only |
-| 1 | `watch` | 2–4 | Include in clinician digest |
-| 2 | `warning` | 5–7 | Same-day clinician review required |
-| 3 | `critical` | ≥ 8 | Immediate urgent alert required |
+| 0 | stable | 0–1 | Routine monitoring |
+| 1 | watch | 2–4 | Include in clinician digest |
+| 2 | warning | 5–7 | Same-day clinician review |
+| 3 | critical | ≥ 8 | Immediate clinician alert |
 
-Scores are also elevated if `explicitSelfHarm` or `explicitPlanOrPreparation` flags are present in any analysed item.
-
-### Lexicon
-`data/analysis/xai_lexicons.json` defines:
-- **Themes** — named clinical concern areas (e.g. `depression`, `anxiety`, `self_harm`)
-- **Keywords** — weighted terms per theme
-- **Scoring rules** — per-keyword score contributions
-- **Privacy settings** — max evidence items surfaced
+The score is also elevated unconditionally if `explicitSelfHarm` or `explicitPlanOrPreparation` is set on any scored item.
 
 ---
 
 ## Digital Phenotyping
 
-`phenotyping_service.dart` (Flutter) passively collects behavioural signals:
+`phenotyping_service.dart` collects passive behavioural signals from the device and writes them to Firestore. The backend reads these collections during XAI analysis.
 
-| Signal | Data Source | Backend Service |
+| Signal | Collection | Backend service |
 |---|---|---|
-| Mobility radius | GPS (geolocator) | `mobility_analysis_service.py` |
-| App activity | Interaction timestamps | `activity_analysis_service.py` |
-| Sleep proxy | Log timestamps + daily log | `daily_log_analysis_service.py` |
-| Medication adherence | Daily log boolean | `medication_adherence_service.py` |
-| Mood trend | Daily log scale (1–10) | `daily_log_analysis_service.py` |
-
-All data is written to Firestore and included in XAI analysis on the backend.
+| GPS location samples | `geolocations` | `mobility_analysis_service.py` |
+| App interaction timestamps | `app_activity_logs` | `activity_analysis_service.py` |
+| Mood and sleep (from daily log) | `daily_logs` | `daily_log_analysis_service.py` |
+| Medication taken / missed | `daily_logs` | `medication_adherence_service.py` |
 
 ---
 
-## Firestore Data Model
+## Firestore Collections
 
-### Collections
-
-```
-users/{uid}                      # All users (role field distinguishes type)
-patients/{uid}                   # Patient profile + assignedDoctor / assignedCounselor
-doctors/{uid}                    # Doctor profile + specialization / department
-counselors/{uid}                 # Counsellor profile
-guardians/{uid}                  # Guardian profile + assignedPatient
-
-diary_entries/{id}               # Patient diary — content, mood, themes
-daily_logs/{id}                  # Daily mood/sleep/medication log
-guardian_logs/{id}               # Guardian observations
-chat_sessions/{id}               # Chat session metadata
-  └── messages/{id}              # Individual chat messages
-
-appointments/{id}                # Appointment records
-reschedule_requests/{id}         # Reschedule requests + status
-
-medication_adherence_events/{id} # Medication taken/missed events
-app_activity_logs/{id}           # App interaction timestamps
-geolocations/{id}                # GPS readings
-
-clinical_reports/{id}            # Generated clinical reports
-clinical_alerts/{id}             # XAI-triggered clinical alerts
-analytics_snapshots/{uid}        # Latest XAI snapshot per patient
-report_exports/{id}              # PDF export audit log
-
-notifications/{id}               # In-app notification inbox
-```
-
-### Key Fields — `patients/{uid}`
-```json
-{
-  "uid": "string",
-  "name": "string",
-  "email": "string",
-  "role": "patient",
-  "assignedDoctor": "doctor-uid",
-  "assignedCounselor": "counselor-uid",
-  "createdAt": "ISO timestamp",
-  "fcmToken": "string"
-}
-```
-
-### Key Fields — `clinical_reports/{id}`
-```json
-{
-  "patientUid": "string",
-  "patientName": "string",
-  "doctorUid": "string",
-  "type": "monthly",
-  "startDate": "YYYY-MM-DD",
-  "endDate": "YYYY-MM-DD",
-  "generatedAt": "ISO timestamp",
-  "aggregatedSeverity": "stable|watch|warning|critical",
-  "band": 0,
-  "score": 0.0,
-  "textConcernScore": 0.0,
-  "confidence": 0.75,
-  "summary": { "action": "...", "screeningNote": "...", "entryCount": 0 },
-  "moodTrend": [],
-  "adherenceSummary": { "trackedDays": 0, "takenDays": 0, "adherencePercent": null },
-  "appointmentSummary": { "total": 0, "byStatus": {}, "rescheduleRequests": 0 },
-  "topDrivers": [],
-  "themeCounts": {},
-  "sourceBreakdown": {},
-  "evidence": []
-}
-```
+| Collection | Contents |
+|---|---|
+| `users/{uid}` | Base profile for all roles |
+| `patients/{uid}` | Patient profile; `assignedDoctor`, `assignedCounselor` |
+| `doctors/{uid}` | Doctor profile; `specialization`, `department` |
+| `counselors/{uid}` | Counsellor profile |
+| `guardians/{uid}` | Guardian profile; `assignedPatient` |
+| `diary_entries/{id}` | Diary entries; `patientUid`, `content`, `createdAt` |
+| `daily_logs/{id}` | Daily log; `mood`, `sleepHours`, `medicationTaken` |
+| `guardian_logs/{id}` | Guardian observations |
+| `chat_sessions/{id}` | Chat session metadata |
+| `chat_sessions/{id}/messages/{id}` | Individual messages |
+| `appointments/{id}` | Appointment records |
+| `reschedule_requests/{id}` | Reschedule requests and status |
+| `medication_adherence_events/{id}` | Medication event records |
+| `app_activity_logs/{id}` | App interaction timestamps |
+| `geolocations/{id}` | GPS samples |
+| `clinical_reports/{id}` | Generated reports (full XAI summary) |
+| `clinical_alerts/{id}` | XAI-triggered alerts |
+| `analytics_snapshots/{uid}` | Latest XAI snapshot per patient |
+| `report_exports/{id}` | PDF export audit records |
+| `notifications/{id}` | In-app notification inbox |
 
 ---
 
-## Testing
+## Tests
 
-### Flutter Tests
+### Flutter
+
 ```bash
 cd mental_health_support_app
-
-# Unit & widget tests
 flutter test
-
-# Integration tests (requires running emulator)
-flutter test integration_test/
+flutter test integration_test/   # requires a running emulator
 ```
 
-### Flask Tests
+### Flask
+
 ```bash
 cd Hospital_Administration
 source venv/bin/activate
 
-# Run full test suite
 pytest
+pytest --cov=. --cov-report=html   # generates htmlcov/index.html
 
-# With coverage report
-pytest --cov=. --cov-report=html
-open htmlcov/index.html   # macOS
-# or xdg-open htmlcov/index.html on Linux
-
-# Run specific test category
 pytest tests/unit/
 pytest tests/integration/
 pytest tests/security/
 ```
 
-Test structure:
-```
-tests/
-├── unit/
-│   ├── controllers/   # User management logic
-│   ├── models/        # Data model validation
-│   ├── services/      # XAI, analysis, clinical report services
-│   ├── notifications/ # FCM trigger logic
-│   ├── data/          # Seed data integrity
-│   └── utils/         # XAI utility functions
-├── integration/
-│   ├── routes/        # HTTP endpoint smoke tests
-│   └── smoke/         # Import and startup checks
-└── security/
-    └── access_control/ # Role-based access enforcement
-```
+Test categories:
 
----
-
-## Security Notes
-
-| Risk | Mitigation |
+| Directory | Coverage |
 |---|---|
-| `serviceAccountKey.json` in repo | Excluded by `.gitignore` — never commit |
-| Hardcoded Flask `secret_key` | Move to `FLASK_SECRET_KEY` env var in production |
-| Firestore rules | Deploy `firestore.rules` — patients cannot read each other's data |
-| FCM tokens in Firestore | Only readable by the owning patient and their assigned doctor |
-| Backend API unauthenticated | `/api/*` endpoints currently have no auth token check — add Firebase ID token verification before production deployment |
-| `firebase_options.dart` | Safe to commit (mobile app API keys are not secret by design) |
-
-> **Production checklist**: set `FLASK_SECRET_KEY` via env var, add Firebase ID token middleware to all `/api/*` routes, deploy Firestore rules, serve Flask behind HTTPS (nginx + certbot or a managed platform).
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes with tests
-4. Run the full test suite (Flutter + Flask)
-5. Push and open a pull request
-
-### Commit Convention
-```
-feat:     new feature
-fix:      bug fix
-refactor: code change without feature/fix
-docs:     documentation only
-test:     tests only
-chore:    build/config/tooling
-```
-
-### Code Style
-- **Flutter/Dart**: `flutter analyze` must pass with no errors. Run `dart format .` before committing.
-- **Python**: PEP 8. Run `python -m py_compile *.py` to check for syntax errors.
+| `tests/unit/controllers/` | User management logic |
+| `tests/unit/models/` | Data model validation |
+| `tests/unit/services/` | XAI, analysis, and report services |
+| `tests/unit/notifications/` | FCM trigger logic |
+| `tests/unit/data/` | Seed data integrity |
+| `tests/unit/utils/` | XAI utility functions |
+| `tests/integration/routes/` | HTTP endpoint smoke tests |
+| `tests/integration/smoke/` | Import and startup checks |
+| `tests/security/` | Role-based access enforcement |
 
 ---
 
-## License
+## Security
 
-This project is developed for academic and research purposes. All patient data handling must comply with applicable healthcare data regulations (HIPAA, GDPR, or local equivalents) before any clinical deployment.
+| Item | Status |
+|---|---|
+| `serviceAccountKey.json` | Excluded from version control via `.gitignore` |
+| `google-services.json` | Excluded from version control via `.gitignore` |
+| Flask `secret_key` | Hardcoded in `app.py` — replace with `FLASK_SECRET_KEY` env var before deployment |
+| Firestore rules | Defined in `firestore.rules`; patients cannot access each other's data |
+| `/api/*` authentication | Not enforced — Firebase ID token verification should be added before production deployment |
+| `/health` endpoint | Public by design; returns no sensitive data |
+| `firebase_options.dart` | Safe to commit; Flutter app API keys are public by platform convention |
+
+Production deployment checklist:
+
+- Set `FLASK_SECRET_KEY` via environment variable.
+- Add Firebase ID token verification middleware to all `/api/*` routes.
+- Deploy `firestore.rules` and `firestore.indexes.json`.
+- Serve Flask over HTTPS.
+- Set `BACKEND_URL` via `--dart-define` to skip subnet scanning.
+
+---
+
+## Dependencies
+
+### Flutter (`pubspec.yaml`)
+
+| Package | Version | Purpose |
+|---|---|---|
+| `firebase_core` | ^3.6.0 | Firebase SDK initialisation |
+| `firebase_auth` | ^5.3.1 | Authentication |
+| `cloud_firestore` | ^5.4.4 | Database |
+| `firebase_messaging` | ^15.1.3 | Push notifications |
+| `flutter_local_notifications` | ^17.2.4 | Local notification display |
+| `flutter_riverpod` | ^2.5.1 | State management |
+| `go_router` | ^13.2.0 | Navigation |
+| `geolocator` | ^13.0.2 | GPS |
+| `shared_preferences` | ^2.3.2 | Local key-value storage |
+| `network_info_plus` | ^6.0.1 | WiFi IP for backend discovery |
+| `http` | ^1.2.1 | HTTP client |
+| `phosphor_flutter` | ^2.1.0 | Icons |
+| `google_fonts` | ^6.2.1 | Typography |
+| `fl_chart` | ^0.69.0 | Charts |
+| `shimmer` | ^3.0.0 | Loading skeletons |
+| `intl` | ^0.19.0 | Internationalisation |
+| `cupertino_icons` | ^1.0.8 | iOS-style icons |
+| `flutter_launcher_icons` *(dev)* | ^0.14.3 | Launcher icon generation |
+| `flutter_lints` *(dev)* | ^6.0.0 | Lint rules |
+
+### Flask (`requirements.txt`)
+
+| Package | Version | Purpose |
+|---|---|---|
+| `Flask` | >=3.0,<4.0 | Web framework |
+| `Flask-Login` | >=0.6,<1.0 | Session management |
+| `firebase-admin` | >=6.5,<7.0 | Firestore and FCM |
+| `APScheduler` | >=3.10,<4.0 | Background job scheduling |
+| `flasgger` | >=0.9.7,<1.0 | Swagger documentation |
+| `reportlab` | >=4.0,<5.0 | PDF generation |
+| `jsonschema` | >=4.22,<5.0 | Request validation |
+| `requests` | >=2.31,<3.0 | Internal HTTP calls |
+| `python-dotenv` | >=1.0,<2.0 | `.env` file loading |
+| `gunicorn` | >=22.0,<24.0 | Production WSGI server |
+| `pytest` | >=8.0,<10.0 | Test runner |
+| `pytest-cov` | >=5.0,<7.0 | Coverage plugin |
+| `coverage` | >=7.0,<8.0 | Coverage reporting |
